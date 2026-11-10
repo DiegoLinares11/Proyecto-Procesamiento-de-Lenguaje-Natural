@@ -1,0 +1,29 @@
+[project]
+name = "tickets-rag"
+version = "0.1.0"
+description = "Asistente NLP/RAG agéntico para tickets de soporte de TI (CC3103, UVG)"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "anthropic>=2.7.0",
+    "fpdf2>=2.9.0",
+    "huggingface-hub>=2.4.0",
+    "numpy>=2.4.6",
+    "pydantic>=2.14.3",
+    "pypdf>=7.0.0",
+    "python-dotenv>=1.2.4",
+    "rank-bm25>=0.2.2",
+    "scikit-learn>=1.9.1",
+    "tokenizers>=0.23.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
