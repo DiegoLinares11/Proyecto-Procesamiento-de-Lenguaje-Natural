@@ -1,0 +1,151 @@
+{
+  "sistema": "linea_base_tfidf",
+  "entrenamiento": 240,
+  "prueba": 60,
+  "categoria": {
+    "macro_f1": 0.942,
+    "accuracy": 0.933,
+    "por_clase": {
+      "ACCESO": {
+        "precision": 0.929,
+        "recall": 0.929,
+        "f1-score": 0.929,
+        "support": 14.0
+      },
+      "APLICACIONES": {
+        "precision": 1.0,
+        "recall": 0.889,
+        "f1-score": 0.941,
+        "support": 9.0
+      },
+      "CORREO": {
+        "precision": 0.929,
+        "recall": 0.929,
+        "f1-score": 0.929,
+        "support": 14.0
+      },
+      "EQUIPOS": {
+        "precision": 0.909,
+        "recall": 0.909,
+        "f1-score": 0.909,
+        "support": 11.0
+      },
+      "OTRO": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 3.0
+      },
+      "RED": {
+        "precision": 0.9,
+        "recall": 1.0,
+        "f1-score": 0.947,
+        "support": 9.0
+      }
+    },
+    "etiquetas": [
+      "ACCESO",
+      "APLICACIONES",
+      "CORREO",
+      "EQUIPOS",
+      "OTRO",
+      "RED"
+    ],
+    "matriz_confusion": [
+      [
+        13,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        8,
+        0,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        13,
+        1,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        10,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        3,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        9
+      ]
+    ]
+  },
+  "prioridad": {
+    "macro_f1": 0.96,
+    "accuracy": 0.967,
+    "por_clase": {
+      "ALTA": {
+        "precision": 0.929,
+        "recall": 0.929,
+        "f1-score": 0.929,
+        "support": 14.0
+      },
+      "BAJA": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 26.0
+      },
+      "MEDIA": {
+        "precision": 0.95,
+        "recall": 0.95,
+        "f1-score": 0.95,
+        "support": 20.0
+      }
+    },
+    "etiquetas": [
+      "ALTA",
+      "BAJA",
+      "MEDIA"
+    ],
+    "matriz_confusion": [
+      [
+        13,
+        0,
+        1
+      ],
+      [
+        0,
+        26,
+        0
+      ],
+      [
+        1,
+        0,
+        19
+      ]
+    ]
+  }
+}

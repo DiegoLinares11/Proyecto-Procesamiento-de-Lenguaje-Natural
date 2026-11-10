@@ -1,0 +1,23 @@
+{
+  "sistema": "linea_base_bm25_prompt_estructurado",
+  "modelo": "claude-sonnet-5-5",
+  "casos": 22,
+  "validez_contrato": 1.0,
+  "abstencion_correcta": 0.909,
+  "falsas_abstenciones": 0.1,
+  "abstenciones_omitidas": 0,
+  "precision_citas": 0.773,
+  "latencia_media_s": 3.57,
+  "latencia_p95_s": 7.69,
+  "costo_promedio_usd": 0.00751,
+  "costo_total_usd": 0.1652,
+  "tokens_entrada": 47436,
+  "tokens_salida": 7025,
+  "llamadas": 22,
+  "motivos_abstencion": {
+    "modelo_sin_evidencia": 4
+  },
+  "modelos_servidos": {
+    "claude-sonnet-5-5": 22
+  }
+}

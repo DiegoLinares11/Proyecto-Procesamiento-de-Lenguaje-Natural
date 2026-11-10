@@ -1,0 +1,47 @@
+{
+  "sistema": "linea_base_bm25",
+  "casos": 22,
+  "casos_con_respuesta": 20,
+  "recall@5": 0.9,
+  "mrr": 0.764,
+  "precision@5": 0.22,
+  "por_tipo": {
+    "ambigua": {
+      "casos": 2,
+      "recall@5": 0.5,
+      "mrr": 0.5
+    },
+    "compuesta": {
+      "casos": 3,
+      "recall@5": 1.0,
+      "mrr": 1.0
+    },
+    "directa": {
+      "casos": 5,
+      "recall@5": 1.0,
+      "mrr": 0.867
+    },
+    "identificador": {
+      "casos": 3,
+      "recall@5": 1.0,
+      "mrr": 1.0
+    },
+    "parafrasis": {
+      "casos": 3,
+      "recall@5": 0.667,
+      "mrr": 0.5
+    },
+    "permisos": {
+      "casos": 2,
+      "recall@5": 1.0,
+      "mrr": 0.625
+    },
+    "vigencia": {
+      "casos": 2,
+      "recall@5": 1.0,
+      "mrr": 0.6
+    }
+  },
+  "sin_respuesta_con_evidencia_devuelta": 2,
+  "fugas_de_permisos": 0
+}
