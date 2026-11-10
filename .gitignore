@@ -1,0 +1,21 @@
+# Credenciales: nunca al repo
+.env
+.env.*
+!.env.example
+
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Artefactos que se regeneran con los scripts
+indices/
+modelos/
+cache/
+
+# Sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
