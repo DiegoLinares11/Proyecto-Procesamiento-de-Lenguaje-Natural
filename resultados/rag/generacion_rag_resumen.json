@@ -1,0 +1,23 @@
+{
+  "sistema": "rag",
+  "modelo": "claude-sonnet-5-5",
+  "umbral_tau": 0.0045,
+  "casos": 37,
+  "validez_contrato": 1.0,
+  "abstencion_correcta": 0.946,
+  "falsas_abstenciones": 0.067,
+  "abstenciones_omitidas": "0 de 7",
+  "precision_citas": 0.764,
+  "latencia_media_s": 3.89,
+  "latencia_p95_s": 6.17,
+  "costo_promedio_usd": 0.00782,
+  "costo_total_usd": 0.2892,
+  "llamadas": 31,
+  "motivos_abstencion": {
+    "modelo_sin_evidencia": 3,
+    "score_bajo": 6
+  },
+  "modelos_servidos": {
+    "claude-sonnet-5-5": 31
+  }
+}
