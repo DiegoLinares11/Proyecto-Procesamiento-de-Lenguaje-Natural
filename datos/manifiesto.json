@@ -1,0 +1,70 @@
+{
+  "documentos": [
+    {
+      "id": "F1-2026-1",
+      "ruta": "datos/f1_manual/manual_mesa_ayuda_v2026-1.pdf",
+      "fuente": "F1. Manual de mesa de ayuda (organización ficticia)",
+      "formato": "PDF",
+      "propietario": "Equipo del proyecto",
+      "permiso": "Lectura por rol",
+      "licencia": "Autoría propia",
+      "sensibilidad": "Privada (simulada)",
+      "actualizacion": "Por versión",
+      "version": "2026-1",
+      "fecha_version": "2026-01-15",
+      "vigente": false,
+      "idioma": "es",
+      "doc_type": "manual",
+      "roles_por_defecto": [
+        "N1",
+        "N2"
+      ],
+      "en_indice": true,
+      "sha256": "64dae7133bc6586f11743adf7f7adfe3622d01bbb06b50d21b639b37bc98a45a"
+    },
+    {
+      "id": "F1-2026-2",
+      "ruta": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+      "fuente": "F1. Manual de mesa de ayuda (organización ficticia)",
+      "formato": "PDF",
+      "propietario": "Equipo del proyecto",
+      "permiso": "Lectura por rol",
+      "licencia": "Autoría propia",
+      "sensibilidad": "Privada (simulada)",
+      "actualizacion": "Por versión",
+      "version": "2026-2",
+      "fecha_version": "2026-07-01",
+      "vigente": true,
+      "idioma": "es",
+      "doc_type": "manual",
+      "roles_por_defecto": [
+        "N1",
+        "N2"
+      ],
+      "en_indice": true,
+      "sha256": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9"
+    },
+    {
+      "id": "F3",
+      "ruta": "datos/f3_tickets/tickets.jsonl",
+      "fuente": "F3. Tickets resueltos sintéticos",
+      "formato": "JSONL",
+      "propietario": "Equipo del proyecto",
+      "permiso": "Lectura por rol",
+      "licencia": "Autoría propia; texto redactado con Claude Haiku 5.5",
+      "sensibilidad": "Confidencial (simulada, con PII ficticia)",
+      "actualizacion": "Única, con semilla",
+      "version": "2026-1",
+      "fecha_version": "2026-11-09",
+      "vigente": true,
+      "idioma": "es",
+      "doc_type": "ticket",
+      "roles_por_defecto": [
+        "N1",
+        "N2"
+      ],
+      "en_indice": false,
+      "sha256": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155"
+    }
+  ]
+}
