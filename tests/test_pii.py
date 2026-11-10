@@ -28,6 +28,11 @@ def test_no_confunde_codigos_de_error_ni_extensiones():
     assert enmascarar(texto) == (texto, {})
 
 
+def test_volcado_de_memoria_no_cuenta_como_tarjeta():
+    texto = "rbx=0000000000000000 ffffa884`c0c40000 00000000`00000000"
+    assert "CARD" not in enmascarar(texto)[1]
+
+
 def test_tarjeta_sin_luhn_valido_no_se_enmascara():
     assert not luhn_valido("4111 1111 1111 1112")
     texto, encontrados = enmascarar("Pedido 4111 1111 1111 1112")

@@ -32,8 +32,15 @@ def main() -> None:
         return
     resumen = ingestar()
     for doc_id, r in resumen.items():
+        if "tickets_indexados" in r:
+            print(
+                f"{doc_id}: {r['tickets_indexados']} tickets, {r['no_vigentes']} no vigentes "
+                f"(procedimientos que cambiaron: {', '.join(r['secciones_modificadas'])}), "
+                f"máx {r['tokens_max']} tokens, PII {r['pii_enmascarada'] or 'ninguna'}"
+            )
+            continue
         print(
-            f"{doc_id}: {r['paginas']} páginas, {r['secciones']} procedimientos "
+            f"{doc_id}: {r['paginas']} páginas, {r['secciones']} secciones "
             f"({len(r['secciones_restringidas'])} solo N2), {r['chunks']} chunks, "
             f"máx {r['tokens_max']} tokens, PII {r['pii_enmascarada'] or 'ninguna'}"
         )

@@ -45,6 +45,29 @@
       "sha256": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9"
     },
     {
+      "id": "F2",
+      "ruta": "datos/f2_microsoft/f2_microsoft_soporte.pdf",
+      "fuente": "F2. Artículos de solución de problemas de Microsoft: Windows, Outlook, Teams y Entra ID (en inglés)",
+      "formato": "PDF (convertido desde Markdown)",
+      "propietario": "Microsoft",
+      "permiso": "Lectura (pública)",
+      "licencia": "CC BY 4.0",
+      "sensibilidad": "Pública",
+      "actualizacion": "Commit fijo del repositorio (aee5deb)",
+      "version": "aee5deb",
+      "fecha_version": "2026-11-10",
+      "vigente": true,
+      "idioma": "en",
+      "doc_type": "articulo",
+      "roles_por_defecto": [
+        "N1",
+        "N2"
+      ],
+      "en_indice": true,
+      "sha256": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794",
+      "indice_articulos": "datos/f2_microsoft/articulos.json"
+    },
+    {
       "id": "F3",
       "ruta": "datos/f3_tickets/tickets.jsonl",
       "fuente": "F3. Tickets resueltos sintéticos",
@@ -63,7 +86,7 @@
         "N1",
         "N2"
       ],
-      "en_indice": false,
+      "en_indice": true,
       "sha256": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155"
     }
   ]
