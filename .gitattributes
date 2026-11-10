@@ -1,0 +1,5 @@
+# Saltos de línea fijos en los datos: así su hash SHA-256 no cambia al clonar en Windows.
+*.jsonl text eol=lf
+*.json  text eol=lf
+*.csv   text eol=lf
+*.pdf   binary
