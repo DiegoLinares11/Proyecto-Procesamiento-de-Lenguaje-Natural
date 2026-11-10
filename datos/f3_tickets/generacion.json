@@ -1,0 +1,13 @@
+{
+  "modelo": "claude-haiku-5-5",
+  "semilla": 2026,
+  "solicitados": 300,
+  "generados": 300,
+  "fallidos": [],
+  "fecha_generacion": "2026-11-09",
+  "version_prompt": "76131192d698b8c2",
+  "tokens_entrada": 448321,
+  "tokens_salida": 276448,
+  "llamadas": 305,
+  "costo_usd": 0.1831
+}
