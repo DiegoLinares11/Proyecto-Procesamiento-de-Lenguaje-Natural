@@ -1,0 +1,271 @@
+{
+  "repositorio": "MicrosoftDocs/SupportArticles-docs",
+  "commit": "aee5deb0299f00851f06ac2db644cb3198728a87",
+  "licencia": "CC BY 4.0",
+  "articulos": [
+    {
+      "articulo": 1,
+      "slug": "outlook-2016-hangs-at-processing",
+      "titulo": "Outlook 2016 hangs at Processing at start-up",
+      "categoria": "CORREO",
+      "ruta": "Outlook/classic-outlook-for-windows/performance/outlook-2016-hangs-at-processing.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Outlook/classic-outlook-for-windows/performance/outlook-2016-hangs-at-processing.md",
+      "fecha_articulo": "01/30/2024",
+      "pagina_inicio": 2,
+      "pagina_fin": 5
+    },
+    {
+      "articulo": 2,
+      "slug": "outlook-not-responding-error-or-outlook-freezes",
+      "titulo": "Outlook not responding error or Outlook freezes",
+      "categoria": "CORREO",
+      "ruta": "Outlook/classic-outlook-for-windows/performance/outlook-not-responding-error-or-outlook-freezes.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Outlook/classic-outlook-for-windows/performance/outlook-not-responding-error-or-outlook-freezes.md",
+      "fecha_articulo": "02/27/2025",
+      "pagina_inicio": 6,
+      "pagina_fin": 13
+    },
+    {
+      "articulo": 3,
+      "slug": "cannot-start-outlook-in-cached-mode-or-create-profile",
+      "titulo": "Cannot start Outlook in cached mode",
+      "categoria": "CORREO",
+      "ruta": "Outlook/classic-outlook-for-windows/performance/cannot-start-outlook-in-cached-mode-or-create-profile.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Outlook/classic-outlook-for-windows/performance/cannot-start-outlook-in-cached-mode-or-create-profile.md",
+      "fecha_articulo": "01/30/2024",
+      "pagina_inicio": 14,
+      "pagina_fin": 15
+    },
+    {
+      "articulo": 4,
+      "slug": "error-0x8004010f-when-sending-or-receiving-emails",
+      "titulo": "Error 0x8004010F when sending or receiving email",
+      "categoria": "CORREO",
+      "ruta": "Outlook/classic-outlook-for-windows/synchronization/error-0x8004010f-when-sending-or-receiving-emails.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Outlook/classic-outlook-for-windows/synchronization/error-0x8004010f-when-sending-or-receiving-emails.md",
+      "fecha_articulo": "01/30/2024",
+      "pagina_inicio": 16,
+      "pagina_fin": 17
+    },
+    {
+      "articulo": 5,
+      "slug": "outlook-send-receive-errors-http-0-http-404-http-500",
+      "titulo": "Outlook send receive errors HTTP 0 HTTP 404 HTTP 500",
+      "categoria": "CORREO",
+      "ruta": "Outlook/classic-outlook-for-windows/connectivity/outlook-send-receive-errors-http-0-http-404-http-500.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Outlook/classic-outlook-for-windows/connectivity/outlook-send-receive-errors-http-0-http-404-http-500.md",
+      "fecha_articulo": "01/30/2024",
+      "pagina_inicio": 18,
+      "pagina_fin": 18
+    },
+    {
+      "articulo": 6,
+      "slug": "clear-teams-cache",
+      "titulo": "Clear the Teams client cache",
+      "categoria": "CORREO",
+      "ruta": "Teams/teams-administration/clear-teams-cache.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Teams/teams-administration/clear-teams-cache.md",
+      "fecha_articulo": "09/14/2026",
+      "pagina_inicio": 19,
+      "pagina_fin": 20
+    },
+    {
+      "articulo": 7,
+      "slug": "fix-choppy-video",
+      "titulo": "Fix screen sharing video display lag issue in Teams",
+      "categoria": "CORREO",
+      "ruta": "Teams/meetings/fix-choppy-video.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/Teams/meetings/fix-choppy-video.md",
+      "fecha_articulo": "07/08/2024",
+      "pagina_inicio": 21,
+      "pagina_fin": 22
+    },
+    {
+      "articulo": 8,
+      "slug": "troubleshoot-windows-update-error-0x80070005",
+      "titulo": "Troubleshoot Windows Update Error 0x80070005",
+      "categoria": "EQUIPOS",
+      "ruta": "support/windows-client/installing-updates-features-roles/troubleshoot-windows-update-error-0x80070005.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/installing-updates-features-roles/troubleshoot-windows-update-error-0x80070005.md",
+      "fecha_articulo": "05/05/2026",
+      "pagina_inicio": 23,
+      "pagina_fin": 26
+    },
+    {
+      "articulo": 9,
+      "slug": "common-windows-update-errors",
+      "titulo": "Common Windows Update errors",
+      "categoria": "EQUIPOS",
+      "ruta": "support/windows-client/installing-updates-features-roles/common-windows-update-errors.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/installing-updates-features-roles/common-windows-update-errors.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 27,
+      "pagina_fin": 34
+    },
+    {
+      "articulo": 10,
+      "slug": "speed-up-your-computer",
+      "titulo": "How to speed up a Windows 8.1 computer",
+      "categoria": "EQUIPOS",
+      "ruta": "support/windows-client/performance/speed-up-your-computer.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/performance/speed-up-your-computer.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 35,
+      "pagina_fin": 40
+    },
+    {
+      "articulo": 11,
+      "slug": "stop-code-error-troubleshooting",
+      "titulo": "Stop code error or bug check troubleshooting",
+      "categoria": "EQUIPOS",
+      "ruta": "support/windows-client/performance/stop-code-error-troubleshooting.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/performance/stop-code-error-troubleshooting.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 41,
+      "pagina_fin": 57
+    },
+    {
+      "articulo": 12,
+      "slug": "windows-based-computer-freeze-troubleshooting",
+      "titulo": "Windows-based computer freeze troubleshooting",
+      "categoria": "EQUIPOS",
+      "ruta": "support/windows-client/performance/windows-based-computer-freeze-troubleshooting.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/performance/windows-based-computer-freeze-troubleshooting.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 58,
+      "pagina_fin": 63
+    },
+    {
+      "articulo": 13,
+      "slug": "printer-not-responding",
+      "titulo": "Printer Not Responding",
+      "categoria": "EQUIPOS",
+      "ruta": "support/windows-server/printing/printer-not-responding.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-server/printing/printer-not-responding.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 64,
+      "pagina_fin": 65
+    },
+    {
+      "articulo": 14,
+      "slug": "error-codes-for-dial-up-vpn-connection",
+      "titulo": "Error codes for dial-up or VPN connections",
+      "categoria": "RED",
+      "ruta": "support/windows-client/networking/error-codes-for-dial-up-vpn-connection.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/networking/error-codes-for-dial-up-vpn-connection.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 66,
+      "pagina_fin": 81
+    },
+    {
+      "articulo": 15,
+      "slug": "l2tp-ipsec-vpn-client-connection-issue",
+      "titulo": "Troubleshoot L2TP/IPSec VPN client connection",
+      "categoria": "RED",
+      "ruta": "support/windows-client/networking/l2tp-ipsec-vpn-client-connection-issue.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/networking/l2tp-ipsec-vpn-client-connection-issue.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 82,
+      "pagina_fin": 83
+    },
+    {
+      "articulo": 16,
+      "slug": "network-connectivity-lost",
+      "titulo": "Network connectivity is lost",
+      "categoria": "RED",
+      "ruta": "support/windows-client/networking/network-connectivity-lost.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/networking/network-connectivity-lost.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 84,
+      "pagina_fin": 84
+    },
+    {
+      "articulo": 17,
+      "slug": "wireless-network-connectivity-issues-troubleshooting",
+      "titulo": "Wireless network connectivity issues troubleshooting",
+      "categoria": "RED",
+      "ruta": "support/windows-client/networking/wireless-network-connectivity-issues-troubleshooting.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-client/networking/wireless-network-connectivity-issues-troubleshooting.md",
+      "fecha_articulo": "07/27/2026",
+      "pagina_inicio": 85,
+      "pagina_fin": 96
+    },
+    {
+      "articulo": 18,
+      "slug": "error-0xc004f074-activate-windows",
+      "titulo": "Error 0xC004F074 when you activate Windows",
+      "categoria": "APLICACIONES",
+      "ruta": "support/windows-server/licensing-and-activation/error-0xc004f074-activate-windows.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/windows-server/licensing-and-activation/error-0xc004f074-activate-windows.md",
+      "fecha_articulo": "02/12/2026",
+      "pagina_inicio": 97,
+      "pagina_fin": 99
+    },
+    {
+      "articulo": 19,
+      "slug": "cannot-use-mfa-signin-lose-phone",
+      "titulo": "Can't use Azure Multi-Factor Authentication to sign in to cloud services after you lose your phone or the phone number changes",
+      "categoria": "ACCESO",
+      "ruta": "support/entra/entra-id/mfa/cannot-use-mfa-signin-lose-phone.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/entra/entra-id/mfa/cannot-use-mfa-signin-lose-phone.md",
+      "fecha_articulo": "07/06/2020",
+      "pagina_inicio": 100,
+      "pagina_fin": 100
+    },
+    {
+      "articulo": 20,
+      "slug": "troubleshoot-azure-mfa-issue",
+      "titulo": "Troubleshoot Azure Multi-Factor Authentication issues",
+      "categoria": "ACCESO",
+      "ruta": "support/entra/entra-id/mfa/troubleshoot-azure-mfa-issue.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/entra/entra-id/mfa/troubleshoot-azure-mfa-issue.md",
+      "fecha_articulo": "07/21/2020",
+      "pagina_inicio": 101,
+      "pagina_fin": 101
+    },
+    {
+      "articulo": 21,
+      "slug": "text-voice-call-verification-code-mfa-not-send",
+      "titulo": "You don't receive a text or voice call that contains the verification code for Microsoft Entra multifactor authentication",
+      "categoria": "ACCESO",
+      "ruta": "support/entra/entra-id/mfa/text-voice-call-verification-code-mfa-not-send.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/entra/entra-id/mfa/text-voice-call-verification-code-mfa-not-send.md",
+      "fecha_articulo": "07/06/2020",
+      "pagina_inicio": 102,
+      "pagina_fin": 102
+    },
+    {
+      "articulo": 22,
+      "slug": "cannot-verify-account-reset-pwd",
+      "titulo": "Error (We could not verify your account) when a new user tries to reset password in Azure, Office 365, or Intune",
+      "categoria": "ACCESO",
+      "ruta": "support/entra/entra-id/mfa/cannot-verify-account-reset-pwd.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/entra/entra-id/mfa/cannot-verify-account-reset-pwd.md",
+      "fecha_articulo": "06/22/2020",
+      "pagina_inicio": 103,
+      "pagina_fin": 103
+    },
+    {
+      "articulo": 23,
+      "slug": "user-name-pwd-incorrect",
+      "titulo": "The user name or password is incorrect error when running Azure Active Directory Sync tool Configuration Wizard",
+      "categoria": "ACCESO",
+      "ruta": "support/entra/entra-id/mfa/user-name-pwd-incorrect.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/entra/entra-id/mfa/user-name-pwd-incorrect.md",
+      "fecha_articulo": "07/06/2020",
+      "pagina_inicio": 104,
+      "pagina_fin": 105
+    },
+    {
+      "articulo": 24,
+      "slug": "cant-set-up-mfa-five-devices-registered",
+      "titulo": "MFA fails because five registered devices use authenticator apps",
+      "categoria": "ACCESO",
+      "ruta": "support/entra/entra-id/mfa/cant-set-up-mfa-five-devices-registered.md",
+      "url": "https://github.com/MicrosoftDocs/SupportArticles-docs/blob/aee5deb0299f00851f06ac2db644cb3198728a87/support/entra/entra-id/mfa/cant-set-up-mfa-five-devices-registered.md",
+      "fecha_articulo": "06/23/2023",
+      "pagina_inicio": 106,
+      "pagina_fin": 108
+    }
+  ]
+}
