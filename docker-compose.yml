@@ -1,0 +1,22 @@
+# PostgreSQL con pgvector para el índice vectorial. Las credenciales salen del .env.
+# Escucha solo en 127.0.0.1:5433 para no exponer la base en la red ni chocar con un
+# PostgreSQL local en el 5432.
+services:
+  db:
+    image: pgvector/pgvector:pg17@sha256:7d0a41464797aeb9862dfdc0bbf1526b82cfd324cdd8036df19e3545f4a9ccb8
+    container_name: tickets_rag_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?Falta POSTGRES_USER en el .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en el .env}
+      POSTGRES_DB: ${POSTGRES_DB:?Falta POSTGRES_DB en el .env}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 12
+
+volumes:
+  pgdata:

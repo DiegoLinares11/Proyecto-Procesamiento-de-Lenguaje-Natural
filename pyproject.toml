@@ -7,13 +7,18 @@ dependencies = [
     "anthropic>=2.7.0",
     "fpdf2>=2.9.0",
     "huggingface-hub>=2.4.0",
+    "markdown>=3.11.3",
     "numpy>=2.4.6",
+    "pgvector>=0.5.1",
+    "psycopg[binary]>=3.3.8",
     "pydantic>=2.14.3",
     "pypdf>=7.0.0",
     "python-dotenv>=1.2.4",
     "rank-bm25>=0.2.2",
     "scikit-learn>=1.9.1",
+    "sentence-transformers>=6.2.0",
     "tokenizers>=0.23.3",
+    "torch>=2.11.0",
 ]
 
 [build-system]
@@ -22,6 +27,15 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+# PyTorch con CUDA en Windows y Linux; en macOS se usa el de PyPI.
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128", marker = "sys_platform == 'win32' or sys_platform == 'linux'" }]
 
 [dependency-groups]
 dev = [
