@@ -63,21 +63,22 @@ class IndiceBM25:
         self.chunks = chunks
         self.bm25 = BM25Okapi([tokenizar(c["text"]) for c in chunks])
 
-    def permitidos(self, rol: str, version: str | None) -> np.ndarray:
-        """Máscara de chunks visibles para el rol: vigentes, o de la versión pedida."""
+    def permitidos(self, rol: str, version: str | None, tipos: list[str] | None = None) -> np.ndarray:
+        """Máscara de chunks visibles para el rol: vigentes, o de la versión pedida, y del tipo pedido."""
         mascara = np.zeros(len(self.chunks), dtype=bool)
         for i, c in enumerate(self.chunks):
-            if rol not in c["roles_permitidos"]:
+            if rol not in c["roles_permitidos"] or (tipos and c["doc_type"] not in tipos):
                 continue
             mascara[i] = c["version"] == version if version else c["vigente"]
         return mascara
 
-    def buscar(self, consulta: str, rol: str, version: str | None = None, top_k: int = 5) -> list[Resultado]:
+    def buscar(self, consulta: str, rol: str, version: str | None = None, top_k: int = 5,
+               tipos: list[str] | None = None) -> list[Resultado]:
         tokens = tokenizar(consulta)
         if not tokens:
             return []
         scores = self.bm25.get_scores(tokens)
-        scores = np.where(self.permitidos(rol, version), scores, -np.inf)
+        scores = np.where(self.permitidos(rol, version, tipos), scores, -np.inf)
         orden = np.argsort(-scores, kind="stable")[:top_k]
         # Score 0 significa que no comparte ningún término con la consulta: no es evidencia.
         return [

@@ -30,7 +30,8 @@ class ClienteFalso:
 
 @pytest.fixture(scope="module")
 def indice():
-    return IndiceBM25(cargar_chunks())
+    # Solo el manual: estas pruebas revisan la lógica del generador, no la recuperación.
+    return IndiceBM25([c for c in cargar_chunks() if c["doc_type"] == "manual"])
 
 
 def chunk_de(indice, seccion):
