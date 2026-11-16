@@ -8,8 +8,15 @@ acciones críticas sin aprobación humana. Todos los datos son ficticios o públ
 
 **Equipo:** Diego Linares, Christian Echeverría, Andy Fuentes y Diederich Solis.
 
-**Estado:** fase 3, RAG terminado. Detalle en [resultados/rag/reporte_rag.md](resultados/rag/reporte_rag.md)
-y, para la línea base, en [resultados/linea_base/reporte_linea_base.md](resultados/linea_base/reporte_linea_base.md).
+**Estado:** fase de herramientas terminada: router, 6 herramientas, aprobación humana y grafo en LangGraph.
+Reportes por fase: [línea base](resultados/linea_base/reporte_linea_base.md), [RAG](resultados/rag/reporte_rag.md)
+y [herramientas](resultados/herramientas/reporte_herramientas.md).
+
+Para probar un ticket con el sistema completo:
+
+```bash
+uv run python scripts/atender_ticket.py "Outlook se queda en Procesando" --rol N1
+```
 
 Con las mismas 37 consultas de validación:
 
@@ -32,12 +39,13 @@ sintéticos. Estos números salen de un set de validación interno; los definiti
 | `datos/f2_microsoft/` | F2: 24 artículos de soporte de Microsoft (CC BY 4.0) en un commit fijo, el Markdown original y el PDF |
 | `datos/f3_tickets/` | F3: 300 tickets resueltos sintéticos y los metadatos de su generación |
 | `datos/manifiesto.json` | Registro de fuentes: permiso, licencia, formato, versión, vigencia y hash SHA-256 |
-| `src/tickets_rag/` | Código: ingesta, PII, BM25, embeddings, pgvector, búsqueda híbrida, generación, contrato y métricas |
+| `src/tickets_rag/` | Código: ingesta, PII, búsqueda, clasificador, herramientas, guardrails y el grafo (`grafo.py`) |
 | `scripts/` | Pasos del pipeline, en el orden de abajo |
 | `evaluacion/validacion_dev.jsonl` | 37 consultas de validación interna. No es el banco oficial de la fase 4 |
 | `resultados/linea_base/` | Fase 2: métricas de la línea base, calculadas con las primeras 22 consultas |
 | `resultados/rag/` | Fase 3: comparación de configuraciones y generación de ambos sistemas con las 37 consultas |
-| `docker-compose.yml` | PostgreSQL con pgvector, solo en 127.0.0.1:5433 |
+| `resultados/herramientas/` | Clasificador few-shot (desarrollo y prueba) y demostración del grafo de punta a punta |
+| `docker-compose.yml` | PostgreSQL con pgvector, solo en 127.0.0.1:5433; también guarda el historial y el checkpointer |
 | `tests/` | Pruebas automáticas, sin llamadas a la API; las de pgvector se saltan si la base no está levantada |
 
 ## Cómo correrlo
@@ -65,6 +73,9 @@ uv run python scripts/evaluar_recuperacion.py  # compara BM25, vectores, RRF y r
 uv run python scripts/evaluar_clasificador.py  # macro-F1 de TF-IDF con regresión logística
 uv run python scripts/evaluar_generacion.py --sistema linea_base   # requiere API key
 uv run python scripts/evaluar_generacion.py --sistema rag          # requiere API key y Docker
+uv run python scripts/preparar_bd.py           # historial, tablas de acciones y roles de solo lectura
+uv run python scripts/evaluar_clasificador_llm.py --conjunto desarrollo   # requiere API key
+uv run python scripts/demo_grafo.py            # el grafo de punta a punta con 7 tickets (requiere API key)
 ```
 
 F1, F2 y F3 ya están en el repo: no hace falta regenerarlos para evaluar. Si cambias un documento a
