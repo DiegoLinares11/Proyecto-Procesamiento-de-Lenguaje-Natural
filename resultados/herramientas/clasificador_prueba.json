@@ -1,0 +1,25 @@
+{
+  "juegos_criterios": {
+    "variante": "juegos_criterios",
+    "tickets": 60,
+    "macro_f1_llm": {
+      "categoria": 0.981,
+      "prioridad": 0.869
+    },
+    "macro_f1_tfidf": {
+      "categoria": 0.942,
+      "prioridad": 0.96
+    },
+    "tickets_con_error": 9,
+    "unanimes": 48,
+    "errores_en_unanimes": 6,
+    "errores_en_divididos": 3,
+    "revision_humana": 12,
+    "errores_enviados_a_revision": 3,
+    "tipos": {
+      "procedimiento": 60
+    },
+    "costo_usd": 0.0292,
+    "costo_por_ticket_usd": 0.00049
+  }
+}
