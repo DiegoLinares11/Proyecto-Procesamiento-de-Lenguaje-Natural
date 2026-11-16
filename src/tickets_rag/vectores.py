@@ -18,12 +18,14 @@ from psycopg.types.json import Jsonb
 from tickets_rag import config
 
 
-def url_bd() -> str:
+def url_bd(usuario: str | None = None, variable_clave: str = "POSTGRES_PASSWORD") -> str:
+    """URL de conexión. Por defecto, el dueño de la base; con `usuario`, otro rol cuya clave
+    está en la variable `variable_clave` del .env."""
     config.cargar_entorno()
-    faltan = [v for v in ("POSTGRES_USER", "POSTGRES_PASSWORD", "POSTGRES_DB") if not os.environ.get(v)]
+    faltan = [v for v in ("POSTGRES_USER", variable_clave, "POSTGRES_DB") if not os.environ.get(v)]
     if faltan:
         raise RuntimeError(f"Faltan variables en el .env: {', '.join(faltan)}")
-    return (f"postgresql://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}"
+    return (f"postgresql://{usuario or os.environ['POSTGRES_USER']}:{os.environ[variable_clave]}"
             f"@{os.environ.get('POSTGRES_HOST', '127.0.0.1')}:{os.environ.get('POSTGRES_PORT', '5433')}"
             f"/{os.environ['POSTGRES_DB']}")
 
