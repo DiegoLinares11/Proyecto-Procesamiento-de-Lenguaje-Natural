@@ -24,6 +24,7 @@ import json
 import operator
 import uuid
 from contextlib import contextmanager
+from functools import lru_cache
 from typing import Annotated, TypedDict
 
 import anthropic
@@ -84,6 +85,7 @@ INSTRUCCIONES_RUTA = {
 class Estado(TypedDict, total=False):
     ticket_id: str
     rol: str
+    texto: str            # solo en LangGraph Studio: el guardrail lo enmascara y lo vacía en el primer nodo
     texto_seguro: str
     guardrail: dict
     triage: dict
@@ -115,9 +117,15 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
     # ---------------------------------------------------------------- nodos
 
     def guardrail_entrada(e: Estado) -> dict:
-        g = e["guardrail"]
+        cambios: dict = {}
+        if not e.get("guardrail"):
+            # Entrada desde LangGraph Studio: se revisa aquí y el texto original se vacía del estado.
+            validar_sesion(e["ticket_id"], e["rol"])
+            decision = revisar_entrada(e.get("texto", ""))
+            cambios = {"texto": "", "texto_seguro": decision.texto_seguro, "guardrail": decision.para_traza()}
+        g = cambios.get("guardrail") or e["guardrail"]
         revision = ["posible inyección de instrucciones"] if g["decision"] == "WARN" else []
-        return {"revision": revision, "traza": [{"etapa": "guardrail_entrada", **g}]}
+        return {**cambios, "revision": revision, "traza": [{"etapa": "guardrail_entrada", **g}]}
 
     def rechazar(e: Estado) -> dict:
         respuesta = Respuesta(
@@ -381,6 +389,24 @@ def sistema(cliente: anthropic.Anthropic | None = None):
     with PostgresSaver.from_conn_string(vectores.url_bd()) as checkpointer:
         checkpointer.setup()
         yield construir_grafo(recursos, cliente, checkpointer)
+
+
+@lru_cache(maxsize=1)
+def _recursos_studio() -> tuple[Recursos, anthropic.Anthropic]:
+    from tickets_rag.ingesta import cargar_chunks
+
+    config.cargar_entorno()
+    cliente = anthropic.Anthropic()
+    recursos = Recursos.crear(cargar_chunks(), cliente)
+    recursos.calentar()
+    return recursos, cliente
+
+
+def grafo_para_studio(_config=None):
+    """Fábrica para `langgraph dev` (LangGraph Studio). El servidor de desarrollo guarda el estado
+    por su cuenta, así que el grafo se compila sin checkpointer. Entrada: ticket_id, rol y texto."""
+    recursos, cliente = _recursos_studio()
+    return construir_grafo(recursos, cliente, checkpointer=None)
 
 
 def atender(grafo, ticket_id: str, rol: str, texto: str, hilo: str | None = None) -> tuple[dict, dict]:

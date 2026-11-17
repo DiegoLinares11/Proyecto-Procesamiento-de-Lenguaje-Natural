@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "asistente_tickets": "./src/tickets_rag/grafo.py:grafo_para_studio"
+  },
+  "env": ".env"
+}

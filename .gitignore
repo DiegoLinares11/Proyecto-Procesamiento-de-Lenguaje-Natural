@@ -19,3 +19,9 @@ cache/
 Thumbs.db
 .vscode/
 .idea/
+
+# Estado local del servidor de LangGraph Studio
+.langgraph_api/
+
+# Configuración local de Claude Code
+.claude/
