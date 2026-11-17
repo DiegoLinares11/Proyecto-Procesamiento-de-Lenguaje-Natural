@@ -136,13 +136,16 @@ def extraer_paginas(ruta: Path) -> list[str]:
     paginas = [_lineas_con_posicion(p) for p in PdfReader(ruta).pages]
     xs = [x for lineas in paginas for _, x, _ in lineas]
     margen = min(xs) if xs else 0.0
+    # Interlineado = el salto más común de todo el documento, que es el de las líneas dentro de un
+    # párrafo. Calcularlo por página fallaba: en una página llena de párrafos de una línea, la mediana
+    # era justo el salto entre párrafos y esos párrafos quedaban unidos.
+    todos = [round(a[0] - b[0], 1) for lineas in paginas for a, b in zip(lineas, lineas[1:]) if a[0] - b[0] > 0]
+    interlineado = Counter(todos).most_common(1)[0][0] if todos else 0.0
     salida = []
     for lineas in paginas:
-        saltos = [a[0] - b[0] for a, b in zip(lineas, lineas[1:])]
-        interlineado = sorted(saltos)[len(saltos) // 2] if saltos else 0.0
         texto = []
-        for i, (_, x, contenido) in enumerate(lineas):
-            if i and saltos[i - 1] > interlineado * 1.25:
+        for i, (y, x, contenido) in enumerate(lineas):
+            if i and lineas[i - 1][0] - y > interlineado * 1.25:
                 texto.append("")
             texto.append(("    " if x - margen > 2 else "") + contenido)
         salida.append("\n".join(texto))

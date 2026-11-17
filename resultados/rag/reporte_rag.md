@@ -51,10 +51,16 @@ configuraciones, salvo la línea base y la última, buscan en F1 y F2.
 | RRF 0.3/0.7 | 0.95 | 0.86 | 0.41 | 0.03 s |
 | **RRF 0.5/0.5** | **0.95** | **0.87** | 0.35 | 0.03 s |
 | RRF 0.7/0.3 | 0.90 | 0.88 | 0.32 | 0.03 s |
-| **RRF + reranker** | **0.95** | **0.93** | **0.40** | 2.9 s |
-| RRF + reranker con tickets mezclados | 0.40 | 0.38 | 0.17 | 2.4 s |
+| **RRF + reranker** | **0.95** | **0.93** | **0.40** | 0.28 s |
+| RRF + reranker con tickets mezclados | 0.40 | 0.38 | 0.17 | 0.28 s |
 
 Ninguna configuración devolvió fragmentos no permitidos para el rol.
+
+> **Actualización del 15 de noviembre.** La tabla se recalculó después de dos cambios:
+> - Se corrigió la extracción, que unía los párrafos de una línea.
+> - El reranker pasó a puntuar los 20 candidatos en un solo lote. Su latencia media bajó de 2.9 s a 0.28 s.
+>
+> Recall@5, MRR, Precision@5 y τ no cambiaron en ninguna configuración.
 
 | Recall@5 por tipo | Línea base | RRF + reranker |
 |---|---|---|
@@ -74,8 +80,8 @@ Ninguna configuración devolvió fragmentos no permitidos para el rol.
 - **RRF 0.5/0.5.** Da el mejor recall. Con 0.7/0.3 el MRR sube apenas, pero el recall en las preguntas
   respondidas por F2 baja de 1.00 a 0.79, porque BM25 casi no empareja español con inglés.
 - **El reranker se queda.** Sube el MRR de 0.87 a 0.93 y el recall en consultas ambiguas de 0.25 a 0.50.
-  Cuesta 2.9 s por consulta en la GPU, dentro de la meta de 20 s de P95 por ticket. Bajar los candidatos
-  de 20 a 10 es una opción si la latencia importa más adelante.
+  Con los 20 candidatos en un solo lote cuesta 0.28 s por consulta en la GPU; al principio, con dos
+  lotes, eran 2.9 s.
 - **Los tickets van en un canal aparte.** Mezclados con los procedimientos, llenan el top 5 porque están
   escritos con las mismas palabras que usan los usuarios. Así, el recall cae a 0.40, y a 0 en paráfrasis
   y permisos. Como canal de casos similares sí sirven: en 22 de 24 consultas, al menos uno de los 3 tickets

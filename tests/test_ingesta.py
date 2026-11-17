@@ -85,6 +85,14 @@ def test_todos_los_pasos_de_f1_quedan_completos_en_su_chunk():
                 assert linea in por_seccion[seccion], (version, seccion, linea)
 
 
+def test_parrafos_de_una_linea_no_se_unen():
+    """En 1.3 cada categoría es un párrafo de una línea; antes quedaban todas en un solo párrafo."""
+    c13 = next(c for c in cargar_chunks() if c["doc_id"] == "F1-2026-2" and c["seccion"] == "1.3")
+    lineas = c13["text"].splitlines()
+    for categoria in ("ACCESO:", "CORREO:", "EQUIPOS:", "RED:", "APLICACIONES:", "OTRO:"):
+        assert any(l.startswith(categoria) for l in lineas), categoria
+
+
 def test_solo_cuentan_como_modificados_los_procedimientos_que_cambiaron():
     assert secciones_modificadas(cargar_chunks()) == {"2.1", "2.2", "3.2", "5.2", "8.3"}
 

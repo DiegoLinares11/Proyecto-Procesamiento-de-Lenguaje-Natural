@@ -101,9 +101,10 @@ inglés.
   confirmación humana y servicio caído), pero el banco oficial con esos casos es de la fase de evaluación.
 - **Nombres sin enmascarar.** Los nombres de personas siguen visibles hasta integrar Presidio, en la fase
   de seguridad.
-- **Párrafos unidos.** La extracción por posición une los párrafos de una línea seguidos, porque la
-  mediana de los saltos es el salto de párrafo. El texto queda completo, pero arreglarlo obliga a
-  reindexar y repetir la evaluación de la fase 3.
+- **Párrafos unidos (resuelto).** La extracción unía los párrafos de una línea seguidos. Se corrigió el
+  15 de noviembre usando el interlineado de todo el documento; se reindexó y se repitió la comparación de
+  la fase 3, y Recall@5, MRR y τ quedaron iguales. El clasificador y la demostración se midieron antes
+  del arreglo, cuando las definiciones de 1.3 venían en un solo párrafo con el mismo texto.
 - **El anteproyecto quedó desactualizado en tres puntos:** el umbral de revisión ahora es «unanimidad»
   y no 0.6, τ vale 0.0045 y los tickets van en un canal aparte.
 
