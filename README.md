@@ -12,11 +12,80 @@ acciones críticas sin aprobación humana. Todos los datos son ficticios o públ
 Reportes por fase: [línea base](resultados/linea_base/reporte_linea_base.md), [RAG](resultados/rag/reporte_rag.md)
 y [herramientas](resultados/herramientas/reporte_herramientas.md).
 
-Para probar un ticket con el sistema completo:
+## Para el equipo
+
+- **Anteproyecto:** [docs/Anteproyecto_Proyecto_Final_CC3103.docx](docs/Anteproyecto_Proyecto_Final_CC3103.docx), la
+  versión corregida. Quedó desactualizado en tres puntos que hay que cambiar en el documento técnico:
+  - La revisión humana del clasificador se activa si algún voto discrepa, no con 0.6.
+  - τ vale 0.0045, no 0.30.
+  - Los tickets resueltos se buscan en un canal aparte, no mezclados con los procedimientos.
+- **Cómo funciona por dentro:** el diagrama de abajo y los tres reportes por fase. Cada decisión está
+  justificada con números.
+- **Qué sigue:**
+
+  | Fase | Responsable | Fecha | Qué falta |
+  |---|---|---|---|
+  | Evaluación | Andy | 20 nov | Banco oficial de 42 casos, fidelidad con Ragas, juez LLM de citas y reporte comparativo |
+  | Seguridad | Diederich | 23 nov | Nombres con Presidio y 12 pruebas adversarias documentadas |
+  | Entrega | Todos | — | Documento técnico de 10 a 15 páginas y demo de 15 minutos |
+
+  También faltan los 20 tickets escritos a mano para evaluar el clasificador. Debe escribirlos alguien
+  que no redactó F3.
+- **Cada quien usa su propia API key de Anthropic.** Va en su `.env`, que nunca se sube. No la compartan
+  por chat.
+
+## El grafo
+
+Generado desde el código con `scripts/dibujar_grafo.py`. Las flechas punteadas son decisiones del grafo.
+
+<!-- grafo:inicio -->
+```mermaid
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	guardrail_entrada(guardrail_entrada)
+	rechazar(rechazar)
+	clasificar(clasificar)
+	agente(agente)
+	herramientas(herramientas)
+	validar_salida(validar_salida)
+	abstener(abstener)
+	aprobacion_humana(aprobacion_humana)
+	responder(responder)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> guardrail_entrada;
+	agente -.-> herramientas;
+	agente -.-> validar_salida;
+	aprobacion_humana --> responder;
+	clasificar --> agente;
+	guardrail_entrada -.-> clasificar;
+	guardrail_entrada -.-> rechazar;
+	herramientas --> agente;
+	validar_salida -.-> abstener;
+	validar_salida -.-> agente;
+	validar_salida -.-> aprobacion_humana;
+	validar_salida -.-> responder;
+	abstener --> __end__;
+	rechazar --> __end__;
+	responder --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
+```
+<!-- grafo:fin -->
+
+Para verlo correr paso a paso en LangGraph Studio:
 
 ```bash
-uv run python scripts/atender_ticket.py "Outlook se queda en Procesando" --rol N1
+uv run langgraph dev --no-reload --allow-blocking
 ```
+
+`--allow-blocking` hace falta porque el grafo usa llamadas síncronas (base de datos, API y modelos locales)
+y el servidor de desarrollo, que es asíncrono, las rechaza por defecto.
+
+Después abre en Chrome `https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024` e inicia sesión
+con una cuenta gratuita de LangSmith. Con `LANGSMITH_TRACING=false` en el `.env`, los datos no salen de la
+máquina. La entrada es `ticket_id`, `rol` y `texto`; si el grafo pide aprobar una acción, Studio muestra la
+pausa y se reanuda con `{"aprobada": true, "aprobador": "...", "rol": "N2"}`.
 
 Con las mismas 37 consultas de validación:
 
@@ -35,6 +104,7 @@ sintéticos. Estos números salen de un set de validación interno; los definiti
 
 | Ruta | Contenido |
 |---|---|
+| `docs/` | Anteproyecto (versión corregida) |
 | `datos/f1_manual/` | F1: manual ficticio de la mesa de ayuda. Fuente en Markdown y PDFs de las versiones 2026-1 y 2026-2 |
 | `datos/f2_microsoft/` | F2: 24 artículos de soporte de Microsoft (CC BY 4.0) en un commit fijo, el Markdown original y el PDF |
 | `datos/f3_tickets/` | F3: 300 tickets resueltos sintéticos y los metadatos de su generación |
@@ -48,38 +118,51 @@ sintéticos. Estos números salen de un set de validación interno; los definiti
 | `docker-compose.yml` | PostgreSQL con pgvector, solo en 127.0.0.1:5433; también guarda el historial y el checkpointer |
 | `tests/` | Pruebas automáticas, sin llamadas a la API; las de pgvector se saltan si la base no está levantada |
 
-## Cómo correrlo
+## Cómo correrlo desde cero
 
-Requiere [uv](https://docs.astral.sh/uv/) y Docker. uv instala Python 3.11 y las dependencias fijadas en
-`uv.lock`, con PyTorch para CUDA en Windows y Linux. Con pip, usa `requirements.txt` y agrega
-`--extra-index-url https://download.pytorch.org/whl/cu128`.
+**Requisitos:**
+- [uv](https://docs.astral.sh/uv/), que instala Python 3.11 y las dependencias fijadas en `uv.lock`.
+- Docker Desktop.
+- Unos 10 GB libres, para PyTorch y los modelos.
+
+Una GPU NVIDIA acelera los embeddings y el reranker, pero todo funciona en CPU.
 
 ```bash
 uv sync
-cp .env.example .env    # completa ANTHROPIC_API_KEY y POSTGRES_PASSWORD; el .env nunca se sube
-docker compose up -d
-uv run pytest
+cp .env.example .env                          # pon tu ANTHROPIC_API_KEY y una contraseña en POSTGRES_PASSWORD
+docker compose up -d                          # PostgreSQL con pgvector
+uv run python scripts/ingestar.py             # escribe los chunks en indices/
+uv run python scripts/indexar_vectores.py     # embeddings en pgvector; la primera vez descarga los modelos
+uv run python scripts/preparar_bd.py          # historial, tablas de acciones y roles (genera sus claves en el .env)
+uv run pytest                                 # unas 80 pruebas, ninguna gasta tokens
+uv run python scripts/atender_ticket.py "Outlook se queda en Procesando" --rol N1
 ```
 
-Pipeline:
+`indices/` y el `.env` no se suben al repo: cada quien los genera con los pasos de arriba.
+
+Las fuentes F1, F2 y F3 ya están en el repo, así que no hace falta regenerarlas. Si cambias un documento a
+propósito, registra su nuevo hash con `uv run python scripts/ingestar.py --actualizar-hashes`.
+
+Con pip en lugar de uv, usa `requirements.txt` y agrega `--extra-index-url https://download.pytorch.org/whl/cu128`.
+
+**Reproducir cada fase:**
 
 ```bash
-uv run python scripts/construir_f1.py          # PDFs de F1 (salida determinista)
-uv run python scripts/construir_f2.py          # descarga F2 en el commit fijo y arma su PDF
-uv run python scripts/generar_f3.py            # redacta F3 con Haiku 5.5 (requiere API key)
-uv run python scripts/ingestar.py              # verifica hashes, limpia, segmenta y escribe los chunks
-uv run python scripts/indexar_vectores.py      # embeddings BGE-M3 y MiniLM en pgvector
-uv run python scripts/evaluar_recuperacion.py  # compara BM25, vectores, RRF y reranker contra la línea base
-uv run python scripts/evaluar_clasificador.py  # macro-F1 de TF-IDF con regresión logística
+uv run python scripts/evaluar_recuperacion.py                   # fase 3: BM25, vectores, RRF y reranker
+uv run python scripts/evaluar_clasificador.py                   # fase 2: TF-IDF
 uv run python scripts/evaluar_generacion.py --sistema linea_base   # requiere API key
-uv run python scripts/evaluar_generacion.py --sistema rag          # requiere API key y Docker
-uv run python scripts/preparar_bd.py           # historial, tablas de acciones y roles de solo lectura
+uv run python scripts/evaluar_generacion.py --sistema rag          # requiere API key
 uv run python scripts/evaluar_clasificador_llm.py --conjunto desarrollo   # requiere API key
-uv run python scripts/demo_grafo.py            # el grafo de punta a punta con 7 tickets (requiere API key)
+uv run python scripts/demo_grafo.py                             # 7 tickets de punta a punta (requiere API key)
 ```
 
-F1, F2 y F3 ya están en el repo: no hace falta regenerarlos para evaluar. Si cambias un documento a
-propósito, registra su nuevo hash con `uv run python scripts/ingestar.py --actualizar-hashes`.
+**Regenerar las fuentes, solo si cambian:**
+
+```bash
+uv run python scripts/construir_f1.py         # PDFs de F1 (salida determinista)
+uv run python scripts/construir_f2.py         # F2 desde el commit fijo de Microsoft
+uv run python scripts/generar_f3.py           # F3 con Haiku 5.5 (requiere API key; el texto cambia en cada corrida)
+```
 
 ## Decisiones de la línea base
 
