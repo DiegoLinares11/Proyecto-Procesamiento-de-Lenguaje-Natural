@@ -1,0 +1,20 @@
+{
+  "inicio_utc": "2026-11-18T19:37:29.436297+00:00",
+  "lanzador_pid": 4431,
+  "log_local": "/tmp/cc3103-banco-continuacion-20261118T193728Z.log",
+  "reanudacion": {
+    "estado": "preparado",
+    "aplicado": true,
+    "huella_sha256": "711fc1b25110ebb27ad1d7279e0b9743fbd4d63f646c4ccc6fbea542e7dbf7d9",
+    "generaciones_conservadas": 75,
+    "modelos_completos_conservados": 353,
+    "fuentes_congeladas": 29,
+    "reintento_permitido": 1,
+    "tokens_intento_previo": "desconocidos",
+    "duracion_intento_previo": "desconocida",
+    "aviso": "La siguiente ejecución de R11 será un segundo intento; el desenlace y uso anteriores siguen desconocidos."
+  },
+  "respaldo_auditoria_sha256": "bf52e5638f147b63ae2f0284cd92e3a0f4fabd56cf5e8099a7be9fc05baf2f72",
+  "respuesta_temporal_anterior": "archivo de 0 bytes; sin registros de salida",
+  "comando": "caffeinate -is .venv/bin/python scripts/reanudar_banco_local.py"
+}

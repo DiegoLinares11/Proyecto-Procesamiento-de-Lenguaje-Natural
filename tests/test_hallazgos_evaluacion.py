@@ -59,7 +59,7 @@ def test_una_llamada_repetida_no_se_ejecuta_ni_gasta_otra_consulta(falsas, chunk
                          final("El promedio fue de 3.3 horas.", ["sql-1"]))
     estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "Tiempo promedio de RED ALTA en el primer semestre")
     assert len(falsas.llamadas["query_tickets"]) == 1
-    repetida = modelo.llamadas[2]["messages"][-1]["content"][0]
+    repetida = modelo.llamadas[2]["mensajes"][-1]["content"][0]
     assert repetida["is_error"] and "misma llamada" in repetida["content"]
     assert not estado["respuesta"]["abstained"]
 
@@ -70,7 +70,7 @@ def test_dos_llamadas_identicas_en_el_mismo_turno_se_ejecutan_una_vez(falsas, ch
                          final("El promedio fue de 3.3 horas.", ["sql-1"]))
     atender(grafo_con(modelo, chunks), TICKET, "N1", "Tiempo promedio de RED ALTA en el primer semestre")
     assert len(falsas.llamadas["query_tickets"]) == 1
-    resultados = modelo.llamadas[1]["messages"][-1]["content"]
+    resultados = modelo.llamadas[1]["mensajes"][-1]["content"]
     assert [r["is_error"] for r in resultados] == [False, True]
 
 
@@ -82,6 +82,10 @@ def conexion():
         c = conectar_lectura()
     except (psycopg.OperationalError, KeyError):
         pytest.skip("Historial no disponible: docker compose up -d y scripts/preparar_bd.py")
+    except RuntimeError as error:
+        if str(error).startswith("Faltan variables en el .env:"):
+            pytest.skip("Historial no configurado: faltan credenciales locales de PostgreSQL")
+        raise
     yield c
     c.close()
 
@@ -147,7 +151,7 @@ def test_el_modelo_no_puede_usar_la_causa_reservada_para_la_abstencion(falsas, c
                          pide(("escalate", {"causa": "sin_evidencia", "motivo": "No encontré el procedimiento exacto"})),
                          final("Siga el 3.1.", [chunk_manual["chunk_id"]]))
     estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "Outlook no abre")
-    rechazo = modelo.llamadas[2]["messages"][-1]["content"][0]
+    rechazo = modelo.llamadas[2]["mensajes"][-1]["content"][0]
     assert rechazo["is_error"] and "la usa el sistema" in rechazo["content"]
     assert "escalate" not in falsas.llamadas and "escalate" not in (estado["respuesta"]["tool_used"] or "")
 

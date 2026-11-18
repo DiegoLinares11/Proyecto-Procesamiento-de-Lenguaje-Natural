@@ -1,0 +1,50 @@
+{
+  "prueba": "correcta",
+  "modelo": "gpt-6.2-sol",
+  "autenticacion": "chatgpt",
+  "api_keys_en_entorno_hijo": false,
+  "salida": {
+    "estado": "conexion_correcta",
+    "suma": 5
+  },
+  "herramientas_observadas": [],
+  "segundos": 5.54,
+  "uso": {
+    "input_tokens": 12367,
+    "cached_input_tokens": 0,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 22,
+    "reasoning_output_tokens": 0
+  },
+  "exit_code": 0,
+  "eventos": [
+    "item.completed",
+    "thread.started",
+    "turn.completed",
+    "turn.started"
+  ],
+  "fecha_utc": "2026-11-18T05:03:51.015374+00:00",
+  "fase": 1,
+  "alcance": "Prueba local de Codex CLI con sesion ChatGPT existente; el backend NLP/RAG todavia no se migra.",
+  "cli_version": "0.167.0-alpha.4.1",
+  "preflight": {
+    "auth_mode": "chatgpt",
+    "ordinary_usage_allowed": true,
+    "quota_used_percent": 28,
+    "quota_window_minutes": 10080,
+    "rate_limit_reached": null,
+    "has_credits": false,
+    "unlimited_credits": false,
+    "fuente": "account/read y account/rateLimits/read del app-server local; datos previos a la inferencia"
+  },
+  "restricciones": {
+    "entorno_hijo_sin_api_keys": true,
+    "config_usuario_omitida_en_inferencia": true,
+    "sesion_efimera": true,
+    "directorio_trabajo_temporal_vacio": true,
+    "sandbox": "read-only",
+    "reintentos_de_aplicacion": 0,
+    "fallback_api_key": false,
+    "prompt_fijo_sin_datos_proyecto": true
+  }
+}

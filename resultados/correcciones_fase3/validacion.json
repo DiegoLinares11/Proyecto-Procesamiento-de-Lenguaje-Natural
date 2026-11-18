@@ -1,0 +1,29 @@
+{
+  "fase": 3,
+  "fecha_registro_utc": "2026-11-18T05:50:03.574291+00:00",
+  "pytest_exit_code": 0,
+  "pruebas": {
+    "total": 258,
+    "pasaron": 238,
+    "fallaron": 0,
+    "errores": 0,
+    "omitidas_postgresql": 20
+  },
+  "alcance": "Suite offline completa; modelos falsos y procesos CLI falsos, guardia CODEX_BIN inexistente. Checkpoints en memoria; sin PostgreSQL configurado.",
+  "inferencias_reales": 0,
+  "fuentes_regeneradas": false,
+  "regresiones_fase3": [
+    {
+      "modulo": "test_fase3_entrada_estado",
+      "pruebas": 31
+    },
+    {
+      "modulo": "test_fase3_fallas",
+      "pruebas": 11
+    },
+    {
+      "modulo": "test_api",
+      "pruebas": 18
+    }
+  ]
+}

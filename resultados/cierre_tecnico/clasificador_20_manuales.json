@@ -1,0 +1,26 @@
+{
+  "estado": "completo",
+  "conjunto": "tickets_humanos_autoria_declarada",
+  "procedencia": "Autoría humana declarada al reservar el conjunto.",
+  "fecha_evaluacion_utc": "2026-11-18T19:24:33.463176+00:00",
+  "tickets": 20,
+  "modelo": "gpt-6.2-sol",
+  "proveedor": "codex_subscription",
+  "variante": "juegos_criterios",
+  "macro_f1_llm": {
+    "categoria": 1.0,
+    "prioridad": 1.0
+  },
+  "macro_f1_tfidf": {
+    "categoria": 0.778,
+    "prioridad": 0.512
+  },
+  "tickets_con_error": 0,
+  "tokens_entrada": 772335,
+  "tokens_salida": 2770,
+  "uso": "evaluacion_reservada; no entrenamiento ni ajuste del prompt",
+  "costo_usd": 0.0,
+  "tickets_manuales_sha256": "146267b49c2cfe4c796dfcf44a3728134f5151cdf3c0717cdac23c45c7bea154",
+  "costo": "Cargo incremental de API. Se usó cuota incluida de la suscripción.",
+  "alcance": "Evaluación de categoría y prioridad sobre 20 tickets. Los textos, metadatos personales y registros privados se conservan localmente."
+}

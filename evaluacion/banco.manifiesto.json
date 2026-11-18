@@ -1,0 +1,58 @@
+{
+  "version_formato": 1,
+  "version_banco": "1.0.0",
+  "fecha_congelacion_utc": "2026-11-18T07:14:52.934761+00:00",
+  "estado": "congelado_tecnicamente_revision_humana_pendiente",
+  "banco": {
+    "archivo": "banco.jsonl",
+    "sha256": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+    "casos": 42
+  },
+  "autoria": {
+    "descripcion": "Reescritura y revisión técnica asistidas por Codex; borrador original de Claude; no atribuidas a un integrante humano",
+    "redaccion_original": "Claude, borrador conservado",
+    "reescritura": "Codex, asistencia de IA",
+    "autor_f3_historico": "Claude Haiku 5.5 según metadatos de F3",
+    "independencia_humana": "pendiente de declaración y revisión por integrante que no redactó la fuente correspondiente"
+  },
+  "revision_humana": {
+    "estado": "pendiente",
+    "registro": "evaluacion/revision_humana_banco.csv",
+    "revisor": null,
+    "fecha": null,
+    "alcance": "42 casos contra fuentes; no equivale a revisión de respuestas de la fase 6"
+  },
+  "revision_casos": {
+    "archivo": "evaluacion/revision_banco.json",
+    "sha256": "600dfe334fd3e67ed2bcd9b4154c10264e10056c9aa0dfaff21e5d7fcdc89527"
+  },
+  "referencias_sha256": {
+    "datos/f1_manual/manual_mesa_ayuda.md": "2b23295cd22609eb56a5f6d3c633c17d6e0417d587e74e96de23784a817f617e",
+    "datos/f1_manual/manual_mesa_ayuda_v2026-1.pdf": "64dae7133bc6586f11743adf7f7adfe3622d01bbb06b50d21b639b37bc98a45a",
+    "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9",
+    "datos/f2_microsoft/f2_microsoft_soporte.pdf": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794",
+    "datos/f3_tickets/tickets.jsonl": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+    "datos/manifiesto.json": "179f4cf76bdf1901681a503e1ab65647521d13100a92476297105d15f91fb84e",
+    "evaluacion/banco_borrador.jsonl": "5b9812ba8d67c27267014e966453203276ad09251eb03883caa16e2e940c8a84",
+    "evaluacion/validacion_dev.jsonl": "ad000def7c89ec58d93996fffd4993b4233f3e144777e6825b401ab9451e3632"
+  },
+  "indice": {
+    "archivo_local": "indices/chunks.jsonl",
+    "sha256_json_canonico": "8143438af2de2ceca2eeb55308577ad488443867e384b37e090ff83533520f55",
+    "hash_de_bytes": false,
+    "fragmentos": 564
+  },
+  "metodologia": {
+    "inferencia_modelos_ejecutada": false,
+    "evaluacion_respuestas_ejecutada": false,
+    "ajuste_modelos_umbral_prompt": false,
+    "nuevo_holdout_ciego": false,
+    "limitaciones": [
+      "Revisión técnica de IA; pendiente autoría/revisión humana independiente.",
+      "Se conocen resultados previos del borrador; no es un holdout nuevo ciego.",
+      "No duplicación exacta normalizada no prueba independencia semántica.",
+      "Los resultados12/12de ataques del borrador no se transfieren a este banco.",
+      "Los20tickets humanos son un conjunto aparte todavía no recibido."
+    ]
+  }
+}

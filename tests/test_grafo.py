@@ -49,13 +49,13 @@ class ModeloFalso:
     def __init__(self, *guion):
         self.guion = list(guion)
         self.llamadas = []
-        self.beta = SimpleNamespace(messages=SimpleNamespace(create=self._create))
 
-    def _create(self, **kwargs):
+    def generar(self, **kwargs):
         self.llamadas.append(kwargs)
         bloques = self.guion.pop(0) if len(self.guion) > 1 else self.guion[0]
         return SimpleNamespace(
-            content=bloques, model=kwargs["model"],
+            content=bloques, model=kwargs["modelo"],
+            proveedor="codex_subscription", modo_autenticacion="chatgpt",
             stop_reason="tool_use" if any(b.type == "tool_use" for b in bloques) else "end_turn",
             usage=SimpleNamespace(input_tokens=1000, output_tokens=100, cache_creation_input_tokens=0, cache_read_input_tokens=0))
 
@@ -84,7 +84,8 @@ def falsas(monkeypatch, chunk_manual):
 
     registrar("classify", lambda r, c, e: {"categoria": "EQUIPOS", "prioridad": "MEDIA", "tipo": cfg["tipo"],
                                            "confianza": {"categoria": 1.0, "prioridad": 1.0, "tipo": 1.0},
-                                           "needs_human_review": cfg["votos_divididos"], "costo_usd": 0.0005})
+                                           "needs_human_review": cfg["votos_divididos"], "costo_usd": 0.0,
+                                           "tokens_entrada": 1000, "tokens_salida": 100})
     registrar("search_docs", lambda r, c, e: {
         "fragmentos": [{"chunk_id": chunk_manual["chunk_id"], "tipo": "manual", "source": chunk_manual["source"],
                         "page": chunk_manual["page"], "version": "2026-2", "score": 0.9, "text": chunk_manual["text"]}],
@@ -120,7 +121,8 @@ def test_camino_feliz_con_cita_verificable(falsas, chunks, chunk_manual):
     assert r["sources"] == [{"source": chunk_manual["source"], "page": chunk_manual["page"], "chunk_id": chunk_manual["chunk_id"]}]
     assert r["tool_used"] == "classify, search_docs"
     # El modelo solo ve las herramientas de la ruta procedimiento
-    assert [t["name"] for t in modelo.llamadas[0]["tools"]] == ["search_docs", "buscar_casos_similares", "escalate"]
+    assert [t["name"] for t in modelo.llamadas[0]["herramientas"]] == ["search_docs", "buscar_casos_similares", "escalate"]
+    assert all(u["proveedor"] == "codex_subscription" and u["costo_api_usd"] == 0 for u in estado["uso"])
 
 
 def test_cita_inventada_se_reintenta_una_vez_y_luego_se_abstiene_y_escala(falsas, chunks):
@@ -128,7 +130,7 @@ def test_cita_inventada_se_reintenta_una_vez_y_luego_se_abstiene_y_escala(falsas
     estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "La VPN no conecta")
     assert estado["respuesta"]["abstained"] and estado["respuesta"]["needs_human_review"]
     assert len(modelo.llamadas) == 3 and "escalate" in falsas.llamadas
-    assert "no pasó la validación" in modelo.llamadas[2]["messages"][-1]["content"]
+    assert "no pasó la validación" in modelo.llamadas[2]["mensajes"][-1]["content"]
 
 
 def test_herramienta_fuera_de_la_ruta_vuelve_como_error(falsas, chunks, chunk_manual):
@@ -136,7 +138,7 @@ def test_herramienta_fuera_de_la_ruta_vuelve_como_error(falsas, chunks, chunk_ma
                          pide(("search_docs", {"query": "mfa"})),
                          final("Escala a N2.", [chunk_manual["chunk_id"]]))
     estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "Perdí el teléfono con el MFA")
-    resultado = modelo.llamadas[1]["messages"][-1]["content"][0]
+    resultado = modelo.llamadas[1]["mensajes"][-1]["content"][0]
     assert resultado["is_error"] and "no está permitida en esta ruta" in resultado["content"]
     assert "take_action" not in falsas.llamadas
 
@@ -146,7 +148,7 @@ def test_tras_cinco_herramientas_el_modelo_tiene_que_responder(falsas, chunks, c
     modelo = ModeloFalso(*guion)
     atender(grafo_con(modelo, chunks), TICKET, "N1", "Outlook no abre")
     assert len(falsas.llamadas["search_docs"]) == 5
-    assert modelo.llamadas[5]["tool_choice"] == {"type": "none"}
+    assert modelo.llamadas[5]["permitir_herramientas"] is False
 
 
 def test_si_ninguna_busqueda_pasa_tau_se_abstiene_aunque_el_modelo_responda(falsas, chunks, chunk_manual):
@@ -198,8 +200,13 @@ def test_la_accion_pausa_el_grafo_hasta_que_n2_decide(accion_pendiente):
 
 def test_un_n1_no_puede_aprobar_la_accion(accion_pendiente):
     estado = reanudar(accion_pendiente.grafo, accion_pendiente.cfg, aprobada=True, aprobador="Agente N1", rol="N1")
-    assert "sigue pendiente" in estado["respuesta"]["answer"]
+    assert estado.get("__interrupt__") and estado.get("respuesta") is None
+    assert any("sigue pendiente" in n for n in estado["notas_accion"])
     assert any("aprobación inválida" in m for m in estado["revision"])
+    assert accion_pendiente.decisiones == []
+    estado = reanudar(accion_pendiente.grafo, accion_pendiente.cfg, aprobada=True, aprobador="Técnico N2", rol="N2")
+    assert "Ejecutada en simulación" in estado["respuesta"]["answer"]
+    assert accion_pendiente.decisiones == [(41, True, "N2")]
 
 
 def test_posible_inyeccion_pasa_marcada_para_revision(falsas, chunks, chunk_manual):

@@ -1,0 +1,42 @@
+{
+  "version_formato": 1,
+  "inicio_utc": "2026-11-18T06:08:07.248040+00:00",
+  "estado": "completo",
+  "procedencia": "evaluacion_actual_local_sin_llm",
+  "banco": {
+    "archivo": "pii_sembrada.jsonl",
+    "version": "1.0",
+    "sha256_esperado": "bb5280953bece83a5861ea873f5424c8d94ea25594aeeed555525c74548d6d06",
+    "sha256_observado": "bb5280953bece83a5861ea873f5424c8d94ea25594aeeed555525c74548d6d06",
+    "textos": 30
+  },
+  "meta_recall": 0.95,
+  "entorno": {
+    "python": "3.11.13"
+  },
+  "codigo_sha256": {
+    "src/tickets_rag/pii.py": "dd31352c6c189b8a0aef5acd9a9afc01a01ef9954071d3f86707a83f523b37fc",
+    "src/tickets_rag/evaluacion_pii.py": "be7b65274ef7c2c59bcd1e25ae54713e04b3f3246196f1843a015b6634bc373c",
+    "scripts/evaluar_pii.py": "57c7b4eeddbe590441491555e12f16babb9344e54727dc86cc47353472fd3f15"
+  },
+  "detector": {
+    "local": true,
+    "ner_disponible": true,
+    "modelo_personas": "es_core_news_md",
+    "version_modelo_personas": "3.8.0",
+    "spacy": "3.8.18",
+    "presidio_analyzer": "2.2.366",
+    "score_personas": 0.85,
+    "tipos": [
+      "PERSON",
+      "EMAIL",
+      "PHONE",
+      "DPI",
+      "CARD"
+    ]
+  },
+  "textos_completos": 30,
+  "metricas": "resumen.json",
+  "fin_utc": "2026-11-18T06:08:11.894678+00:00",
+  "codigo_salida": 0
+}

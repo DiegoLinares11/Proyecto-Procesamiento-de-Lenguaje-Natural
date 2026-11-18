@@ -1,0 +1,77 @@
+{
+  "textos_evaluados": 30,
+  "entidades_referencia": 56,
+  "estricto": {
+    "tp": 55,
+    "fp": 2,
+    "fn": 1,
+    "precision": 0.9649122807017544,
+    "recall": 0.9821428571428571,
+    "f1": 0.9734513274336283
+  },
+  "por_tipo": {
+    "CARD": {
+      "tp": 5,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "entidades_efectivas": 5,
+      "recall_efectivo": 1.0
+    },
+    "DPI": {
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "entidades_efectivas": 7,
+      "recall_efectivo": 1.0
+    },
+    "EMAIL": {
+      "tp": 10,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "entidades_efectivas": 10,
+      "recall_efectivo": 1.0
+    },
+    "PERSON": {
+      "tp": 24,
+      "fp": 2,
+      "fn": 1,
+      "precision": 0.9230769230769231,
+      "recall": 0.96,
+      "f1": 0.9411764705882353,
+      "entidades_efectivas": 24,
+      "recall_efectivo": 0.96
+    },
+    "PHONE": {
+      "tp": 9,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "entidades_efectivas": 9,
+      "recall_efectivo": 1.0
+    }
+  },
+  "redaccion": {
+    "textos_integros": 30,
+    "textos_no_integros": 0,
+    "entidades_efectivas": 55,
+    "recall_efectivo": 0.9821428571428571
+  },
+  "negativos": {
+    "fragmentos": 24,
+    "fragmentos_afectados": 0,
+    "detecciones_sobre_negativos": 0
+  },
+  "meta_recall": 0.95,
+  "cumple_meta": true
+}

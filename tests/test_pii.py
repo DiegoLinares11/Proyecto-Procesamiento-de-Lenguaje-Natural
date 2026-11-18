@@ -1,4 +1,4 @@
-from tickets_rag.pii import enmascarar, luhn_valido
+from tickets_rag.pii import detectar, enmascarar, luhn_valido
 
 
 def test_enmascara_correo_y_conserva_el_sentido():
@@ -37,3 +37,20 @@ def test_tarjeta_sin_luhn_valido_no_se_enmascara():
     assert not luhn_valido("4111 1111 1111 1112")
     texto, encontrados = enmascarar("Pedido 4111 1111 1111 1112")
     assert "CARD" not in encontrados
+
+
+def test_spans_originales_no_contienen_valores_ni_se_solapan():
+    texto = "Correo cliente@example.com, teléfono 5555-1234 y DPI 2456 78901 0101."
+    detecciones = detectar(texto)
+    assert [d.tipo for d in detecciones] == ["EMAIL", "PHONE", "DPI"]
+    assert [texto[d.inicio:d.fin] for d in detecciones] == ["cliente@example.com", "5555-1234", "2456 78901 0101"]
+    assert all(a.fin <= b.inicio for a, b in zip(detecciones, detecciones[1:]))
+    assert "cliente@example.com" not in repr(detecciones)
+    assert all(0 < d.score <= 1 for d in detecciones)
+
+
+def test_tarjeta_tiene_prioridad_sobre_telefono_dentro_del_mismo_numero():
+    texto = "4111 1111 1111 1111"
+    detecciones = detectar(texto)
+    assert [(d.tipo, d.inicio, d.fin) for d in detecciones] == [("CARD", 0, len(texto))]
+    assert enmascarar(texto) == ("[CARD_REDACTED]", {"CARD": 1})

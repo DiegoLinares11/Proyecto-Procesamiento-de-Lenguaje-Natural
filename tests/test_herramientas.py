@@ -1,6 +1,10 @@
 """Pruebas de las herramientas sin llamar a la API: cliente falso, herramientas falsas y la base local."""
 
+import dataclasses
+import threading
 import time
+from concurrent.futures import wait
+from contextlib import ExitStack
 from types import SimpleNamespace
 
 import psycopg
@@ -9,6 +13,7 @@ import pytest
 from tickets_rag import herramientas as H
 from tickets_rag.clasificador_llm import Clasificacion, ClasificadorLLM
 from tickets_rag.ingesta import cargar_chunks
+from tickets_rag.modelo import ErrorModelo
 
 CTX = H.Contexto(ticket_id="TCK-2026-09001", rol="N1")
 TODAS = set(H.HERRAMIENTAS)
@@ -60,7 +65,7 @@ def falsa(monkeypatch):
     return registrar
 
 
-def test_servicio_lento_se_corta_y_se_reintenta_una_vez(recursos_minimos, falsa):
+def test_servicio_lento_agota_dos_ventanas_sin_duplicar_el_worker(recursos_minimos, falsa):
     llamadas = []
 
     def lenta(recursos, contexto, entrada):
@@ -70,7 +75,7 @@ def test_servicio_lento_se_corta_y_se_reintenta_una_vez(recursos_minimos, falsa)
 
     falsa(lenta)
     r = H.ejecutar(recursos_minimos, CTX, "falsa", {"text": "x"}, {"falsa"}, timeout=0.1)
-    assert not r.ok and r.intentos == 2 and "no respondió" in r.error and len(llamadas) == 2
+    assert not r.ok and r.intentos == 2 and "no respondió" in r.error and len(llamadas) == 1
 
 
 def test_falla_pasajera_se_reintenta_y_luego_funciona(recursos_minimos, falsa):
@@ -99,6 +104,63 @@ def test_error_de_la_herramienta_no_se_reintenta(recursos_minimos, falsa):
     assert not r.ok and r.error == "ticket inexistente" and estado["n"] == 1
 
 
+@pytest.mark.parametrize("codigo", ["autenticacion", "cuota", "configuracion"])
+def test_error_permanente_del_modelo_no_se_reintenta(recursos_minimos, falsa, codigo):
+    llamadas = []
+
+    def falla(recursos, contexto, entrada):
+        llamadas.append(1)
+        raise ErrorModelo(codigo)
+
+    falsa(falla)
+    r = H.ejecutar(recursos_minimos, CTX, "falsa", {"text": "x"}, {"falsa"})
+    assert not r.ok and r.intentos == 1 and llamadas == [1] and codigo in r.error
+
+
+def test_error_transitorio_del_modelo_conserva_el_reintento(recursos_minimos, falsa):
+    llamadas = []
+
+    def inestable(recursos, contexto, entrada):
+        llamadas.append(1)
+        if len(llamadas) == 1:
+            raise ErrorModelo("transporte", transitorio=True)
+        return {"ok": True}
+
+    falsa(inestable)
+    r = H.ejecutar(recursos_minimos, CTX, "falsa", {"text": "x"}, {"falsa"})
+    assert r.ok and r.intentos == 2
+
+
+def test_classify_espera_sin_pool_ni_timeout_de_herramienta(recursos_minimos, monkeypatch):
+    llamadas = []
+
+    def clasificar(recursos, contexto, entrada):
+        llamadas.append(1)
+        time.sleep(0.02)
+        return {"categoria": "RED"}
+
+    def no_enviar_al_pool(*args, **kwargs):
+        raise AssertionError("classify debe esperar directamente al cliente del modelo")
+
+    monkeypatch.setitem(H.HERRAMIENTAS, "classify", dataclasses.replace(H.HERRAMIENTAS["classify"], funcion=clasificar))
+    monkeypatch.setattr(H._POOL, "submit", no_enviar_al_pool)
+    r = H.ejecutar(recursos_minimos, CTX, "classify", {"text": "vpn"}, {"classify"}, timeout=0.001)
+    assert r.ok and r.intentos == 1 and llamadas == [1] and r.contenido == {"categoria": "RED"}
+
+
+@pytest.mark.parametrize("codigo", ["transporte", "timeout"])
+def test_classify_no_repite_inferencias_ante_error_transitorio(recursos_minimos, monkeypatch, codigo):
+    llamadas = []
+
+    def clasificar(recursos, contexto, entrada):
+        llamadas.append(1)
+        raise ErrorModelo(codigo, transitorio=True)
+
+    monkeypatch.setitem(H.HERRAMIENTAS, "classify", dataclasses.replace(H.HERRAMIENTAS["classify"], funcion=clasificar))
+    r = H.ejecutar(recursos_minimos, CTX, "classify", {"text": "vpn"}, {"classify"})
+    assert not r.ok and r.intentos == 1 and llamadas == [1] and codigo in r.error
+
+
 def test_esquemas_para_la_api_son_compatibles_con_modo_estricto():
     prohibidas = {"title", "default", "pattern", "minimum", "maximum", "minLength", "maxLength", "maxItems",
                   "oneOf", "discriminator"}
@@ -124,12 +186,12 @@ def test_esquemas_para_la_api_son_compatibles_con_modo_estricto():
 class ClienteVotos:
     def __init__(self, respuestas):
         self.respuestas = list(respuestas)
-        self.messages = SimpleNamespace(parse=self._parse)
 
-    def _parse(self, **kwargs):
+    def generar(self, **kwargs):
         voto = self.respuestas.pop(0)
         return SimpleNamespace(parsed_output=voto, stop_reason="refusal" if voto is None else "end_turn",
-                               usage=SimpleNamespace(input_tokens=1000, output_tokens=20))
+                               proveedor="codex_subscription", modo_autenticacion="chatgpt",
+                               usage=SimpleNamespace(input_tokens=1000, output_tokens=20, cache_read_input_tokens=400))
 
 
 def voto(categoria, prioridad="MEDIA", tipo="procedimiento"):
@@ -140,12 +202,29 @@ def test_votacion_unanime_no_va_a_revision():
     r = ClasificadorLLM(ClienteVotos([voto("RED")] * 5)).clasificar("La VPN no conecta")
     assert r.categoria == "RED" and r.confianza == {"categoria": 1.0, "prioridad": 1.0, "tipo": 1.0}
     assert not r.needs_human_review
+    assert r.tokens_entrada == 5000 and r.tokens_salida == 100
+    assert r.costo_api_usd == 0 and r.proveedor == "codex_subscription"
 
 
 def test_voto_discrepante_o_rechazo_va_a_revision():
     r = ClasificadorLLM(ClienteVotos([voto("RED")] * 3 + [voto("ACCESO"), None])).clasificar("La VPN no conecta")
     assert r.categoria == "RED" and r.confianza["categoria"] == 0.6 and r.needs_human_review
     assert r.corridas_validas == 4  # el rechazo cuenta en contra de la confianza
+
+
+def test_error_del_primer_voto_impide_iniciar_los_restantes():
+    llamadas = []
+
+    class ClienteInterrumpido:
+        def generar(self, **kwargs):
+            llamadas.append(kwargs)
+            raise ErrorModelo("transporte", transitorio=True)
+
+    clasificador = ClasificadorLLM(ClienteInterrumpido())
+    assert clasificador.corridas == 5
+    with pytest.raises(ErrorModelo):
+        clasificador.clasificar("La VPN no conecta")
+    assert len(llamadas) == 1
 
 
 def test_cada_voto_usa_un_juego_de_ejemplos_distinto():
@@ -156,8 +235,8 @@ def test_cada_voto_usa_un_juego_de_ejemplos_distinto():
 def test_el_clasificador_ve_el_texto_enmascarado():
     cliente = ClienteVotos([voto("ACCESO")] * 5)
     vistos = []
-    original = cliente.messages.parse
-    cliente.messages = SimpleNamespace(parse=lambda **k: vistos.append(k["messages"][0]["content"]) or original(**k))
+    original = cliente.generar
+    cliente.generar = lambda **k: vistos.append(k["mensajes"][0]["content"]) or original(**k)
     ClasificadorLLM(cliente).clasificar("Olvidé la clave, mi correo es ana@correo.example")
     assert all("ana@correo.example" not in v and "[EMAIL_REDACTED]" in v for v in vistos)
 
@@ -166,25 +245,75 @@ def test_el_clasificador_ve_el_texto_enmascarado():
 
 @pytest.fixture(scope="module")
 def recursos_bd(chunks):
+    cierres = ExitStack()
     try:
         from tickets_rag import acciones, historial, vectores
         from tickets_rag.recuperacion import Configuracion, RecuperadorHibrido
 
         conexion = vectores.conectar()
+        cierres.callback(conexion.close)
+        lectura = historial.conectar_lectura()
+        cierres.callback(lectura.close)
+        acciones_bd = acciones.conectar_acciones()
+        cierres.callback(acciones_bd.close)
         bm25 = H.IndiceBM25(chunks)
         recursos = H.Recursos(
             chunks=chunks, bm25=bm25,
             procedimientos=RecuperadorHibrido(chunks, Configuracion(tipos=["manual", "articulo"]), conexion=conexion, bm25=bm25),
             casos=RecuperadorHibrido(chunks, Configuracion(tipos=["ticket"]), conexion=conexion, bm25=bm25),
             conexion_vectores=conexion,
-            conexion_lectura=historial.conectar_lectura(),
-            conexion_acciones=acciones.conectar_acciones(),
+            conexion_lectura=lectura,
+            conexion_acciones=acciones_bd,
         )
     except Exception:
+        cierres.close()
         pytest.skip("Base no disponible: docker compose up -d y scripts/preparar_bd.py")
-    yield recursos
-    conexion.execute("DELETE FROM solicitudes_accion WHERE ticket_id = %s", (CTX.ticket_id,))
-    conexion.execute("DELETE FROM escalamientos WHERE ticket_id = %s", (CTX.ticket_id,))
+
+    # Solo en esta fixture de integración: observar Future sin cambiar funciones, plazos,
+    # permisos o resultados. Un timeout no detiene el trabajo nativo del pool.
+    futuros, candado = set(), threading.Lock()
+    enviar_original = H._POOL.submit
+    def descartar(futuro):
+        with candado:
+            futuros.discard(futuro)
+    def enviar(*args, **kwargs):
+        futuro = enviar_original(*args, **kwargs)
+        with candado:
+            futuros.add(futuro)
+        futuro.add_done_callback(descartar)
+        return futuro
+    def pendientes():
+        with candado:
+            return [f for f in futuros if not f.done()]
+    recursos._futuros_integracion_pendientes = pendientes
+    H._POOL.submit = enviar
+    ocupados = []
+    try:
+        # Igual que producción: el primer ticket se mide con pesos ya cargados.
+        # Se deja fuera del except de BD: un fallo del modelo debe fallar, no saltarse.
+        recursos.calentar()
+        yield recursos
+    finally:
+        try:
+            activos = pendientes()
+            if activos:
+                _, ocupados = wait(activos, timeout=2 * H.config.TIMEOUT_HERRAMIENTA_S)
+            if not ocupados:
+                conexion.execute("DELETE FROM solicitudes_accion WHERE ticket_id = %s", (CTX.ticket_id,))
+                conexion.execute("DELETE FROM escalamientos WHERE ticket_id = %s", (CTX.ticket_id,))
+        finally:
+            H._POOL.submit = enviar_original
+            cierres.close()
+        if ocupados:
+            pytest.exit("Integración incompleta: sigue activo un worker tras el timeout; no se inician más pruebas con GPU.", returncode=2)
+
+
+@pytest.fixture(autouse=True)
+def _no_solapar_integracion_pendiente(request):
+    if "recursos_bd" in request.fixturenames:
+        recursos = request.getfixturevalue("recursos_bd")
+        if recursos._futuros_integracion_pendientes():
+            pytest.exit("Integración incompleta: un test anterior dejó un worker activo; no se inicia otra recuperación.", returncode=2)
 
 
 def test_search_docs_devuelve_citas_y_respeta_el_rol(recursos_bd):

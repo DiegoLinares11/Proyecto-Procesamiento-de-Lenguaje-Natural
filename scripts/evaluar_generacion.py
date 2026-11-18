@@ -4,8 +4,8 @@ Uso:
     uv run python scripts/evaluar_generacion.py --sistema linea_base   # BM25 solo sobre el manual
     uv run python scripts/evaluar_generacion.py --sistema rag          # híbrida + reranker + τ
 
-Necesita ANTHROPIC_API_KEY en el .env; el sistema rag necesita además la base de Docker.
-Escribe resultados/rag/generacion_<sistema>_trazas.jsonl y generacion_<sistema>_resumen.json.
+Necesita Codex con sesión de ChatGPT y cuota incluida; el sistema rag necesita además Docker.
+Escribe resultados/codex_suscripcion/rag/, sin sobrescribir los resultados históricos.
 La fidelidad con Ragas se agrega en la fase de evaluación.
 """
 
@@ -25,7 +25,7 @@ from tickets_rag.ingesta import cargar_chunks
 from tickets_rag.lexico import IndiceBM25
 from tickets_rag.metricas import promedio
 
-SALIDA = config.RESULTADOS / "rag"
+SALIDA = config.RESULTADOS_SUSCRIPCION / "rag"
 UMBRAL_INICIAL = 0.30  # valor del anteproyecto si todavía no se calibró
 
 
@@ -34,7 +34,7 @@ def construir(sistema: str, chunks: list[dict]) -> tuple[Generador, float | None
         return Generador(IndiceBM25([c for c in chunks if c["doc_type"] == "manual"])), None
     from tickets_rag.recuperacion import Configuracion, RecuperadorHibrido
 
-    comparacion = SALIDA / "recuperacion_comparacion.json"
+    comparacion = config.RESULTADOS / "rag" / "recuperacion_comparacion.json"
     umbral = UMBRAL_INICIAL
     if comparacion.exists():
         umbral = json.loads(comparacion.read_text(encoding="utf-8"))["rrf_reranker"]["umbral"]["tau"]
@@ -76,6 +76,10 @@ def main() -> None:
     resumen = {
         "sistema": args.sistema,
         "modelo": config.MODELO_GENERADOR,
+        "proveedor": "codex_subscription",
+        "costo_medido": "API incremental; excluye el precio del plan y consume cuota incluida",
+        "tokens_entrada": sum(t["tokens_entrada"] for t in trazas),
+        "tokens_salida": sum(t["tokens_salida"] for t in trazas),
         "umbral_tau": umbral,
         "casos": len(trazas),
         "validez_contrato": 1.0,

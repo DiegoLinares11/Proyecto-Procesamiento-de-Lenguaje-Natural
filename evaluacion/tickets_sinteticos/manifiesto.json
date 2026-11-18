@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "conjunto": "tickets_sinteticos_ia",
+  "estado": "congelado_sintetico",
+  "fecha_redaccion": "2026-11-18",
+  "tickets": 20,
+  "autoria": {
+    "tipo": "IA",
+    "herramienta": "Codex",
+    "modelo_redactor": "no_expuesto_en_esta_sesion",
+    "persona_autora": null,
+    "revision_humana": "pendiente"
+  },
+  "cumple_requisito_20_humanos": false,
+  "uso_permitido": "evaluacion_tecnica_reservada",
+  "excluido_de": [
+    "entrenamiento",
+    "ejemplos_few_shot",
+    "ajuste_prompt",
+    "indice",
+    "seleccion_variantes",
+    "acreditacion_20_tickets_humanos"
+  ],
+  "artefactos_sha256": {
+    "tickets.jsonl": "b58f6b0775067b85d7c46ab838d4430eb67fc9cbbc25c866089865d7e69a1325"
+  },
+  "fuentes_referencia": [
+    {
+      "nombre": "f3",
+      "ruta": "datos/f3_tickets/tickets.jsonl",
+      "sha256": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+      "registros": 300
+    },
+    {
+      "nombre": "desarrollo",
+      "ruta": "evaluacion/validacion_dev.jsonl",
+      "sha256": "ad000def7c89ec58d93996fffd4993b4233f3e144777e6825b401ab9451e3632",
+      "registros": 37
+    },
+    {
+      "nombre": "banco_oficial",
+      "ruta": "evaluacion/banco.jsonl",
+      "sha256": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+      "registros": 42
+    },
+    {
+      "nombre": "banco_borrador",
+      "ruta": "evaluacion/banco_borrador.jsonl",
+      "sha256": "5b9812ba8d67c27267014e966453203276ad09251eb03883caa16e2e940c8a84",
+      "registros": 42
+    },
+    {
+      "nombre": "manifiesto_corpus",
+      "ruta": "datos/manifiesto.json",
+      "sha256": "179f4cf76bdf1901681a503e1ab65647521d13100a92476297105d15f91fb84e"
+    }
+  ],
+  "chunks_sha256": "8e18a3fad5fa8d14681ddb9ed3b2a5568260e86b06909402962915e3fcf85dd4",
+  "balance": {
+    "categoria": {
+      "ACCESO": 4,
+      "CORREO": 4,
+      "EQUIPOS": 4,
+      "RED": 3,
+      "APLICACIONES": 3,
+      "OTRO": 2
+    },
+    "prioridad": {
+      "ALTA": 6,
+      "MEDIA": 6,
+      "BAJA": 8
+    },
+    "tipo": {
+      "accion": 1,
+      "procedimiento": 17,
+      "fuera_de_dominio": 2
+    }
+  },
+  "criterios_etiquetado": {
+    "categoria": "Manual F1-2026-2, sección 1.3, F1-2026-2-c003.",
+    "prioridad": "Manual F1-2026-2, sección 1.4, F1-2026-2-c004: impacto y alternativa temporal, no insistencia.",
+    "tipo": "Contrato Tipo/TIPOS de src/tickets_rag/clasificador_llm.py; etiqueta auxiliar solo para el LLM.",
+    "desempate": "Problema principal que impide trabajar; no se ajustan etiquetas al resultado del evaluador."
+  },
+  "duplicados": "Sin duplicados exactos NFC/espacios/casefold contra F3, desarrollo y ambos bancos; no certifica independencia semántica.",
+  "limitaciones": [
+    "Redacción y etiquetas producidas por IA, sin revisión humana independiente.",
+    "No equivalen a tickets escritos a mano ni satisfacen ese requisito del anteproyecto.",
+    "Veinte casos pequeños y deliberadamente variados: la métrica es técnica, no representativa de usuarios reales.",
+    "No contienen nombres, correos, teléfonos ni credenciales reales; no se afirmó ausencia de todas las clases de PII mediante un detector.",
+    "No se ejecutaron clasificadores ni se generaron métricas al crear el conjunto."
+  ]
+}

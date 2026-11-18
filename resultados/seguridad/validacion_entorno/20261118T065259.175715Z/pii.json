@@ -1,0 +1,12 @@
+{
+  "inicio_utc": "2026-11-18T06:53:10.245479+00:00",
+  "fin_utc": "2026-11-18T06:53:15.823287+00:00",
+  "exit_code": 0,
+  "duracion_s": 5.577,
+  "comando": [
+    "/tmp/cc3103-fase4-clean-zgnh99y8/venv/bin/python",
+    "scripts/evaluar_pii.py"
+  ],
+  "entorno_aislado": true,
+  "log": "pii.log"
+}

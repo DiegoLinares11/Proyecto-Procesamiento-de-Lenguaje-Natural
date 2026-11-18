@@ -1,0 +1,93 @@
+{
+  "fecha_utc": "2026-11-18T08:31:27.936744+00:00",
+  "alcance": "UI/UX local",
+  "referencia": "https://pro-procesos.vercel.app/",
+  "referencia_observada": "acceso público y tokens compartidos de estilos",
+  "paleta": {
+    "--canvas": "#f3f4f6",
+    "--surface": "#fff",
+    "--muted": "#f8fafc",
+    "--foreground": "#17191d",
+    "--foreground-muted": "#667085",
+    "--border": "#e4e7ec",
+    "--brand": "#ed1c2e",
+    "--brand-strong": "#c81324",
+    "--brand-soft": "#fff0f1",
+    "--sidebar": "#111216",
+    "--success": "#16794d",
+    "--destructive": "#b42318"
+  },
+  "url_aplicacion": "http://127.0.0.1:8000",
+  "build": {
+    "estado": "correcto",
+    "node": "24.21.0",
+    "vite": "8.3.8"
+  },
+  "git_diff_check": 0,
+  "callbacks_negocio_sha256": {
+    "reducir": "1ab332067c2225ebebf278f114cccdd661e667ff6efe43e0b49e99bfed05df66",
+    "atender": "97376e7f9a36b5402db65ef10f41e0500fed3c48e5be67826d9224e974da715a",
+    "decidir": "6e3629904a8f7b998f22d4a626390a04c9b186ceee7896fd64ce9beb5911c9ef",
+    "usarEjemplo": "169abad160aeb81a218419372bce76e210689619b8d6bde5e7ac01ba21168e19"
+  },
+  "backend_api_y_cli_hashes_preservados": true,
+  "comunicacion_frontend_y_nodos_identicos": true,
+  "corpus_y_banco_preservados": true,
+  "cambios_frontend": [
+    "demo/src/index.css",
+    "demo/src/App.jsx",
+    "demo/src/components/Evaluacion.jsx",
+    "demo/src/components/Fragmento.jsx",
+    "demo/src/components/TicketsManuales.css",
+    "demo/src/components/useDialogFocus.js",
+    "demo/src/components/Respuesta.jsx",
+    "demo/src/components/Linea.jsx",
+    "demo/src/components/TicketsManuales.jsx",
+    "demo/src/components/Grafo.jsx",
+    "demo/src/components/Aprobacion.jsx",
+    "demo/index.html"
+  ],
+  "sha256_actuales": {
+    "demo/src/index.css": "439d8ae5b1186e89e0cf952d964f59de891af81f46e7fd7c37e3dc2ee9b7deb7",
+    "demo/src/App.jsx": "8806af74d39c8581a98648784256ec5e05c501317d7250c9310a2406c1d29016",
+    "demo/src/components/Evaluacion.jsx": "14b7969036afd61d91e848e37aebf0160ba6253a0779174b7713116055904916",
+    "demo/src/components/Fragmento.jsx": "14e7487ef0bd5fa70b0091e3d92056e35c20c5a0e57f1386447ce94d9efa683c",
+    "demo/src/components/TicketsManuales.css": "c3928ca92d2604cff22707561e082ae253b071e12128ccc961c8103db3872ad6",
+    "demo/src/components/useDialogFocus.js": "8981c76b7420ef74590698a1d4d13d2183a0b002475a57059c81c5f0e3a42ad0",
+    "demo/src/components/Respuesta.jsx": "331480b206a4905f4b17ee5c356dc428d9d66cc45158e1d7d0919150fb28871e",
+    "demo/src/components/Linea.jsx": "d1f481b5529ede58831b10a4a2a84741986acfb1b169612dfcdaee3ddd51fe0e",
+    "demo/src/components/TicketsManuales.jsx": "034902be7e93d99043af65f922fe6283c2b4198163c7971771abdde507bab208",
+    "demo/src/components/Grafo.jsx": "e5f9aa195a7cf9f039c74b680d7be7baebc7f1e6ddf556bf3b3d5fee530e4a70",
+    "demo/src/components/Aprobacion.jsx": "862f8edbc673951ffdd4084acf2f83645f50da0c50dc6896b69fe7a2e5c56fa4",
+    "demo/index.html": "0ed437b2d6379d2e27205e4483dc23f9b72aa33409ea807c8b8d227a4b1000cd"
+  },
+  "efectos_ui_nuevos": [
+    "menú responsive y su foco",
+    "foco y teclado en diálogos",
+    "desplazamiento del índice móvil"
+  ],
+  "qa": {
+    "captura_escenarios": 9,
+    "interacciones_grupos": 8,
+    "repeticion_interacciones_mobile": 8,
+    "anchos_css": [
+      320,
+      375,
+      768,
+      1440
+    ],
+    "sin_overflow_horizontal": true,
+    "teclado_y_escape": "correcto",
+    "movimiento_reducido": "correcto",
+    "errores_js": 0
+  },
+  "modelos_reales_ejecutados": 0,
+  "datos_humanos_proyecto": "0/20; sin autoría prefabricada",
+  "commit": false,
+  "push": false,
+  "despliegue": false,
+  "limites": [
+    "Ensayos con respuestas simuladas; no nueva evaluación académica del modelo.",
+    "La atención real conserva los requisitos de PostgreSQL/modelos de la aplicación."
+  ]
+}

@@ -14,16 +14,15 @@ from __future__ import annotations
 
 import time
 
-import anthropic
 from pydantic import BaseModel, Field
 
 from tickets_rag import config
 from tickets_rag.contrato import Fuente, Respuesta
 from tickets_rag.lexico import IndiceBM25, Resultado
+from tickets_rag.modelo import ClienteModelo
 from tickets_rag.pii import enmascarar
 
 HERRAMIENTA = "search_docs"
-BETA_RESPALDO = "server-side-fallback-2026-07-01"
 
 SISTEMA = """Eres el asistente de los agentes de soporte de nivel 1 (N1) de la mesa de ayuda de TI de
 Corporación Valcora. Respondes un ticket usando solo los fragmentos que vienen entre <fragmentos>:
@@ -72,10 +71,10 @@ class Generador:
     """`indice` es cualquier recuperador con buscar(consulta, rol, version, top_k): IndiceBM25 o
     RecuperadorHibrido. `umbral` es τ: si el mejor score es menor, se abstiene sin llamar al modelo."""
 
-    def __init__(self, indice: IndiceBM25, cliente: anthropic.Anthropic | None = None,
+    def __init__(self, indice: IndiceBM25, cliente: ClienteModelo | None = None,
                  modelo: str = config.MODELO_GENERADOR, umbral: float | None = None) -> None:
         self.indice = indice
-        self.cliente = cliente or anthropic.Anthropic()
+        self.cliente = cliente or ClienteModelo()
         self.modelo = modelo
         self.umbral = umbral
 
@@ -94,7 +93,11 @@ class Generador:
             "llamadas": 0,
             "tokens_entrada": 0,
             "tokens_salida": 0,
+            "tokens_entrada_cache": 0,
+            "proveedor": "codex_subscription",
+            "modo_autenticacion": "chatgpt",
             "motivo_abstencion": None,
+            "pii_salida": {},
         }
         if not resultados:
             respuesta = _abstencion("la búsqueda no devolvió fragmentos")
@@ -112,20 +115,21 @@ class Generador:
         }]
         respuesta = None
         for _ in range(2):
-            r = self.cliente.beta.messages.parse(
-                model=self.modelo,
-                max_tokens=4000,
-                system=SISTEMA,
-                messages=mensajes,
-                output_format=SalidaModelo,
-                output_config={"effort": "medium"},
-                betas=[BETA_RESPALDO],
-                fallbacks="default",
+            r = self.cliente.generar(
+                modelo=self.modelo,
+                sistema=SISTEMA,
+                mensajes=mensajes,
+                esquema=SalidaModelo,
+                permitir_herramientas=False,
+                esfuerzo="medium",
             )
             traza["llamadas"] += 1
             traza["tokens_entrada"] += r.usage.input_tokens
             traza["tokens_salida"] += r.usage.output_tokens
+            traza["tokens_entrada_cache"] += getattr(r.usage, "cache_read_input_tokens", 0) or 0
             traza["modelo_servido"] = r.model
+            traza["proveedor"] = getattr(r, "proveedor", "codex_subscription")
+            traza["modo_autenticacion"] = getattr(r, "modo_autenticacion", "chatgpt")
             if r.stop_reason == "refusal" or r.parsed_output is None:
                 traza["motivo_abstencion"] = "rechazo_o_salida_invalida"
                 break
@@ -135,13 +139,15 @@ class Generador:
                 break
             invalidas = [c for c in salida.citas if c not in por_id]
             if salida.citas and not invalidas:
+                answer_segura, pii_salida = enmascarar(salida.answer)
+                traza["pii_salida"] = pii_salida
                 respuesta = Respuesta(
-                    answer=salida.answer,
+                    answer=answer_segura,
                     sources=[Fuente(source=por_id[c]["source"], page=por_id[c]["page"], chunk_id=c)
                              for c in dict.fromkeys(salida.citas)],
                     abstained=False,
                     tool_used=HERRAMIENTA,
-                    needs_human_review=False,
+                    needs_human_review=bool(pii_salida),
                 )
                 break
             traza["motivo_abstencion"] = "citas_invalidas"
@@ -158,9 +164,8 @@ class Generador:
 
     def _cerrar(self, respuesta: Respuesta, traza: dict, inicio: float) -> tuple[Respuesta, dict]:
         traza["segundos_total"] = round(time.perf_counter() - inicio, 3)
-        modelo = traza["modelo_servido"] or self.modelo
-        precio = modelo if modelo in config.PRECIOS else self.modelo
-        traza["costo_usd"] = round(config.costo_usd(precio, traza["tokens_entrada"], traza["tokens_salida"]), 5)
+        traza["costo_usd"] = 0.0
+        traza["costo_api_usd"] = 0.0
         traza["respuesta"] = respuesta.model_dump()
         return respuesta, traza
 

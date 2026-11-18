@@ -1,0 +1,7 @@
+{
+  "observado_por": "verificacion_externa_del_proceso",
+  "fecha_utc": "2026-11-18T06:46:06.762301+00:00",
+  "exit_code": 139,
+  "estado": "metricas_completas_fallo_nativo_al_cerrar_python",
+  "diagnostico": "spaCy3.8.18 con NER y Torch2.15.0: importaciones solas exit0; cargar/aplicar es_core_news_md produce resultados y SIGSEGV al cerrar. Se conservan resultados y se fija Torch2.11.0 para verificar compatibilidad."
+}

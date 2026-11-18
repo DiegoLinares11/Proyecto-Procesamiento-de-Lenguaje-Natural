@@ -1,0 +1,44 @@
+{
+  "estado": "verificado",
+  "huella": "711fc1b25110ebb27ad1d7279e0b9743fbd4d63f646c4ccc6fbea542e7dbf7d9",
+  "fin_utc": "2026-11-18T20:52:50.096405+00:00",
+  "error_modelo": 0,
+  "sistemas": {
+    "agente": {
+      "generaciones": 42,
+      "recall_at_5": 0.898,
+      "fidelidad_ragas": 0.778,
+      "n_fidelidad_rag": 17,
+      "precision_citas": 0.98,
+      "abstencion_correcta": 0.957,
+      "media_23_comunes_s": 79.15,
+      "errores_ragas": 0,
+      "casos_verificacion_automatica": 38
+    },
+    "rag": {
+      "generaciones": 23,
+      "recall_at_5": 1.0,
+      "fidelidad_ragas": 0.698,
+      "n_fidelidad_rag": 17,
+      "precision_citas": 1.0,
+      "abstencion_correcta": 0.957,
+      "media_23_comunes_s": 25.22,
+      "errores_ragas": 0,
+      "casos_verificacion_automatica": 22
+    },
+    "linea_base": {
+      "generaciones": 23,
+      "recall_at_5": 0.815,
+      "fidelidad_ragas": 0.713,
+      "n_fidelidad_rag": 15,
+      "precision_citas": 1.0,
+      "abstencion_correcta": 0.87,
+      "media_23_comunes_s": 10.66,
+      "errores_ragas": 0,
+      "casos_verificacion_automatica": 20
+    }
+  },
+  "tiempo_medio": "Mismos 23 casos por sistema; tiempo activo. R11 BM25 incluye el segundo intento y excluye el tiempo desconocido del primero.",
+  "fidelidad": "Respuestas evaluables del bloque RAG; las cantidades medidas se registran por sistema.",
+  "recall_at_5": "Media de 18 preguntas con fuentes esperadas."
+}

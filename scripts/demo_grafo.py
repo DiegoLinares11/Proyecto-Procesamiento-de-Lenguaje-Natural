@@ -5,7 +5,8 @@ Uso:
     uv run python scripts/preparar_bd.py
     uv run python scripts/demo_grafo.py
 
-Necesita ANTHROPIC_API_KEY. Escribe resultados/herramientas/demo_grafo.jsonl con la respuesta,
+Necesita Codex autenticado con ChatGPT y cuota incluida. Escribe
+resultados/codex_suscripcion/herramientas/demo_grafo.jsonl con la respuesta,
 la traza (sin textos), la latencia y el costo de cada ticket. La acción sensible se aprueba como N2.
 """
 
@@ -16,6 +17,7 @@ import time
 
 from tickets_rag import config
 from tickets_rag.grafo import atender, reanudar, resumen_costo, sistema
+from tickets_rag.modelo import ErrorModelo
 
 CASOS = [
     ("TCK-2026-09101", "N1", "procedimiento con F2", "Me sale el error 0x8004010F cuando envío o recibo correos en Outlook."),
@@ -29,12 +31,14 @@ CASOS = [
 
 
 def main() -> None:
-    salida = config.RESULTADOS / "herramientas" / "demo_grafo.jsonl"
+    salida = config.RESULTADOS_SUSCRIPCION / "herramientas" / "demo_grafo.jsonl"
     salida.parent.mkdir(parents=True, exist_ok=True)
     with sistema() as grafo, salida.open("w", encoding="utf-8", newline="\n") as f:
         for ticket_id, rol, caso, texto in CASOS:
             inicio = time.perf_counter()
             estado, cfg = atender(grafo, ticket_id, rol, texto)
+            if estado.get("error_modelo") in {"cuota", "autenticacion", "configuracion", "modelo"}:
+                raise ErrorModelo(estado["error_modelo"])
             pausas = []
             while "__interrupt__" in estado:
                 pausas.append(estado["__interrupt__"][0].value)

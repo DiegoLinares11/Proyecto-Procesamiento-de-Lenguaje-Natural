@@ -1,0 +1,100 @@
+{
+  "version_formato": 2,
+  "inicio_utc": "2026-11-18T06:53:10.327921+00:00",
+  "estado": "completo",
+  "procedencia": "evaluacion_actual_local_sin_llm",
+  "interpretacion": "comprobacion_versionada_no_holdout_ciego_nuevo",
+  "banco": {
+    "archivo": "pii_sembrada.jsonl",
+    "version": "1.0",
+    "sha256_esperado": "bb5280953bece83a5861ea873f5424c8d94ea25594aeeed555525c74548d6d06",
+    "sha256_observado": "bb5280953bece83a5861ea873f5424c8d94ea25594aeeed555525c74548d6d06",
+    "textos": 30
+  },
+  "meta_recall": 0.95,
+  "entorno": {
+    "python": "3.11.13"
+  },
+  "codigo_sha256": {
+    "src/tickets_rag/pii.py": "7b1b9d08f1377125255c508afc27d11a965b356504cbefb87759f3ee514d76fb",
+    "src/tickets_rag/evaluacion_pii.py": "be7b65274ef7c2c59bcd1e25ae54713e04b3f3246196f1843a015b6634bc373c",
+    "scripts/evaluar_pii.py": "5c8867f41f7e84929df3d9f49f51a922027798f84d7b5485eb4559926422b857"
+  },
+  "dependencias_sha256": {
+    "pyproject.toml": "145bc823cce45f8d8fb9c6fdd5198b9222ed2b60c807a5d90396ab43f40344c6",
+    "uv.lock": "6decf8114ff8d9ca7a21096432cd7d55812b53f776625f89db17e6ddb155e5bb"
+  },
+  "metadata_modelos": {
+    "es": {
+      "distribucion": "es_core_news_md",
+      "version_instalada": "3.8.0",
+      "archivos_sha256": {
+        "METADATA": "ee6e05299251551c5866f4432ca2a83013bc220c301afe1a5f219b7361b09fb5",
+        "es_core_news_md/es_core_news_md-3.8.0/config.cfg": "0287eff7a5b4e86c91d59629a3e039a159bf232c03352ebd56579af59aa3d5e9",
+        "es_core_news_md/es_core_news_md-3.8.0/meta.json": "889a2fd05d217fa7c1bcffa867af7fc30911bc7b48523f87b5b2525846553ef5",
+        "es_core_news_md/meta.json": "889a2fd05d217fa7c1bcffa867af7fc30911bc7b48523f87b5b2525846553ef5"
+      }
+    },
+    "en": {
+      "distribucion": "en_core_web_md",
+      "version_instalada": "3.8.0",
+      "archivos_sha256": {
+        "METADATA": "6f175bb40aeed3ccf23c7331a626e9b8207caad7881f1b8b6d4a867cd64ef9ae",
+        "en_core_web_md/en_core_web_md-3.8.0/config.cfg": "24b1b17065a74a6a3f999dd9c722f5532dc6bb5994b6a7ba5aa4f2ce09d434cc",
+        "en_core_web_md/en_core_web_md-3.8.0/meta.json": "5bcf739c5ac3b0038fc218d3227f8600e35a420e29fbe4c6bcc643688ab63b1b",
+        "en_core_web_md/meta.json": "5bcf739c5ac3b0038fc218d3227f8600e35a420e29fbe4c6bcc643688ab63b1b"
+      }
+    }
+  },
+  "detector": {
+    "local": true,
+    "ner_disponible": true,
+    "modelo_personas": "es_core_news_md",
+    "version_modelo_personas": "3.8.0",
+    "spacy": "3.8.18",
+    "presidio_analyzer": "2.2.366",
+    "score_personas": 0.85,
+    "tipos": [
+      "PERSON",
+      "EMAIL",
+      "PHONE",
+      "DPI",
+      "CARD"
+    ],
+    "idioma": "es",
+    "modelos": {
+      "es": {
+        "nombre": "es_core_news_md",
+        "version": "3.8.0",
+        "componentes": [
+          "tok2vec",
+          "morphologizer",
+          "attribute_ruler",
+          "ner"
+        ]
+      },
+      "en": {
+        "nombre": "en_core_web_md",
+        "version": "3.8.0",
+        "componentes": [
+          "tok2vec",
+          "tagger",
+          "attribute_ruler",
+          "ner"
+        ]
+      }
+    },
+    "componentes_activos": [
+      "tok2vec",
+      "morphologizer",
+      "attribute_ruler",
+      "ner"
+    ],
+    "configuracion": "presidio_spacy_pos_bilingue_v2",
+    "filtro_personas": "NER_PERSON_con_limites_PROPN_sintaxis_tecnica_y_separadores_de_rutas_usuario"
+  },
+  "textos_completos": 30,
+  "metricas": "resumen.json",
+  "fin_utc": "2026-11-18T06:53:15.236576+00:00",
+  "codigo_salida": 0
+}

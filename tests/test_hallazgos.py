@@ -9,7 +9,6 @@ Cada prueba reproduce el fallo con el modelo falso y comprueba la corrección:
 
 import json
 
-import anthropic
 import pytest
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
@@ -17,6 +16,7 @@ from langgraph.types import Command
 from tickets_rag import acciones
 from tickets_rag import herramientas as H
 from tickets_rag.grafo import atender, construir_grafo, reanudar
+from tickets_rag.modelo import ErrorModelo
 from tests.test_grafo import TICKET, ModeloFalso, accion_pendiente, chunk_manual, chunks, falsas, final, grafo_con, pide  # noqa: F401
 
 
@@ -26,7 +26,8 @@ from tests.test_grafo import TICKET, ModeloFalso, accion_pendiente, chunk_manual
 def test_aprobacion_que_no_es_booleano_no_aprueba(accion_pendiente, valor):
     estado = reanudar(accion_pendiente.grafo, accion_pendiente.cfg, aprobada=valor, aprobador="Técnico N2", rol="N2")
     assert accion_pendiente.decisiones == []  # ni siquiera llega a resolver la solicitud
-    assert "sigue pendiente" in estado["respuesta"]["answer"]
+    assert estado.get("__interrupt__") and estado.get("respuesta") is None
+    assert any("sigue pendiente" in n for n in estado["notas_accion"])
     assert any("aprobación inválida" in m for m in estado["revision"])
 
 
@@ -38,14 +39,14 @@ def test_false_booleano_rechaza(accion_pendiente):
 
 def test_aprobador_vacio_no_cuenta(accion_pendiente):
     estado = reanudar(accion_pendiente.grafo, accion_pendiente.cfg, aprobada=True, aprobador="   ", rol="N2")
-    assert accion_pendiente.decisiones == [] and "sigue pendiente" in estado["respuesta"]["answer"]
+    assert accion_pendiente.decisiones == [] and estado.get("__interrupt__") and estado.get("respuesta") is None
 
 
 @pytest.mark.parametrize("decision", ["sí", True, {"aprobada": True, "aprobador": "N2", "rol": "N2", "extra": 1}])
 def test_reanudar_directo_con_algo_que_no_es_la_decision_no_aprueba(accion_pendiente, decision):
     # Así reanuda LangGraph Studio: manda el JSON tal cual, sin pasar por reanudar()
     estado = accion_pendiente.grafo.invoke(Command(resume=decision), accion_pendiente.cfg)
-    assert accion_pendiente.decisiones == [] and "sigue pendiente" in estado["respuesta"]["answer"]
+    assert accion_pendiente.decisiones == [] and estado.get("__interrupt__") and estado.get("respuesta") is None
 
 
 def test_resolver_solicitud_tambien_rechaza_lo_que_no_es_booleano():
@@ -92,15 +93,14 @@ def test_camino_normal_no_guarda_el_texto_original_en_ningun_checkpoint(falsas, 
 class ModeloCaido:
     def __init__(self, error):
         self.error = error
-        self.beta = type("B", (), {"messages": type("M", (), {"create": self._create})()})()
 
-    def _create(self, **kwargs):
+    def generar(self, **kwargs):
         raise self.error
 
 
 @pytest.mark.parametrize("error", [
-    anthropic.APIConnectionError(message="sin red", request=None),
-    anthropic.APITimeoutError(request=None),
+    ErrorModelo("transporte", transitorio=True),
+    ErrorModelo("timeout", transitorio=True),
 ])
 def test_si_la_api_falla_responde_de_forma_controlada(falsas, chunks, error):
     recursos = H.Recursos(chunks=chunks, bm25=H.IndiceBM25(chunks))
@@ -138,5 +138,5 @@ def test_el_modelo_no_puede_decir_que_escalo_si_no_llamo_a_escalate(falsas, chun
                          final("Siga el procedimiento 5.2.", [chunk_manual["chunk_id"]]))
     estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "La VPN no conecta")
     assert len(modelo.llamadas) == 3  # la primera respuesta no pasa la validación y se reintenta
-    assert "no pasó la validación" in modelo.llamadas[2]["messages"][-1]["content"]
+    assert "no pasó la validación" in modelo.llamadas[2]["mensajes"][-1]["content"]
     assert "escalé" not in estado["respuesta"]["answer"].lower()

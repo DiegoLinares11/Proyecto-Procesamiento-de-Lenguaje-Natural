@@ -1,6 +1,6 @@
 // La respuesta del sistema: texto, citas verificables, banderas del contrato y el JSON tal cual.
 import { useState } from 'react'
-import { BookOpen, Braces, CircleSlash, Clock, Coins, Database, Globe, ShieldAlert, Ticket, Wrench } from 'lucide-react'
+import { ArrowUpRight, BookOpen, Braces, CircleSlash, Clock, Coins, Database, Globe, ShieldAlert, Ticket, Wrench } from 'lucide-react'
 import { fuenteCorta, tipoFuente } from '../nodos'
 
 const ICONO_FUENTE = { manual: BookOpen, articulo: Globe, consulta: Database, ticket: Ticket }
@@ -12,8 +12,8 @@ export default function Respuesta({ resultado, alVerFragmento }) {
   // Algunas respuestas traen "\n" escrito como texto (pendiente en hallazgos.md); aquí solo se muestra bien
   const texto = r.answer.replaceAll('\\n', '\n')
   return (
-    <div className="space-y-4 animar-entrada">
-      <div className="flex flex-wrap gap-1.5">
+    <div className="min-w-0 space-y-5 animar-entrada">
+      <div className="flex flex-wrap gap-2" aria-label="Estado de la respuesta">
         {r.abstained
           ? <Insignia tono="amber" icono={CircleSlash}>Se abstuvo</Insignia>
           : <Insignia tono="emerald" icono={BookOpen}>Respondió con evidencia</Insignia>}
@@ -21,23 +21,29 @@ export default function Respuesta({ resultado, alVerFragmento }) {
         {resultado.triage?.categoria && <Insignia tono="slate">{resultado.triage.categoria} · {resultado.triage.prioridad}</Insignia>}
       </div>
 
-      <p className="text-[14.5px] leading-relaxed text-slate-100 whitespace-pre-line max-h-[38vh] overflow-y-auto pr-1">{texto}</p>
+      <div className="rounded-[20px] border border-border bg-muted p-4 sm:p-5">
+        <p className="max-h-[38vh] overflow-y-auto pr-1 text-[14px] leading-[1.8] text-ink whitespace-pre-line [overflow-wrap:anywhere]">{texto}</p>
+      </div>
 
       {r.sources.length > 0 && (
         <div>
-          <h4 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Fuentes citadas</h4>
-          <ul className="space-y-1">
+          <h4 className="mb-2.5 text-[11px] font-extrabold uppercase tracking-[0.12em] text-ink-muted">Fuentes citadas</h4>
+          <ul className="space-y-2">
             {r.sources.map((s, i) => {
               const Icono = ICONO_FUENTE[tipoFuente(s)]
               const esConsulta = s.chunk_id.startsWith('sql-')
               return (
                 <li key={s.chunk_id}>
                   <button type="button" disabled={esConsulta} onClick={() => alVerFragmento(s.chunk_id)}
-                    className="w-full flex items-center gap-2.5 rounded-lg border border-slate-800 bg-slate-900/70 px-3 py-2 text-left enabled:hover:border-indigo-500/60 enabled:hover:bg-slate-800/60 transition">
-                    <span className="grid place-items-center size-5 rounded bg-indigo-500/20 text-[11px] font-bold text-indigo-300">{i + 1}</span>
-                    <Icono size={15} className="text-slate-400 shrink-0" />
-                    <span className="text-[13px] text-slate-200 truncate">{fuenteCorta(s)}</span>
-                    <span className="ml-auto font-mono text-[10.5px] text-slate-500">{s.chunk_id}</span>
+                    className="group flex w-full min-w-0 items-start gap-3 rounded-[20px] border border-border bg-surface p-3 text-left font-semibold transition enabled:hover:border-brand/35 enabled:hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 disabled:cursor-default disabled:bg-muted sm:items-center"
+                    aria-label={`Fuente citada: ${fuenteCorta(s)}`}>
+                    <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg bg-brand-soft font-mono text-[11px] font-semibold text-brand-strong sm:mt-0">{i + 1}</span>
+                    <Icono size={16} className="mt-1.5 shrink-0 text-ink-muted sm:mt-0" aria-hidden="true" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[12.5px] font-semibold leading-relaxed text-ink [overflow-wrap:anywhere]">{fuenteCorta(s)}</span>
+                      <span className="mt-0.5 block font-mono text-[10px] leading-relaxed text-ink-muted [overflow-wrap:anywhere]">{s.chunk_id}</span>
+                    </span>
+                    <span className="mt-1.5 inline-flex shrink-0 items-center gap-1 text-brand group-disabled:invisible sm:mt-0" aria-hidden="true"><ArrowUpRight size={15} /></span>
                   </button>
                 </li>
               )
@@ -47,21 +53,22 @@ export default function Respuesta({ resultado, alVerFragmento }) {
       )}
 
       {r.needs_human_review && resultado.revision?.length > 0 && (
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[12.5px] text-amber-200">
+        <div className="rounded-[20px] border border-[#fde68a] bg-[#fffbeb] px-4 py-3 text-[12.5px] leading-relaxed text-[#92400e]">
           <span className="font-semibold">Por qué pide revisión: </span>{resultado.revision.join(' · ')}
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-slate-400 border-t border-slate-800 pt-3">
-        <span className="flex items-center gap-1.5"><Wrench size={13} />{r.tool_used || 'ninguna'}</span>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-border pt-4 text-[11.5px] text-ink-muted">
+        <span className="flex items-center gap-1.5"><Wrench size={13} />Herramienta: {r.tool_used || 'ninguna'}</span>
         <span className="flex items-center gap-1.5"><Clock size={13} />{resultado.segundos_total.toFixed(1)} s</span>
-        <span className="flex items-center gap-1.5"><Coins size={13} />US${resultado.costo_usd.toFixed(4)}</span>
-        <button type="button" onClick={() => setVerJson(!verJson)} className="ml-auto flex items-center gap-1.5 text-indigo-300 hover:text-indigo-200">
+        <span className="flex items-center gap-1.5" title="Cargo incremental de API; la consulta también consume cuota de ChatGPT/Codex."><Coins size={13} />API: US${resultado.costo_usd.toFixed(4)}</span>
+        <button type="button" onClick={() => setVerJson(!verJson)} aria-expanded={verJson}
+          className="flex min-h-9 items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 font-semibold text-ink-muted transition hover:border-brand/30 hover:bg-brand-soft hover:text-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:ml-auto">
           <Braces size={13} />{verJson ? 'Ocultar' : 'Ver'} contrato JSON
         </button>
       </div>
       {verJson && (
-        <pre className="font-mono text-[11px] leading-relaxed bg-slate-950 border border-slate-800 rounded-lg p-3 overflow-x-auto text-slate-300">
+        <pre className="max-w-full overflow-x-auto rounded-[20px] border border-border bg-muted p-4 font-mono text-[11px] leading-relaxed text-ink" tabIndex={0} aria-label="Contrato JSON de la respuesta">
           {JSON.stringify(r, null, 2)}
         </pre>
       )}
@@ -70,15 +77,15 @@ export default function Respuesta({ resultado, alVerFragmento }) {
 }
 
 const TONOS = {
-  emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  amber: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  rose: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
-  slate: 'bg-slate-800 text-slate-300 border-slate-700',
+  emerald: 'bg-[#ecfdf3] text-[#16794d] border-[#bbebce]',
+  amber: 'bg-[#fffbeb] text-[#92400e] border-[#fde68a]',
+  rose: 'bg-[#fef3f2] text-[#b42318] border-[#fecdca]',
+  slate: 'bg-muted text-ink-muted border-border',
 }
 
 export function Insignia({ tono = 'slate', icono: Icono, children }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12px] font-medium ${TONOS[tono]}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${TONOS[tono]}`}>
       {Icono && <Icono size={13} />}{children}
     </span>
   )

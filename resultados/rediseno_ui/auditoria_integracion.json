@@ -1,0 +1,270 @@
+{
+  "fecha_utc": "2026-11-18T08:20:02.105Z",
+  "alcance": "Auditoría estática independiente, sin inferencias, DB ni cambios de código; sólo este informe temporal.",
+  "baseline": "Copia temporal de App.jsx previa al rediseño",
+  "app_actual": "demo/src/App.jsx",
+  "sha256_app_antes": "a7125cd93fd1409ce8b0c714835c20d009ee7c789984ba9120cf8f3631a23d13",
+  "sha256_app_actual": "b12217d57bfaeead3d1ad79791cb4e40911a6f184452cbdfa76d205642769f13",
+  "estado_y_datos": {
+    "funciones": {
+      "reducir": {
+        "identica_bytes": true,
+        "sha256_antes": "2a79f971c492d7e257c6cda2e2892bdcab639e849114a7ddb1795240b25ecde8",
+        "sha256_actual": "2a79f971c492d7e257c6cda2e2892bdcab639e849114a7ddb1795240b25ecde8"
+      },
+      "atender": {
+        "identica_bytes": true,
+        "sha256_antes": "675c68b9e31dcf8bfd69dae577230809f9b6fe0e784fd08ef2f411aa97268b7f",
+        "sha256_actual": "675c68b9e31dcf8bfd69dae577230809f9b6fe0e784fd08ef2f411aa97268b7f"
+      },
+      "decidir": {
+        "identica_bytes": true,
+        "sha256_antes": "cdf7210f3152dbf9f3980bf0fbf70487adbef318ecc320931d59c1995b38d347",
+        "sha256_actual": "cdf7210f3152dbf9f3980bf0fbf70487adbef318ecc320931d59c1995b38d347"
+      },
+      "usarEjemplo": {
+        "identica_bytes": true,
+        "sha256_antes": "bc188dc19ac249590f0b807de55d9557c057d61bdeb1a01d09930fc0927b9d6e",
+        "sha256_actual": "bc188dc19ac249590f0b807de55d9557c057d61bdeb1a01d09930fc0927b9d6e"
+      }
+    },
+    "variables": {
+      "INICIAL": true,
+      "ICONO_GRUPO": true,
+      "grupos": true,
+      "ocupado": true,
+      "[pestana, setPestana]": true,
+      "[salud, setSalud]": true,
+      "[ejemplos, setEjemplos]": true,
+      "[texto, setTexto]": true,
+      "[rol, setRol]": true,
+      "[falla, setFalla]": true,
+      "[fragmento, setFragmento]": true,
+      "[estado, despachar]": true
+    },
+    "efecto_GET_identico": true,
+    "llamadas_HTTP_identicas": true,
+    "llamadas_HTTP_actuales": [
+      "obtener('/api/salud')",
+      "obtener('/api/ejemplos')",
+      "atenderTicket({ texto: t, rol: r, falla: f }, despachar)",
+      "enviarDecision(hilo, decision, despachar)"
+    ],
+    "propagacion_componentes_identica": true,
+    "gates_componentes_identicos": true,
+    "props_antes": {
+      "Grafo": [
+        {
+          "pasos": "{estado.pasos}",
+          "corriendo": "{estado.corriendo}",
+          "enPausa": "{!!estado.pausa}"
+        }
+      ],
+      "LoQueVioElModelo": [
+        {
+          "inicio": "{estado.inicio}"
+        }
+      ],
+      "Respuesta": [
+        {
+          "resultado": "{estado.resultado}",
+          "alVerFragmento": "{setFragmento}"
+        }
+      ],
+      "Linea": [
+        {
+          "pasos": "{estado.pasos}",
+          "corriendo": "{estado.corriendo}",
+          "alVerFragmento": "{setFragmento}"
+        }
+      ],
+      "TicketsManuales": [
+        {
+          "activo": "{pestana === 'manuales'}"
+        }
+      ],
+      "Aprobacion": [
+        {
+          "solicitudes": "{estado.pausa.solicitudes}",
+          "notas": "{estado.pausa.notas}",
+          "alDecidir": "{decidir}"
+        }
+      ],
+      "Fragmento": [
+        {
+          "chunkId": "{fragmento}",
+          "rol": "{estado.inicio?.rol || rol}",
+          "alCerrar": "{() => setFragmento(null)}"
+        }
+      ]
+    },
+    "props_actuales": {
+      "Respuesta": [
+        {
+          "resultado": "{estado.resultado}",
+          "alVerFragmento": "{setFragmento}"
+        }
+      ],
+      "Grafo": [
+        {
+          "pasos": "{estado.pasos}",
+          "corriendo": "{estado.corriendo}",
+          "enPausa": "{!!estado.pausa}"
+        }
+      ],
+      "LoQueVioElModelo": [
+        {
+          "inicio": "{estado.inicio}"
+        }
+      ],
+      "Linea": [
+        {
+          "pasos": "{estado.pasos}",
+          "corriendo": "{estado.corriendo}",
+          "alVerFragmento": "{setFragmento}"
+        }
+      ],
+      "TicketsManuales": [
+        {
+          "activo": "{pestana === 'manuales'}"
+        }
+      ],
+      "Aprobacion": [
+        {
+          "solicitudes": "{estado.pausa.solicitudes}",
+          "notas": "{estado.pausa.notas}",
+          "alDecidir": "{decidir}"
+        }
+      ],
+      "Fragmento": [
+        {
+          "chunkId": "{fragmento}",
+          "rol": "{estado.inicio?.rol || rol}",
+          "alCerrar": "{() => setFragmento(null)}"
+        }
+      ]
+    },
+    "handlers_negocio_identicos": true,
+    "input_caso_identico": true,
+    "efectos_nuevos_UI": [
+      {
+        "dependencia": "menuAbierto",
+        "contiene_HTTP": false,
+        "alcance": "overflow, foco, Escape/Tab y resize de navegación"
+      }
+    ]
+  },
+  "hashes_contra_captura_web": {
+    "src/tickets_rag/api.py": {
+      "esperado": "051f3624c135f62b1d7bf42a6d2f868298da66e7987e9fcb6226b40a76d1749f",
+      "observado": "051f3624c135f62b1d7bf42a6d2f868298da66e7987e9fcb6226b40a76d1749f",
+      "coincide": true
+    },
+    "src/tickets_rag/captura_manuales.py": {
+      "esperado": "f33355f115e8d9df1fff0af921beddfd147ada01b29d06decdcd1926454ad33d",
+      "observado": "f33355f115e8d9df1fff0af921beddfd147ada01b29d06decdcd1926454ad33d",
+      "coincide": true
+    },
+    "src/tickets_rag/evaluacion_manual_web.py": {
+      "esperado": "bdfe020ce875430712c4dbd33031a4c0e21314cebab53f5a6b41f51a4cc623b2",
+      "observado": "bdfe020ce875430712c4dbd33031a4c0e21314cebab53f5a6b41f51a4cc623b2",
+      "coincide": true
+    },
+    "scripts/evaluar_clasificador_llm.py": {
+      "esperado": "64b6bff03bae5a176376e34b1f8ab4091472eab6b6027f3b7fe0d0311e603101",
+      "observado": "64b6bff03bae5a176376e34b1f8ab4091472eab6b6027f3b7fe0d0311e603101",
+      "coincide": true
+    },
+    "demo/src/api.js": {
+      "esperado": "6bc0e8c5b01182e09380ffb0fe3512f386f4c6a65d7db9c3461840d3b63f36b5",
+      "observado": "6bc0e8c5b01182e09380ffb0fe3512f386f4c6a65d7db9c3461840d3b63f36b5",
+      "coincide": true
+    }
+  },
+  "frontend_redisenado_excluido": [
+    "demo/src/App.jsx",
+    "demo/src/components/TicketsManuales.jsx"
+  ],
+  "datos_corpus_contra_manifiesto": {
+    "datos/f1_manual/manual_mesa_ayuda_v2026-1.pdf": {
+      "esperado": "64dae7133bc6586f11743adf7f7adfe3622d01bbb06b50d21b639b37bc98a45a",
+      "observado": "64dae7133bc6586f11743adf7f7adfe3622d01bbb06b50d21b639b37bc98a45a",
+      "coincide": true
+    },
+    "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf": {
+      "esperado": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9",
+      "observado": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9",
+      "coincide": true
+    },
+    "datos/f2_microsoft/f2_microsoft_soporte.pdf": {
+      "esperado": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794",
+      "observado": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794",
+      "coincide": true
+    },
+    "datos/f3_tickets/tickets.jsonl": {
+      "esperado": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+      "observado": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+      "coincide": true
+    }
+  },
+  "banco_y_referencias_contra_congelacion": {
+    "datos/f1_manual/manual_mesa_ayuda.md": {
+      "esperado": "2b23295cd22609eb56a5f6d3c633c17d6e0417d587e74e96de23784a817f617e",
+      "observado": "2b23295cd22609eb56a5f6d3c633c17d6e0417d587e74e96de23784a817f617e",
+      "coincide": true
+    },
+    "datos/f1_manual/manual_mesa_ayuda_v2026-1.pdf": {
+      "esperado": "64dae7133bc6586f11743adf7f7adfe3622d01bbb06b50d21b639b37bc98a45a",
+      "observado": "64dae7133bc6586f11743adf7f7adfe3622d01bbb06b50d21b639b37bc98a45a",
+      "coincide": true
+    },
+    "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf": {
+      "esperado": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9",
+      "observado": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9",
+      "coincide": true
+    },
+    "datos/f2_microsoft/f2_microsoft_soporte.pdf": {
+      "esperado": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794",
+      "observado": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794",
+      "coincide": true
+    },
+    "datos/f3_tickets/tickets.jsonl": {
+      "esperado": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+      "observado": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+      "coincide": true
+    },
+    "datos/manifiesto.json": {
+      "esperado": "179f4cf76bdf1901681a503e1ab65647521d13100a92476297105d15f91fb84e",
+      "observado": "179f4cf76bdf1901681a503e1ab65647521d13100a92476297105d15f91fb84e",
+      "coincide": true
+    },
+    "evaluacion/banco_borrador.jsonl": {
+      "esperado": "5b9812ba8d67c27267014e966453203276ad09251eb03883caa16e2e940c8a84",
+      "observado": "5b9812ba8d67c27267014e966453203276ad09251eb03883caa16e2e940c8a84",
+      "coincide": true
+    },
+    "evaluacion/validacion_dev.jsonl": {
+      "esperado": "ad000def7c89ec58d93996fffd4993b4233f3e144777e6825b401ab9451e3632",
+      "observado": "ad000def7c89ec58d93996fffd4993b4233f3e144777e6825b401ab9451e3632",
+      "coincide": true
+    },
+    "evaluacion/banco.jsonl": {
+      "esperado": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+      "observado": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+      "coincide": true
+    },
+    "evaluacion/revision_banco.json": {
+      "esperado": "600dfe334fd3e67ed2bcd9b4154c10264e10056c9aa0dfaff21e5d7fcdc89527",
+      "observado": "600dfe334fd3e67ed2bcd9b4154c10264e10056c9aa0dfaff21e5d7fcdc89527",
+      "coincide": true
+    }
+  },
+  "cobertura_baseline_datasets": "validacion.json.fuentes_sha256 no incluye datasets. Se comprobaron por separado contra datos/manifiesto.json y evaluacion/banco.manifiesto.json; no se atribuye esa cobertura al registro de captura.",
+  "modelos_llamados": 0,
+  "errores": [],
+  "resultado": "sin_cambios_de_negocio_detectados",
+  "limites": [
+    "La inspección estática no sustituye el ensayo interactivo del menú, Escape, foco, edición y citación; root lo realiza por separado con respuestas falsas.",
+    "El nuevo estado/menuRef y su efecto afectan sólo navegación y foco. Los helpers de presentación y las clases cambiaron intencionalmente."
+  ]
+}

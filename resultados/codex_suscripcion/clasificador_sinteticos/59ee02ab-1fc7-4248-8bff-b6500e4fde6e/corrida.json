@@ -1,0 +1,205 @@
+{
+  "version": 1,
+  "corrida_id": "59ee02ab-1fc7-4248-8bff-b6500e4fde6e",
+  "plan": {
+    "conjunto": "tickets_sinteticos_ia",
+    "variante": "juegos_criterios",
+    "ajustes": {
+      "corridas": 5,
+      "juegos_distintos": true,
+      "reglas_extra": true,
+      "effort": "low"
+    },
+    "modelo": "gpt-6.2-sol",
+    "proveedor": "codex_subscription",
+    "autenticacion": "chatgpt",
+    "juegos": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "semilla_ejemplos": 7,
+    "semilla_desarrollo": 11,
+    "ejemplos_por_categoria": 2,
+    "criterios": "REGLAS_EXTRA y manual vigente 1.3/1.4, fijados antes de medir",
+    "reglas_extra_sha256": "b736f2c0aeaa36c91a35690ad29821c2e075336fc6b8d15e6b42f14fcb2af24e",
+    "reglas_tipo_sha256": "f0d05c399447f5d75c797e6c66f5d6873137b31caa70ff44c40fb47dc98fee9e",
+    "confianza_minima": 1.0,
+    "tickets_sha256": "b58f6b0775067b85d7c46ab838d4430eb67fc9cbbc25c866089865d7e69a1325",
+    "manifiesto_sha256": "3169638b83e992a3934e3c2f692081a593e94a2cce2c71e08d82927ad4b29a05",
+    "referencias": [
+      {
+        "nombre": "f3",
+        "ruta": "datos/f3_tickets/tickets.jsonl",
+        "sha256": "69ac97f4f55f9932e6503ed1ddc6c96f7c629a21c5d59b67040471df54429155",
+        "registros": 300
+      },
+      {
+        "nombre": "desarrollo",
+        "ruta": "evaluacion/validacion_dev.jsonl",
+        "sha256": "ad000def7c89ec58d93996fffd4993b4233f3e144777e6825b401ab9451e3632",
+        "registros": 37
+      },
+      {
+        "nombre": "banco_oficial",
+        "ruta": "evaluacion/banco.jsonl",
+        "sha256": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+        "registros": 42
+      },
+      {
+        "nombre": "banco_borrador",
+        "ruta": "evaluacion/banco_borrador.jsonl",
+        "sha256": "5b9812ba8d67c27267014e966453203276ad09251eb03883caa16e2e940c8a84",
+        "registros": 42
+      },
+      {
+        "nombre": "manifiesto_corpus",
+        "ruta": "datos/manifiesto.json",
+        "sha256": "179f4cf76bdf1901681a503e1ab65647521d13100a92476297105d15f91fb84e"
+      }
+    ],
+    "chunks_sha256": "8e18a3fad5fa8d14681ddb9ed3b2a5568260e86b06909402962915e3fcf85dd4",
+    "orden": [
+      "SYN-01",
+      "SYN-02",
+      "SYN-03",
+      "SYN-04",
+      "SYN-05",
+      "SYN-06",
+      "SYN-07",
+      "SYN-08",
+      "SYN-09",
+      "SYN-10",
+      "SYN-11",
+      "SYN-12",
+      "SYN-13",
+      "SYN-14",
+      "SYN-15",
+      "SYN-16",
+      "SYN-17",
+      "SYN-18",
+      "SYN-19",
+      "SYN-20"
+    ],
+    "codigo_sha256": {
+      "scripts/evaluar_sinteticos.py": "e600f57a065d15859df21a447333abecc26223b1b9be01b0f759a43a6a12812c",
+      "src/tickets_rag/clasificador.py": "ab8f7feaba5127023e34131ce09da8fdeac6074412a4227ce5098bf837991489",
+      "src/tickets_rag/clasificador_llm.py": "5d270b34c2ae7bdfdcb803130152bd953faa63814d45628a1ed01579f895dd63",
+      "src/tickets_rag/modelo.py": "e67488bf7c0cbf13352dc4ab5f3a2fd5a516113b3bca5e436ddc2d2b76a9a4ce",
+      "src/tickets_rag/pii.py": "7b1b9d08f1377125255c508afc27d11a965b356504cbefb87759f3ee514d76fb",
+      "src/tickets_rag/ingesta.py": "ca7cd914519f956bfb2fb1bf21e5d9931043ed7a13f4ec14fda55997016f4a97",
+      "src/tickets_rag/config.py": "20cfeb6f2486533743f4487fd27e0292a7e725e0638e742bfa00a38011aa00ab",
+      "uv.lock": "6decf8114ff8d9ca7a21096432cd7d55812b53f776625f89db17e6ddb155e5bb",
+      "src/tickets_rag/historial.py": "b5445aff45b6f69f5ca3d62e42136ae90c7f69f3e1ddab33021033ea88ec6a18",
+      "src/tickets_rag/f3.py": "6ce155e398a5d1b5d338f6ee4cc777750f097539220f05406e37f642e57b7197",
+      "src/tickets_rag/tickets_manuales.py": "a75baaa4ac3cc663cea4b0f67b1980721e11dbd8047d6d7e4d0b951a04bbd34c"
+    },
+    "versiones": {
+      "scikit-learn": "1.9.1",
+      "numpy": "2.4.6",
+      "pydantic": "2.14.3"
+    }
+  },
+  "plan_sha256": "9c5d607f2c3a08b282f4f7964546917189a33e394f5b6118e9717a74d943212b",
+  "estado": "incompleto",
+  "inicio_utc": "2026-11-18T09:30:30.904435+00:00",
+  "entrenamiento_tfidf": 240,
+  "entrenamiento": "solo F3 particion indice; sintéticos excluidos",
+  "tfidf": {
+    "SYN-01": {
+      "categoria": "ACCESO",
+      "prioridad": "ALTA"
+    },
+    "SYN-02": {
+      "categoria": "ACCESO",
+      "prioridad": "BAJA"
+    },
+    "SYN-03": {
+      "categoria": "ACCESO",
+      "prioridad": "BAJA"
+    },
+    "SYN-04": {
+      "categoria": "ACCESO",
+      "prioridad": "BAJA"
+    },
+    "SYN-05": {
+      "categoria": "CORREO",
+      "prioridad": "ALTA"
+    },
+    "SYN-06": {
+      "categoria": "CORREO",
+      "prioridad": "MEDIA"
+    },
+    "SYN-07": {
+      "categoria": "CORREO",
+      "prioridad": "BAJA"
+    },
+    "SYN-08": {
+      "categoria": "CORREO",
+      "prioridad": "BAJA"
+    },
+    "SYN-09": {
+      "categoria": "EQUIPOS",
+      "prioridad": "BAJA"
+    },
+    "SYN-10": {
+      "categoria": "EQUIPOS",
+      "prioridad": "ALTA"
+    },
+    "SYN-11": {
+      "categoria": "EQUIPOS",
+      "prioridad": "MEDIA"
+    },
+    "SYN-12": {
+      "categoria": "ACCESO",
+      "prioridad": "ALTA"
+    },
+    "SYN-13": {
+      "categoria": "RED",
+      "prioridad": "MEDIA"
+    },
+    "SYN-14": {
+      "categoria": "RED",
+      "prioridad": "MEDIA"
+    },
+    "SYN-15": {
+      "categoria": "RED",
+      "prioridad": "BAJA"
+    },
+    "SYN-16": {
+      "categoria": "APLICACIONES",
+      "prioridad": "ALTA"
+    },
+    "SYN-17": {
+      "categoria": "APLICACIONES",
+      "prioridad": "MEDIA"
+    },
+    "SYN-18": {
+      "categoria": "APLICACIONES",
+      "prioridad": "MEDIA"
+    },
+    "SYN-19": {
+      "categoria": "OTRO",
+      "prioridad": "BAJA"
+    },
+    "SYN-20": {
+      "categoria": "CORREO",
+      "prioridad": "BAJA"
+    }
+  },
+  "tfidf_sha256": "2fcbf53598787db9310e3ee00aade704f373efeea15d3ff0f0183d1a34f49bf8",
+  "sistemas_sha256": [
+    "d1536a0cd8dedb6c2a61b2a64c82fbc9dfbff90fce3c8c72739265b617be4eb3",
+    "3643cf4427aee8ad0241f67e339192fe91d5397256f3c56a5265726c3d81630c",
+    "93491f30ff9ed06eaa93878f3cbeae91bbf396be8e42971de10e1814c3a4c305",
+    "27dd357f35dbf4f1d17cf93cfcace8fe0adcdfaa68c6a2d41857c0605c0a3801",
+    "c5e5461f845487ab946571f7f90aa8b2987e72e86a9f6f510f196e57c7d94eb2"
+  ],
+  "ultimo_error": {
+    "ticket_id": "SYN-01",
+    "codigo": "timeout"
+  },
+  "actualizado_utc": "2026-11-18T09:32:27.304524+00:00"
+}

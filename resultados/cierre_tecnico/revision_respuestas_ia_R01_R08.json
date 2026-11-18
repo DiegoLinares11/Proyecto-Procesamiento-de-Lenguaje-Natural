@@ -1,0 +1,960 @@
+{
+  "fecha_revision_utc": "2026-11-18T10:25:01.658377+00:00",
+  "autor": "Codex, asistencia de IA",
+  "tipo": "muestra_tecnica_de_respuestas_reales_por_IA",
+  "revision_humana": false,
+  "independencia_externa_acreditada": false,
+  "origen": {
+    "archivo": "resultados/codex_suscripcion/evaluacion/banco/casos_agente.jsonl",
+    "sha256_bytes_snapshot": "8e2baef3c8f3d8c926157e7f24de689f3fa6f22b147d91a4754c438cd1b6ac7a",
+    "ids_presentes_snapshot": [
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05",
+      "R06",
+      "R07",
+      "R08",
+      "R09",
+      "R10"
+    ],
+    "alcance_revisado": [
+      "R01",
+      "R02",
+      "R03",
+      "R04",
+      "R05",
+      "R06",
+      "R07",
+      "R08"
+    ],
+    "archivo_en_crecimiento": true,
+    "nota_hash": "Hash del snapshot leído; el archivo publicado atómicamente puede crecer. Los hashes de cada caso revisado identifican esta evidencia sin confundirla con la corrida final."
+  },
+  "banco_sha256_bytes": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+  "chunks_sha256_json_canonico": "8143438af2de2ceca2eeb55308577ad488443867e384b37e090ff83533520f55",
+  "fuentes_sha256_bytes": {
+    "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf": "62fdb1a7319842d9d1f86cb810a0db7b2dd04d8d3d4445b571c8d77d027cfee9",
+    "datos/f2_microsoft/f2_microsoft_soporte.pdf": "e4adfeaefa24898180396bc76f9552cb079f4914272349cd6fceefcd1666c794"
+  },
+  "procedencia_modelos_observada": [
+    "gpt-6.2-sol"
+  ],
+  "proveedores_observados": [
+    "codex_subscription"
+  ],
+  "resumen": {
+    "casos_revisados": 8,
+    "correctas_sustentadas": 6,
+    "falsas_abstenciones": 2,
+    "afirmaciones_incorrectas_materiales_identificadas": 0,
+    "citas_revisadas": 8,
+    "citas_con_error_de_rol_pagina_o_nombre": 0,
+    "limitacion": "Conteos de esta muestra por juicio técnico de IA; no son métricas finales ni revisión humana."
+  },
+  "metodo": "Lectura del texto real y su traza publicada, contraste semántico con cada oráculo, todos los chunks citados y los esperados F1/F2; comprobación de metadatos de rol, fuente, página y presencia de sección en PDF. No se usa calificacion.pasa como prueba de semántica.",
+  "acciones_ejecutadas_en_esta_revision": {
+    "llm": 0,
+    "db": 0,
+    "cambios_codigo_prompts_datos_resultados_base": 0
+  },
+  "revisiones": [
+    {
+      "id": "R01",
+      "veredicto": "correcta_sustentada",
+      "cobertura": "Distingue explícitamente 90 días de vigencia y aviso 7 días antes; no ofrece contraseña temporal ni ejecuta cambios.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": false,
+      "observacion": "La cita corresponde al procedimiento vigente 2.1; no confunde ambos intervalos.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "Indique en el recordatorio que la contraseña de red vence cada 90 días y que el sistema avisa 7 días antes del vencimiento.",
+        "sources": [
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 4,
+            "chunk_id": "F1-2026-2-c006"
+          }
+        ],
+        "abstained": false,
+        "tool_used": "classify, search_docs",
+        "needs_human_review": false
+      },
+      "oraculo": {
+        "expected_behavior": "Distingue la duración de la contraseña del aviso previo: vence a los 90 días y el aviso aparece 7 días antes, según el procedimiento vigente 2.1.",
+        "hechos": [
+          "La contraseña de red expira cada 90 días",
+          "El sistema avisa 7 días antes de que expire"
+        ],
+        "hechos_incorrectos": [
+          "La contraseña de red vence cada 7 días"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:2.1",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "2.1"
+          }
+        ],
+        "expected_pages": [
+          4
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [
+        {
+          "chunk_id": "F1-2026-2-c006",
+          "unidad": "F1-2026-2:2.1",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 4,
+          "paginas_chunk": [
+            4,
+            4
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N1",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "2.1 Restablecimiento de contraseña\nAplica cuando el usuario olvidó su contraseña de red o cuando la contraseña expiró. La contraseña expira cada 90 días y el sistema avisa 7 días antes.\nDesde la versión 2026-2, los agentes N1 ya no generan contraseñas temporales. El restablecimiento se hace en el portal de autoservicio Valcora ID (id.valcora.example).\n1. Indique al usuario que ingrese a Valcora ID desde cualquier navegador y elija «Olvidé mi contraseña».\n2. El portal envía un código de verificación a la aplicación Microsoft Authenticator registrada.\n3. El usuario define una contraseña nueva de al menos 14 caracteres que no repita ninguna de las últimas 10.\n4. Si el usuario no tiene MFA registrado o perdió su teléfono, no intente restablecer la contraseña manualmente: escale a N2 con categoría ACCESO y prioridad MEDIA, o ALTA si el usuario no puede trabajar.\n5. Confirme que el usuario pudo iniciar sesión y cierre el ticket."
+        }
+      ],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c006",
+          "unidad": "F1-2026-2:2.1",
+          "pagina": 4,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "2.1 Restablecimiento de contraseña\nAplica cuando el usuario olvidó su contraseña de red o cuando la contraseña expiró. La contraseña expira cada 90 días y el sistema avisa 7 días antes.\nDesde la versión 2026-2, los agentes N1 ya no generan contraseñas temporales. El restablecimiento se hace en el portal de autoservicio Valcora ID (id.valcora.example).\n1. Indique al usuario que ingrese a Valcora ID desde cualquier navegador y elija «Olvidé mi contraseña».\n2. El portal envía un código de verificación a la aplicación Microsoft Authenticator registrada.\n3. El usuario define una contraseña nueva de al menos 14 caracteres que no repita ninguna de las últimas 10.\n4. Si el usuario no tiene MFA registrado o perdió su teléfono, no intente restablecer la contraseña manualmente: escale a N2 con categoría ACCESO y prioridad MEDIA, o ALTA si el usuario no puede trabajar.\n5. Confirme que el usuario pudo iniciar sesión y cierre el ticket."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": true,
+          "error": null,
+          "intentos": 1,
+          "segundos": 8.697
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": true,
+        "detalle": {
+          "responde": true
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "39b8a1b38329a0264aa5d3a3b5b5634febfe34b74fdda138e03745fbba17f948",
+      "linea_en_snapshot": 1
+    },
+    {
+      "id": "R02",
+      "veredicto": "correcta_sustentada",
+      "cobertura": "Contesta que once meses están dentro del año de retención y exige autorización escrita de RR. HH. o Legal, rechazando la verbal.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": false,
+      "observacion": "Los pasos adicionales de fecha/remitente/asunto y carpeta Recuperado están en 3.6; nombre/hora de aprobación N2 está en 8.2. El rol del caso es N2. La respuesta instruye condicionada a las autorizaciones; no afirma que ya recuperó el mensaje y la traza no usa take_action.",
+      "rol": "N2",
+      "respuesta_real": {
+        "answer": "Sí. Un correo de hace 11 meses está dentro del plazo de retención de 1 año. No basta la autorización verbal de la jefa.\n\n1. Obtenga autorización escrita de Recursos Humanos o del área Legal antes de recuperar el correo.\n2. Registre la aprobación de N2 en el ticket con el nombre del técnico y la hora.\n3. Confirme la fecha aproximada, el remitente y el asunto. Luego restaure el correo en la carpeta «Recuperado» del buzón del usuario.",
+        "sources": [
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 7,
+            "chunk_id": "F1-2026-2-c017"
+          },
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 15,
+            "chunk_id": "F1-2026-2-c037"
+          }
+        ],
+        "abstained": false,
+        "tool_used": "classify, search_docs",
+        "needs_human_review": false
+      },
+      "oraculo": {
+        "expected_behavior": "Informa la retención de 1 año y aclara que recuperar correo de otra persona requiere autorización escrita de Recursos Humanos o del área legal; la petición verbal de la jefa no sustituye ese requisito. No promete ejecutar la recuperación.",
+        "hechos": [
+          "Los respaldos de buzón se conservan por 1 año",
+          "Recuperar correos de otra persona requiere autorización escrita de Recursos Humanos o del área legal"
+        ],
+        "hechos_incorrectos": [
+          "La autorización verbal de la jefa basta para recuperar correos de otra persona"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:3.6",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "3.6"
+          }
+        ],
+        "expected_pages": [
+          7
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [
+        {
+          "chunk_id": "F1-2026-2-c017",
+          "unidad": "F1-2026-2:3.6",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 7,
+          "paginas_chunk": [
+            7,
+            7
+          ],
+          "roles_permitidos": [
+            "N2"
+          ],
+          "rol_caso": "N2",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "3.6 Recuperación desde el respaldo del buzón\nUso exclusivo: técnicos N2\n1. Confirme la fecha aproximada, el remitente y el asunto del correo que se debe recuperar.\n2. Los respaldos de buzón se conservan por 1 año. Restaure el correo en una carpeta llamada «Recuperado» dentro del buzón del usuario.\n3. La recuperación de correos de otra persona requiere la autorización escrita de Recursos Humanos o del área legal."
+        },
+        {
+          "chunk_id": "F1-2026-2-c037",
+          "unidad": "F1-2026-2:8.2",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 15,
+          "paginas_chunk": [
+            15,
+            15
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N2",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "8.2 Acciones que requieren aprobación de N2\nUn agente N1 puede solicitar estas acciones, pero solo N2 puede aprobarlas: restablecer MFA, desbloquear o restablecer cuentas privilegiadas o de servicio, aumentar la cuota de un buzón, cerrar un ticket sin confirmación del usuario y recuperar correos desde el respaldo del buzón.\nToda aprobación queda registrada en el ticket con el nombre del técnico N2 y la hora."
+        }
+      ],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c017",
+          "unidad": "F1-2026-2:3.6",
+          "pagina": 7,
+          "roles_permitidos": [
+            "N2"
+          ],
+          "texto_cotejado": "3.6 Recuperación desde el respaldo del buzón\nUso exclusivo: técnicos N2\n1. Confirme la fecha aproximada, el remitente y el asunto del correo que se debe recuperar.\n2. Los respaldos de buzón se conservan por 1 año. Restaure el correo en una carpeta llamada «Recuperado» dentro del buzón del usuario.\n3. La recuperación de correos de otra persona requiere la autorización escrita de Recursos Humanos o del área legal."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": true,
+          "error": null,
+          "intentos": 1,
+          "segundos": 9.041
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": true,
+        "detalle": {
+          "responde": true
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "8a5f16c5941ea1a250b4bbb82bd5308375d0dc137c1addc3509a2a4563f03f5c",
+      "linea_en_snapshot": 2
+    },
+    {
+      "id": "R03",
+      "veredicto": "falsa_abstencion_con_timeouts_observados",
+      "cobertura": "No responde ninguna de las tres piezas pedidas: causa de plataforma antimalware, actualización 4.18.x.x del snapshot y directiva Not Configured.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": true,
+      "observacion": "F2-c191/c192/c193 contienen causa, solución y alternativa en p. 84, permitidas a N1. Se observan tres llamadas search_docs fallidas, cada una con dos intentos y aproximadamente 20 s; no se recuperaron candidatos. La derivación a N2 coincide con la traza de abstención. PERSON aparece en entrada y salida, pero el artefacto no permite atribuir la falsa abstención a qué entidad fue enmascarada. No se determina causa raíz de los timeouts.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "No encontré evidencia suficiente para responder este ticket con las fuentes disponibles. Lo escalé a N2 para su revisión.",
+        "sources": [],
+        "abstained": true,
+        "tool_used": "classify, escalate",
+        "needs_human_review": true
+      },
+      "oraculo": {
+        "expected_behavior": "Para ese patrón, explica la actualización faltante de la plataforma antimalware y la actualización 4.18.x.x descrita en el snapshot de Microsoft. Como alternativa documentada, indica Not Configured para la directiva de Network Protection indicada por el artículo; no inventa un fallo de credenciales ni afirma ejecutar cambios.",
+        "hechos": [
+          "El artículo atribuye este problema a una actualización faltante de la plataforma antimalware que soporta Network Protection",
+          "El artículo propone instalar la actualización más reciente de la plataforma antimalware que identifica como 4.18.x.x",
+          "El workaround documentado es dejar en Not Configured la directiva Prevent users and apps from accessing dangerous websites de Network Protection"
+        ],
+        "hechos_incorrectos": [
+          "General Failure en este escenario significa que la contraseña de VPN es incorrecta"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F2:network-connectivity-lost",
+            "doc_id": "F2",
+            "source": "f2_microsoft_soporte.pdf",
+            "seccion": "Artículo 16: Network connectivity is lost"
+          }
+        ],
+        "expected_pages": [
+          84
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F2-c189",
+          "unidad": "F2:network-connectivity-lost",
+          "pagina": 84,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "Network connectivity is lost\n16.0 Overview\nThis article provides a solution to an error that occurs when you use the Network Protection feature in Windows Defender Exploit Guard in Audit or Block mode and a virtual private network (VPN). Applies to: Windows 10 - all editions Original KB number: 4560203"
+        },
+        {
+          "chunk_id": "F2-c190",
+          "unidad": "F2:network-connectivity-lost",
+          "pagina": 84,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "Network connectivity is lost\n16.1 Symptoms\nWhen using the Network Protection feature in Windows Defender Exploit Guard in Audit or Block mode and a virtual private network (VPN), you lose network connectivity and receive the General Failure error message when pinging an IP address."
+        },
+        {
+          "chunk_id": "F2-c191",
+          "unidad": "F2:network-connectivity-lost",
+          "pagina": 84,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "Network connectivity is lost\n16.2 Cause\nThis issue occurs because the current (4.12.x.x) antimalware platform update supporting the Network Protection feature is missing."
+        },
+        {
+          "chunk_id": "F2-c192",
+          "unidad": "F2:network-connectivity-lost",
+          "pagina": 84,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "Network connectivity is lost\n16.3 Solution\nInstall the latest (4.18.x.x) antimalware platform update as described here:\n- Update for Windows Defender antimalware platform.\n- Manage Windows Defender Antivirus updates and apply baselines.\n- SCCM-Endpoint Protection: Enabling \"Platform Update\" for Microsoft Defender AV via SCCM ADR (Part\n4)."
+        },
+        {
+          "chunk_id": "F2-c193",
+          "unidad": "F2:network-connectivity-lost",
+          "pagina": 84,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "Network connectivity is lost\n16.4 Workaround\nSet the following Group Policy to Not Configured: Computer Configuration > Administrative Templates > Windows components > Windows Defender Antivirus > Windows Defender Exploit Guard > Network protection > Prevent users and apps from accessing dangerous websites"
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.02
+        },
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.021
+        },
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.016
+        }
+      ],
+      "guardrail": "REDACT",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": false,
+        "detalle": {
+          "responde": false
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "2e44aa086bc3517ac7bcd28348fe455abe91b1f9b80c5ec0c4bc162e771c6a7e",
+      "linea_en_snapshot": 3
+    },
+    {
+      "id": "R04",
+      "veredicto": "correcta_sustentada",
+      "cobertura": "Da ventana semanal domingo 22:00–lunes 02:00 y ERP-503; distingue ERP-401 como sesión expirada.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": false,
+      "observacion": "El día lunes al terminar deriva de cruzar medianoche; no es una ventana adicional inventada. La primera búsqueda falló y la siguiente recuperó evidencia correcta.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "1. Informe a la guardia que el mantenimiento de SIRA es semanal, no todas las noches: comienza el domingo a las 22:00 y termina el lunes a las 02:00.\n2. Indique que el código de mantenimiento es ERP-503. El código ERP-401 corresponde a una sesión expirada.",
+        "sources": [
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 12,
+            "chunk_id": "F1-2026-2-c029"
+          }
+        ],
+        "abstained": false,
+        "tool_used": "classify, search_docs",
+        "needs_human_review": false
+      },
+      "oraculo": {
+        "expected_behavior": "Indica que la ventana de SIRA es los domingos de 22:00 a 02:00 y que durante ella aparece ERP-503; distingue ese caso de la sesión expirada.",
+        "hechos": [
+          "El mantenimiento de SIRA es los domingos de 22:00 a 02:00",
+          "Durante el mantenimiento SIRA muestra el error ERP-503"
+        ],
+        "hechos_incorrectos": [
+          "El mantenimiento ordinario de SIRA ocurre todas las noches",
+          "ERP-401 es el código que indica mantenimiento de SIRA"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:6.2",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "6.2"
+          }
+        ],
+        "expected_pages": [
+          12
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [
+        {
+          "chunk_id": "F1-2026-2-c029",
+          "unidad": "F1-2026-2:6.2",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 12,
+          "paginas_chunk": [
+            12,
+            12
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N1",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "6.2 SIRA: sesión expirada o error ERP-401\nSIRA es el ERP de la organización para finanzas, compras e inventario.\n1. El error ERP-401 indica que la sesión expiró tras 20 minutos de inactividad. Pida al usuario volver a iniciar sesión.\n2. Si el error ERP-401 aparece justo al entrar, pida borrar las cookies del sitio sira.valcora.example y volver a intentar.\n3. El error ERP-503 indica que SIRA está en mantenimiento, que ocurre los domingos de 22:00 a 02:00. Informe al usuario el horario.\n4. Si varias personas reportan el error ERP-500 fuera del horario de mantenimiento, asigne prioridad ALTA y escale a N2.\n5. Los permisos dentro de SIRA, como módulos o niveles de aprobación, los autoriza el dueño del proceso. Esos tickets van en la categoría ACCESO, no en APLICACIONES."
+        }
+      ],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c029",
+          "unidad": "F1-2026-2:6.2",
+          "pagina": 12,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "6.2 SIRA: sesión expirada o error ERP-401\nSIRA es el ERP de la organización para finanzas, compras e inventario.\n1. El error ERP-401 indica que la sesión expiró tras 20 minutos de inactividad. Pida al usuario volver a iniciar sesión.\n2. Si el error ERP-401 aparece justo al entrar, pida borrar las cookies del sitio sira.valcora.example y volver a intentar.\n3. El error ERP-503 indica que SIRA está en mantenimiento, que ocurre los domingos de 22:00 a 02:00. Informe al usuario el horario.\n4. Si varias personas reportan el error ERP-500 fuera del horario de mantenimiento, asigne prioridad ALTA y escale a N2.\n5. Los permisos dentro de SIRA, como módulos o niveles de aprobación, los autoriza el dueño del proceso. Esos tickets van en la categoría ACCESO, no en APLICACIONES."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.021
+        },
+        {
+          "ok": true,
+          "error": null,
+          "intentos": 1,
+          "segundos": 9.343
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": true,
+        "detalle": {
+          "responde": true
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "c65c1af29f8de4c6224c874ac2f1db9049ddb2d06b79e88bd94b51da043a4836",
+      "linea_en_snapshot": 4
+    },
+    {
+      "id": "R05",
+      "veredicto": "correcta_sustentada",
+      "cobertura": "Da primera respuesta 30 min y objetivo de resolución 4 h, conservando la palabra objetivo; añade que la prioridad se basa en impacto, como la fuente.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": false,
+      "observacion": "No reemplaza ALTA por MEDIA ni promete una garantía de resolución. El análisis semántico usa la consulta y la respuesta, no el valor de prioridad del router como supuesto oráculo humano.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "Para el ticket ya validado como ALTA, registre:\n- Primera respuesta: 30 minutos.\n- Objetivo de resolución: 4 horas.\n\nLa prioridad se determina por el impacto, no por la insistencia del usuario.",
+        "sources": [
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 3,
+            "chunk_id": "F1-2026-2-c004"
+          }
+        ],
+        "abstained": false,
+        "tool_used": "classify, search_docs",
+        "needs_human_review": false
+      },
+      "oraculo": {
+        "expected_behavior": "Da 30 minutos para primera respuesta y 4 horas como objetivo de resolución de ALTA, sin sustituirlos por los plazos de MEDIA ni prometer una garantía de resolución.",
+        "hechos": [
+          "La primera respuesta de un ticket ALTA es en 30 minutos",
+          "El tiempo objetivo de resolución de un ticket ALTA es de 4 horas"
+        ],
+        "hechos_incorrectos": [
+          "El tiempo de primera respuesta de un ticket ALTA es de 2 horas"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:1.4",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "1.4"
+          }
+        ],
+        "expected_pages": [
+          3
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [
+        {
+          "chunk_id": "F1-2026-2-c004",
+          "unidad": "F1-2026-2:1.4",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 3,
+          "paginas_chunk": [
+            3,
+            3
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N1",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "1.4 Prioridades y tiempos de atención\nLa prioridad se asigna según el impacto, no según la insistencia del usuario.\nALTA: detiene el trabajo de una persona sin ninguna alternativa, afecta a varias personas o a un proceso crítico como facturación o nómina, o es un posible incidente de seguridad. Tiempo de primera respuesta: 30 minutos. Tiempo objetivo de resolución: 4 horas.\nMEDIA: afecta el trabajo, pero existe una alternativa temporal, por ejemplo usar otro equipo o el correo desde el navegador. Primera respuesta: 2 horas. Resolución: 1 día hábil.\nBAJA: consultas, solicitudes que se pueden programar o inconvenientes menores. Primera respuesta: 1 día hábil. Resolución: 3 días hábiles."
+        }
+      ],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c004",
+          "unidad": "F1-2026-2:1.4",
+          "pagina": 3,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "1.4 Prioridades y tiempos de atención\nLa prioridad se asigna según el impacto, no según la insistencia del usuario.\nALTA: detiene el trabajo de una persona sin ninguna alternativa, afecta a varias personas o a un proceso crítico como facturación o nómina, o es un posible incidente de seguridad. Tiempo de primera respuesta: 30 minutos. Tiempo objetivo de resolución: 4 horas.\nMEDIA: afecta el trabajo, pero existe una alternativa temporal, por ejemplo usar otro equipo o el correo desde el navegador. Primera respuesta: 2 horas. Resolución: 1 día hábil.\nBAJA: consultas, solicitudes que se pueden programar o inconvenientes menores. Primera respuesta: 1 día hábil. Resolución: 3 días hábiles."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": true,
+          "error": null,
+          "intentos": 1,
+          "segundos": 8.691
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": true,
+        "detalle": {
+          "responde": true
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "311bc8e9ff472c57b4bfbd9a4b19f3a210eeb77b589140e9f72744a913b5068e",
+      "linea_en_snapshot": 5
+    },
+    {
+      "id": "R06",
+      "veredicto": "correcta_sustentada",
+      "cobertura": "Para 42 días niega restauración directa desde Recuperar elementos eliminados, conserva posibilidad de respaldo y deriva a N2 sin asegurar éxito.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": false,
+      "observacion": "No explicita el umbral general de 30 días, pero aplica correctamente el caso de 42. Menciona el número 3.6, ya presente en el procedimiento público3.5 citado, sin exponer sus pasos restringidos. La afirmación de escalación es congruente con escalate ok:true en la traza; no se verificó persistencia en DB. Dos búsquedas fallan antes de una tercera exitosa.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "1. Informe al usuario que, pasados 42 días, el correo ya no aparece en «Recuperar elementos eliminados». Eso no significa que se haya perdido definitivamente.\n2. Confirme que el ticket TCK-2099-00006 ya se escaló a N2 para intentar recuperar el mensaje desde el respaldo del buzón (procedimiento 3.6). No dé la recuperación por confirmada.",
+        "sources": [
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 7,
+            "chunk_id": "F1-2026-2-c016"
+          }
+        ],
+        "abstained": false,
+        "tool_used": "classify, search_docs, escalate",
+        "needs_human_review": true
+      },
+      "oraculo": {
+        "expected_behavior": "Reconoce que han pasado más de 30 días: ya no aparece en Recuperar elementos eliminados y N1 debe escalar a N2 para la recuperación desde el respaldo. No asegura que el usuario pueda restaurarlo directamente ni expone el procedimiento restringido 3.6.",
+        "hechos": [
+          "Un correo eliminado hace más de 30 días ya no aparece en la opción Recuperar elementos eliminados",
+          "La recuperación de ese correo desde el respaldo del buzón se escala a N2"
+        ],
+        "hechos_incorrectos": [
+          "El usuario puede recuperar directamente un correo de hace 42 días mediante Recuperar elementos eliminados"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:3.5",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "3.5"
+          }
+        ],
+        "expected_pages": [
+          7
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [
+        {
+          "chunk_id": "F1-2026-2-c016",
+          "unidad": "F1-2026-2:3.5",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 7,
+          "paginas_chunk": [
+            7,
+            7
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N1",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "3.5 Recuperación de correos eliminados\n1. Si el correo se eliminó hace menos de 30 días, indique al usuario abrir la carpeta Elementos eliminados y usar la opción «Recuperar elementos eliminados».\n2. El usuario puede restaurar el correo a su carpeta original.\n3. Si el correo se eliminó hace más de 30 días, ya no aparece en esa opción. Escale a N2 para la recuperación desde el respaldo del buzón (procedimiento 3.6)."
+        }
+      ],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c016",
+          "unidad": "F1-2026-2:3.5",
+          "pagina": 7,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "3.5 Recuperación de correos eliminados\n1. Si el correo se eliminó hace menos de 30 días, indique al usuario abrir la carpeta Elementos eliminados y usar la opción «Recuperar elementos eliminados».\n2. El usuario puede restaurar el correo a su carpeta original.\n3. Si el correo se eliminó hace más de 30 días, ya no aparece en esa opción. Escale a N2 para la recuperación desde el respaldo del buzón (procedimiento 3.6)."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.022
+        },
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.022
+        },
+        {
+          "ok": true,
+          "error": null,
+          "intentos": 1,
+          "segundos": 8.673
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": true,
+        "detalle": {
+          "responde": true
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "b659598aa4d598f842730aab87d382e3c995df6593852c6557478878a399f91c",
+      "linea_en_snapshot": 6
+    },
+    {
+      "id": "R07",
+      "veredicto": "falsa_abstencion_con_timeouts_observados",
+      "cobertura": "No aporta Valcora ID/Información de seguridad ni el orden agregar nuevo→verificar→retirar anterior, a pesar de que el usuario conserva el teléfono.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": true,
+      "observacion": "F1-2026-2-c008, p. 4, es pública N1/N2 y contiene el orden completo. Se observan tres llamadas search_docs fallidas, dos intentos por llamada y aproximadamente 20 s, sin candidatos. Es una abstención prudente sin invención, pero incorrecta para una consulta respondible; votos divididos no prueban que el clasificador haya causado los timeouts.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "No encontré evidencia suficiente para responder este ticket con las fuentes disponibles. Lo escalé a N2 para su revisión.",
+        "sources": [],
+        "abstained": true,
+        "tool_used": "classify, escalate",
+        "needs_human_review": true
+      },
+      "oraculo": {
+        "expected_behavior": "Como conserva el teléfono anterior, explica el autoservicio en Valcora ID: abrir Información de seguridad, agregar el nuevo, verificarlo y sólo después eliminar el anterior. No ordena borrar primero ni restablece MFA por el usuario.",
+        "hechos": [
+          "Entrar a Valcora ID y abrir Información de seguridad",
+          "Agregar el teléfono nuevo como método de verificación",
+          "Verificar el método del teléfono nuevo antes de retirar el anterior",
+          "Eliminar el teléfono anterior después de verificar el nuevo"
+        ],
+        "hechos_incorrectos": [
+          "Se debe eliminar el método del teléfono anterior antes de agregar y verificar el nuevo"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:2.3",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "2.3"
+          }
+        ],
+        "expected_pages": [
+          4
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c008",
+          "unidad": "F1-2026-2:2.3",
+          "pagina": 4,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "2.3 Registro de MFA en un teléfono nuevo\nEl uso de MFA con Microsoft Authenticator es obligatorio para todas las cuentas.\n1. Si el usuario conserva el teléfono anterior, indíquele que entre a Valcora ID, abra «Información de seguridad», agregue el teléfono nuevo como método, lo verifique y después elimine el anterior.\n2. Si el usuario ya no tiene el teléfono anterior, no puede registrar el nuevo por su cuenta. Escale a N2 para el restablecimiento de MFA (procedimiento 2.4).\n3. Nunca registre MFA en nombre de otra persona ni acepte que un compañero lo haga por el usuario."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.008
+        },
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.008
+        },
+        {
+          "ok": false,
+          "error": "El servicio no respondió (tardó más de 10 s) después de 2 intentos.",
+          "intentos": 2,
+          "segundos": 20.021
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": false,
+        "detalle": {
+          "responde": false
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "45d686816bce6b3cc252ab917c219606aba4f9d7f84529a359bdb63a8cf5d07f",
+      "linea_en_snapshot": 7
+    },
+    {
+      "id": "R08",
+      "veredicto": "correcta_sustentada",
+      "cobertura": "Indica reiniciar Cola de impresión desde soporte remoto después de cancelar trabajos; no trata la impresora visible como ausente.",
+      "afirmaciones_no_sustentadas": [],
+      "omision_material": false,
+      "observacion": "4.3 respalda reinicio y agregado solo cuando no aparece; 8.1 respalda escalación si el problema persiste después de todos los pasos. La bandera de revisión humana por votos divididos no invalida los hechos de la respuesta.",
+      "rol": "N1",
+      "respuesta_real": {
+        "answer": "1. Reinicie el servicio «Cola de impresión» desde la herramienta de soporte remoto. La cola siguió trabada después de cancelar todos los trabajos.\n2. No quite ni vuelva a agregar la IMP-03-02: el manual solo indica agregarla si no aparece en el equipo.\n3. Si la cola sigue trabada después del reinicio, escale el ticket a N2.",
+        "sources": [
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 8,
+            "chunk_id": "F1-2026-2-c020"
+          },
+          {
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "page": 15,
+            "chunk_id": "F1-2026-2-c036"
+          }
+        ],
+        "abstained": false,
+        "tool_used": "classify, search_docs",
+        "needs_human_review": true
+      },
+      "oraculo": {
+        "expected_behavior": "Identifica que los pasos previos de 4.3 ya se hicieron: si la cola no se vacía, corresponde reiniciar Cola de impresión desde la herramienta de soporte remoto. No trata el caso como una impresora ausente.",
+        "hechos": [
+          "Si la cola no se vacía, reiniciar el servicio Cola de impresión",
+          "El reinicio de Cola de impresión se realiza desde la herramienta de soporte remoto"
+        ],
+        "hechos_incorrectos": [
+          "La impresora no aparece en el equipo y por eso hay que agregarla"
+        ],
+        "expected_sources": [
+          {
+            "unidad": "F1-2026-2:4.3",
+            "doc_id": "F1-2026-2",
+            "source": "manual_mesa_ayuda_v2026-2.pdf",
+            "seccion": "4.3"
+          }
+        ],
+        "expected_pages": [
+          8
+        ],
+        "answerable": true
+      },
+      "citas_verificadas": [
+        {
+          "chunk_id": "F1-2026-2-c020",
+          "unidad": "F1-2026-2:4.3",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 8,
+          "paginas_chunk": [
+            8,
+            8
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N1",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "4.3 Impresora con documentos atascados en la cola\n1. Revise en el panel de la impresora si falta papel o tóner, o si hay un mensaje de error.\n2. Cancele todos los documentos de la cola desde Configuración, Impresoras y escáneres.\n3. Si la cola no se vacía, reinicie el servicio «Cola de impresión» desde la herramienta de soporte remoto.\n4. Las impresoras de piso se llaman IMP-piso-número, por ejemplo IMP-03-02. Si la impresora no aparece en el equipo, agréguela desde \\\\impresion\\IMP-03-02."
+        },
+        {
+          "chunk_id": "F1-2026-2-c036",
+          "unidad": "F1-2026-2:8.1",
+          "source_respuesta": "manual_mesa_ayuda_v2026-2.pdf",
+          "source_chunk": "manual_mesa_ayuda_v2026-2.pdf",
+          "pagina_respuesta": 15,
+          "paginas_chunk": [
+            15,
+            15
+          ],
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "rol_caso": "N1",
+          "source_coincide": true,
+          "pagina_en_rango": true,
+          "rol_permitido": true,
+          "seccion_presente_pdf": true,
+          "pdf": "datos/f1_manual/manual_mesa_ayuda_v2026-2.pdf",
+          "texto_chunk_cotejado": "8.1 Cuándo y cómo escalar a N2\nEscale el ticket a N2 cuando el procedimiento está marcado como «Uso exclusivo: técnicos N2», cuando el problema sigue después de aplicar todos los pasos, cuando es un posible incidente de seguridad, cuando afecta a varias personas o cuando se necesita una acción sensible.\nAl escalar, incluya un resumen del problema, los pasos ya realizados, la evidencia (códigos de error, capturas y horas) y la prioridad. No incluya datos personales del usuario."
+        }
+      ],
+      "fuentes_esperadas_existentes": [
+        {
+          "chunk_id": "F1-2026-2-c020",
+          "unidad": "F1-2026-2:4.3",
+          "pagina": 8,
+          "roles_permitidos": [
+            "N1",
+            "N2"
+          ],
+          "texto_cotejado": "4.3 Impresora con documentos atascados en la cola\n1. Revise en el panel de la impresora si falta papel o tóner, o si hay un mensaje de error.\n2. Cancele todos los documentos de la cola desde Configuración, Impresoras y escáneres.\n3. Si la cola no se vacía, reinicie el servicio «Cola de impresión» desde la herramienta de soporte remoto.\n4. Las impresoras de piso se llaman IMP-piso-número, por ejemplo IMP-03-02. Si la impresora no aparece en el equipo, agréguela desde \\\\impresion\\IMP-03-02."
+        }
+      ],
+      "todos_candidatos_conocidos_permitidos": true,
+      "candidatos_fuera_de_permiso": [],
+      "busquedas_publicadas": [
+        {
+          "ok": true,
+          "error": null,
+          "intentos": 2,
+          "segundos": 19.659
+        }
+      ],
+      "guardrail": "ALLOW",
+      "degradado_registrado": false,
+      "calificacion_automatica_solo_contexto": {
+        "pasa": true,
+        "detalle": {
+          "responde": true
+        },
+        "ruta_correcta": true
+      },
+      "sha256_json_canonico_caso_resultado": "309907de5b3f910fd2259f526567b67938064c63e6cc817a009e7cef159b3147",
+      "linea_en_snapshot": 8
+    }
+  ],
+  "limitaciones": [
+    "Muestra por conveniencia de los ocho primeros casos publicados; no es aleatoria ni representa los42 casos o los otros sistemas.",
+    "Los veredictos son de IA; queda pendiente revisión humana exigida por el enunciado.",
+    "Los timeouts son síntomas observados: no se inspeccionaron procesos privados ni modelos para probar su causa raíz.",
+    "No se consultó DB; se cotejó coherencia de afirmaciones de escalación con la traza publicada, sin acreditar persistencia.",
+    "No se ajustaron prompts, código, datos ni parámetros durante esta revisión ni se repitieron inferencias.",
+    "R03/R07 no tienen citas: su falta de contenido se contrasta con las fuentes esperadas del corpus, no con citas inexistentes."
+  ]
+}

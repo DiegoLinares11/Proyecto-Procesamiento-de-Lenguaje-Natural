@@ -1,0 +1,109 @@
+.ts-page { width: 100%; max-width: 1160px; min-width: 0; margin: 0 auto; display: grid; gap: 22px; color: var(--foreground); font-size: 14px; }
+.ts-page h1, .ts-page h2, .ts-page h3, .ts-page p, .ts-page dl, .ts-page dd { margin: 0; }
+.ts-heading, .ts-section-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+.ts-eyebrow { display: block; color: var(--brand); font-size: 11px; line-height: 1.6; letter-spacing: .09em; text-transform: uppercase; font-weight: 600; }
+.ts-heading h1 { margin: 6px 0 10px; color: var(--brand); font-size: clamp(28px, 3vw, 36px); line-height: 1.25; font-weight: 800; letter-spacing: -.04em; outline: none; }
+.ts-heading p { max-width: 650px; color: var(--foreground-muted); font-size: 14px; line-height: 1.8; }
+.ts-badge { display: inline-flex; flex-shrink: 0; align-items: center; gap: 6px; padding: 7px 11px; border: 1px solid #d0dff5; border-radius: 999px; background: var(--brand-soft); color: var(--brand); font-size: 11px; line-height: 1.6; font-weight: 600; }
+.ts-toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 20px; }
+.ts-toolbar > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 14px; }
+.ts-toolbar strong { font-size: 18px; font-weight: 800; }
+.ts-toolbar span { color: var(--foreground-muted); font-size: 12px; line-height: 1.7; }
+.ts-button { display: inline-flex; justify-content: center; align-items: center; gap: 8px; min-height: 42px; padding: 9px 13px; border: 1px solid #cbd4e2; border-radius: 9px; background: var(--surface); color: var(--foreground); font-size: 12px; line-height: 1.7; font-weight: 600; }
+.ts-button:hover:not(:disabled) { background: var(--brand-soft); border-color: #9db7e0; }
+.ts-button:disabled { opacity: .6; cursor: not-allowed; }
+.ts-error { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 16px 19px; border: 1px solid #fecdca; border-radius: 12px; background: var(--destructive-soft); color: var(--destructive); font-size: 13px; line-height: 1.8; }
+.ts-loading { display: flex; align-items: center; gap: 10px; min-height: 160px; justify-content: center; color: var(--foreground-muted); }
+.ts-workspace { display: grid; grid-template-columns: 224px minmax(0, 1fr); border: 1px solid var(--border); border-radius: 19px; overflow: hidden; background: var(--surface); box-shadow: 0 3px 14px #11224003; }
+.ts-nav { padding: 24px 18px; border-right: 1px solid var(--border); background: var(--brand-soft); }
+.ts-nav-heading { display: flex; align-items: center; gap: 8px; color: var(--brand); }
+.ts-nav-heading h2 { font-size: 14px; font-weight: 800; }
+.ts-nav > p { margin-top: 7px; color: var(--foreground-muted); font-size: 11px; line-height: 1.8; }
+.ts-ticket-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0; margin: 19px 0 0; list-style: none; }
+.ts-ticket-grid > li { min-width: 0; }
+.ts-ticket-button { width: 100%; min-width: 0; min-height: 42px; padding: 9px 4px; border: 1px solid #cbd8ea; border-radius: 8px; background: white; color: var(--foreground-muted); font-family: var(--font-mono); font-size: 11px; line-height: 1.6; transition: background-color .15s, border-color .15s; }
+.ts-ticket-button:hover { border-color: var(--brand); color: var(--brand); }
+.ts-ticket-button.is-selected { background: var(--lime); color: var(--foreground); border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); font-weight: 600; }
+.ts-detail { padding: 27px 29px 22px; min-width: 0; }
+.ts-detail-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ts-detail-heading h2 { margin-top: 5px; font-family: var(--font-mono); color: var(--foreground); font-size: 20px; line-height: 1.5; font-weight: 600; }
+.ts-detail-heading > span { flex-shrink: 0; color: var(--foreground-muted); font-size: 12px; }
+.ts-page .ts-ticket-text { padding: 20px 22px; border: 1px solid #e1e7ef; border-left: 3px solid var(--brand); border-radius: 0 12px 12px 0; background: #fbfcfe; font-size: 15px; line-height: 1.95; white-space: pre-wrap; overflow-wrap: anywhere; }
+.ts-labels { margin-top: 26px; }
+.ts-labels h3 { color: var(--brand); font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.ts-page .ts-labels-intro { margin-top: 6px; color: var(--foreground-muted); font-size: 12px; line-height: 1.8; }
+.ts-labels dl { margin-top: 15px; }
+.ts-labels dl > div { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; padding: 16px 0; border-bottom: 1px solid #edf0f5; }
+.ts-labels dt { padding-top: 3px; color: var(--foreground-muted); font-size: 12px; line-height: 1.8; }
+.ts-labels dd { min-width: 0; }
+.ts-label-value { display: inline-block; padding: 3px 8px; border-radius: 5px; background: var(--brand-soft); color: var(--brand); font-size: 11px; font-weight: 600; line-height: 1.7; }
+.ts-label-value.ts-priority-alta { color: #92400e; background: #fffbeb; }
+.ts-label-value.ts-priority-media { color: var(--brand); background: var(--brand-soft); }
+.ts-label-value.ts-priority-baja { color: #16794d; background: #ecfdf3; }
+.ts-labels dd p { margin-top: 7px; color: var(--foreground); font-size: 12px; line-height: 1.9; overflow-wrap: anywhere; }
+.ts-page .ts-ticket-origin { display: flex; align-items: center; flex-wrap: wrap; gap: 5px 7px; margin-top: 21px; color: var(--foreground-muted); font-size: 11px; line-height: 1.8; }
+.ts-ticket-origin svg { color: var(--brand); }
+.ts-empty { padding: 45px 22px; text-align: center; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); color: var(--foreground-muted); }
+.ts-empty svg { margin: 0 auto 15px; color: var(--brand); }
+.ts-empty h2 { font-weight: 800; color: var(--brand); font-size: 18px; }
+.ts-empty p { margin-top: 8px; font-size: 13px; line-height: 1.8; }
+.ts-results { padding: 24px 27px 22px; min-width: 0; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); }
+.ts-section-heading { align-items: center; }
+.ts-section-heading h2 { display: flex; align-items: center; gap: 9px; margin-top: 6px; color: var(--foreground); font-size: 17px; line-height: 1.6; font-weight: 800; letter-spacing: -.02em; }
+.ts-section-heading h2 svg { flex-shrink: 0; color: var(--brand); }
+.ts-page .ts-results-empty { margin-top: 17px; padding: 17px 19px; border-radius: 10px; background: var(--muted); color: var(--foreground-muted); font-size: 13px; line-height: 1.8; }
+.ts-page .ts-partial { margin-top: 17px; padding: 11px 14px; border: 1px solid #f4dfad; border-radius: 9px; background: #fffbeb; color: #795519; font-size: 12px; line-height: 1.8; }
+.ts-page .ts-results-description { margin-top: 17px; color: var(--foreground-muted); font-size: 12px; line-height: 1.8; }
+.ts-metrics-scroll { margin-top: 19px; max-width: 100%; overflow-x: auto; }
+.ts-metrics { width: 100%; min-width: 330px; border-collapse: collapse; text-align: left; font-size: 12px; }
+.ts-metrics caption { text-align: left; color: var(--foreground-muted); padding-bottom: 11px; font-size: 11px; }
+.ts-metrics th, .ts-metrics td { padding: 12px; border-bottom: 1px solid var(--border); }
+.ts-metrics thead { background: var(--brand-soft); color: var(--brand); }
+.ts-metrics th { font-weight: 600; }
+.ts-metrics td, .ts-metrics thead th:not(:first-child) { text-align: right; }
+.ts-metrics td { font-family: var(--font-mono); font-size: 13px; }
+.ts-result-meta { display: flex; flex-wrap: wrap; gap: 12px 25px; padding-top: 18px; }
+.ts-result-meta > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; min-width: 0; font-size: 11px; line-height: 1.8; }
+.ts-result-meta dt { color: var(--foreground-muted); }
+.ts-result-meta dd { color: var(--foreground); overflow-wrap: anywhere; }
+.ts-page .ts-readonly-note { margin-top: 17px; color: var(--foreground-muted); font-size: 11px; line-height: 1.8; }
+.ts-provenance { min-width: 0; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+.ts-provenance summary { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 19px 22px; color: var(--brand); font-size: 13px; font-weight: 600; }
+.ts-provenance summary > span { display: flex; align-items: center; gap: 9px; }
+.ts-provenance summary > svg { flex-shrink: 0; }
+.ts-provenance[open] summary { border-bottom: 1px solid var(--border); }
+.ts-provenance[open] summary > svg { transform: rotate(180deg); }
+.ts-provenance > div { padding: 21px 23px; }
+.ts-origin-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 25px; }
+.ts-origin-grid dt { color: var(--foreground-muted); font-size: 11px; line-height: 1.7; }
+.ts-origin-grid dd { margin-top: 4px; color: var(--foreground); font-size: 12px; font-weight: 600; line-height: 1.8; overflow-wrap: anywhere; }
+@media (max-width: 1000px) {
+  .ts-workspace { grid-template-columns: 184px minmax(0, 1fr); }
+  .ts-nav { padding: 22px 13px; }
+  .ts-detail { padding: 24px; }
+  .ts-labels dl > div { grid-template-columns: 100px minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .ts-heading, .ts-section-heading { flex-wrap: wrap; gap: 13px; }
+  .ts-workspace { grid-template-columns: minmax(0, 1fr); }
+  .ts-nav { padding: 19px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .ts-ticket-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 13px; }
+  .ts-detail { padding: 23px 20px; }
+  .ts-page .ts-ticket-text { padding: 17px 18px; font-size: 14px; line-height: 1.9; }
+  .ts-results { padding: 21px 20px; }
+}
+@media (max-width: 440px) {
+  .ts-page { gap: 18px; }
+  .ts-toolbar > div { gap: 3px 12px; }
+  .ts-button { width: 100%; }
+  .ts-ticket-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .ts-ticket-button { font-size: 10px; min-height: 42px; }
+  .ts-detail { padding: 21px 17px; }
+  .ts-labels dl > div { grid-template-columns: 1fr; gap: 7px; padding: 15px 0; }
+  .ts-labels dt { font-size: 11px; }
+  .ts-results { padding: 21px 17px; }
+  .ts-section-heading h2 { font-size: 16px; }
+  .ts-origin-grid { grid-template-columns: 1fr; }
+  .ts-provenance > div { padding: 19px; }
+  .ts-provenance summary { padding: 18px; font-size: 12px; }
+}

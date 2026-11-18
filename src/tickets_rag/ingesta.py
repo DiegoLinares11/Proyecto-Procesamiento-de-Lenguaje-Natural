@@ -340,7 +340,7 @@ def procesar_pdf(doc: Documento) -> tuple[list[dict], dict]:
     pii_total: Counter[str] = Counter()
     for s in secciones:
         for u in s.unidades:
-            u.texto, encontrados = enmascarar(u.texto)
+            u.texto, encontrados = enmascarar(u.texto, idioma=doc.idioma)
             pii_total.update(encontrados)
 
     articulos = {}
@@ -414,7 +414,7 @@ def procesar_tickets(doc: Documento, modificadas: set[str], version_vigente: str
             continue
         partes = []
         for campo in ("resumen", "texto", "diagnostico", "solucion"):
-            texto, encontrados = enmascarar(t[campo])
+            texto, encontrados = enmascarar(t[campo], idioma=doc.idioma)
             pii_total.update(encontrados)
             partes.append(texto)
         texto = (f"Ticket {t['ticket_id']} · {partes[0]}\nReporte: {partes[1]}\n"

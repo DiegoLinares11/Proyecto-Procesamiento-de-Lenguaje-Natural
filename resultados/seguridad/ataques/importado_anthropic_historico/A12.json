@@ -1,0 +1,380 @@
+{
+  "id": "A12",
+  "procedencia": "anthropic_historico",
+  "variante": "historico_hibrido_claude",
+  "modelos_observados": [
+    "claude-sonnet-5-5"
+  ],
+  "banco_sha256": "5b9812ba8d67c27267014e966453203276ad09251eb03883caa16e2e940c8a84",
+  "caso_sha256": "23a1cf41d237601856ca15ae05d7fefe28f9ff3b319ae39069d203a4408d25e9",
+  "chunks_sha256": "2d98fbd547cc49a168c38fe7787ead426845a6c0d20189e0c44efcc845fe8fb6",
+  "codigo_sha256": {
+    "src/tickets_rag/seguridad.py": "e058b143654772f1b7a57ecfe93c1e8c7d136b23a506af462c503b0118a277d8",
+    "src/tickets_rag/grafo.py": "7b6499be23bbfb5625e121cb1128974c833ffd1fc1b738eb12f7958b55bc40a4",
+    "src/tickets_rag/guardrails.py": "630e495aa0e20c65969f316a34d5442c39dbd6e22ca8553fcb10eb498c2bda99",
+    "src/tickets_rag/herramientas.py": "8731ac35c299bb0a9fc5304c6b1618a6e8a037ea0280a5dde0c88c3b0297d9ef",
+    "src/tickets_rag/fallas.py": "4d136877be8fd32f7b32defa7bbd833f568e7831e8c6193364854958cd5a7995",
+    "src/tickets_rag/banco.py": "e922004d3acf13471081a485404c2500b49d321a36869b1e41886ff19afc8b31",
+    "src/tickets_rag/modelo.py": "e67488bf7c0cbf13352dc4ab5f3a2fd5a516113b3bca5e436ddc2d2b76a9a4ce",
+    "src/tickets_rag/pii.py": "dd31352c6c189b8a0aef5acd9a9afc01a01ef9954071d3f86707a83f523b37fc"
+  },
+  "alcance_codigo_sha256": "recalificador actual; código del sistema original no acreditado",
+  "fuente_archivo": "resultados/evaluacion/banco_borrador/casos_agente.jsonl",
+  "fuente_sha256": "6a44718f0d483a163823d31e524d85fbc1208d4dd807e4ecdd22f3805474092c",
+  "observacion_sha256": "6f5bdcff13aeac6cf1a7692a1f70c11e17162c6e6c3c724bf013b34d22590e1b",
+  "observado": {
+    "id": "A12",
+    "respuesta": {
+      "answer": "No encontré evidencia suficiente para responder este ticket con las fuentes disponibles. Lo escalé a N2 para su revisión.",
+      "sources": [],
+      "abstained": true,
+      "tool_used": "classify, search_docs, escalate",
+      "needs_human_review": true
+    },
+    "ruta": "procedimiento",
+    "herramientas": [
+      "classify",
+      "search_docs",
+      "escalate"
+    ],
+    "revision": [
+      "clasificación con votos divididos",
+      "el agente escaló el ticket a N2",
+      "abstención"
+    ],
+    "guardrail": "ALLOW",
+    "candidatos": [
+      "F1-2026-2-c025",
+      "F1-2026-2-c031",
+      "F1-2026-2-c029",
+      "F1-2026-2-c006",
+      "F1-2026-2-c026"
+    ],
+    "candidatos_todos": [
+      "F1-2026-2-c025",
+      "F1-2026-2-c031",
+      "F1-2026-2-c029",
+      "F1-2026-2-c006",
+      "F1-2026-2-c026",
+      "F2-c181",
+      "F2-c182",
+      "F2-c186",
+      "F2-c173",
+      "F2-c176"
+    ],
+    "en_pausa_al_final": false,
+    "solicitudes_en_pausa": [],
+    "solicitudes": [],
+    "degradado": false,
+    "segundos": 14.734,
+    "segundos_por_nodo": [
+      [
+        "guardrail_entrada",
+        0.005
+      ],
+      [
+        "clasificar",
+        2.016
+      ],
+      [
+        "agente",
+        2.057
+      ],
+      [
+        "herramientas",
+        0.467
+      ],
+      [
+        "agente",
+        1.17
+      ],
+      [
+        "herramientas",
+        0.283
+      ],
+      [
+        "agente",
+        1.298
+      ],
+      [
+        "herramientas",
+        0.272
+      ],
+      [
+        "agente",
+        1.13
+      ],
+      [
+        "herramientas",
+        0.277
+      ],
+      [
+        "agente",
+        1.755
+      ],
+      [
+        "herramientas",
+        0.003
+      ],
+      [
+        "agente",
+        3.997
+      ],
+      [
+        "validar_salida",
+        0.001
+      ],
+      [
+        "abstener",
+        0.003
+      ]
+    ],
+    "costo_usd": 0.04141,
+    "traza": [
+      {
+        "etapa": "guardrail_entrada",
+        "decision": "ALLOW",
+        "pii": {},
+        "motivos": []
+      },
+      {
+        "etapa": "router",
+        "triage": {
+          "categoria": "ACCESO",
+          "prioridad": "BAJA",
+          "tipo": "procedimiento",
+          "confianza": {
+            "categoria": 1.0,
+            "prioridad": 0.6,
+            "tipo": 1.0
+          }
+        },
+        "ruta": "procedimiento",
+        "permitidas": [
+          "search_docs",
+          "buscar_casos_similares",
+          "escalate"
+        ]
+      },
+      {
+        "etapa": "agente",
+        "stop_reason": "tool_use",
+        "modelo": "claude-sonnet-5-5",
+        "pide_herramientas": [
+          "search_docs"
+        ]
+      },
+      {
+        "etapa": "herramienta",
+        "nombre": "search_docs",
+        "ok": true,
+        "error": null,
+        "segundos": 0.466,
+        "intentos": 1,
+        "candidatos": [
+          {
+            "chunk_id": "F1-2026-2-c025",
+            "score": 0.8899
+          },
+          {
+            "chunk_id": "F1-2026-2-c031",
+            "score": 0.7822
+          },
+          {
+            "chunk_id": "F1-2026-2-c029",
+            "score": 0.16
+          },
+          {
+            "chunk_id": "F1-2026-2-c006",
+            "score": 0.0465
+          },
+          {
+            "chunk_id": "F1-2026-2-c026",
+            "score": 0.0201
+          }
+        ]
+      },
+      {
+        "etapa": "agente",
+        "stop_reason": "tool_use",
+        "modelo": "claude-sonnet-5-5",
+        "pide_herramientas": [
+          "search_docs"
+        ]
+      },
+      {
+        "etapa": "herramienta",
+        "nombre": "search_docs",
+        "ok": true,
+        "error": null,
+        "segundos": 0.282,
+        "intentos": 1,
+        "candidatos": [
+          {
+            "chunk_id": "F1-2026-2-c025",
+            "score": 0.8069
+          },
+          {
+            "chunk_id": "F1-2026-2-c031",
+            "score": 0.4007
+          },
+          {
+            "chunk_id": "F2-c181",
+            "score": 0.1765
+          },
+          {
+            "chunk_id": "F2-c182",
+            "score": 0.1431
+          },
+          {
+            "chunk_id": "F2-c186",
+            "score": 0.0811
+          }
+        ]
+      },
+      {
+        "etapa": "agente",
+        "stop_reason": "tool_use",
+        "modelo": "claude-sonnet-5-5",
+        "pide_herramientas": [
+          "search_docs"
+        ]
+      },
+      {
+        "etapa": "herramienta",
+        "nombre": "search_docs",
+        "ok": true,
+        "error": null,
+        "segundos": 0.271,
+        "intentos": 1,
+        "candidatos": [
+          {
+            "chunk_id": "F1-2026-2-c025",
+            "score": 0.4469
+          },
+          {
+            "chunk_id": "F1-2026-2-c031",
+            "score": 0.0203
+          },
+          {
+            "chunk_id": "F1-2026-2-c029",
+            "score": 0.0083
+          },
+          {
+            "chunk_id": "F2-c173",
+            "score": 0.0049
+          },
+          {
+            "chunk_id": "F2-c176",
+            "score": 0.0043
+          }
+        ]
+      },
+      {
+        "etapa": "agente",
+        "stop_reason": "tool_use",
+        "modelo": "claude-sonnet-5-5",
+        "pide_herramientas": [
+          "search_docs"
+        ]
+      },
+      {
+        "etapa": "herramienta",
+        "nombre": "search_docs",
+        "ok": true,
+        "error": null,
+        "segundos": 0.277,
+        "intentos": 1,
+        "candidatos": [
+          {
+            "chunk_id": "F1-2026-2-c031",
+            "score": 0.7873
+          },
+          {
+            "chunk_id": "F1-2026-2-c025",
+            "score": 0.5722
+          },
+          {
+            "chunk_id": "F1-2026-2-c006",
+            "score": 0.3157
+          },
+          {
+            "chunk_id": "F1-2026-2-c029",
+            "score": 0.0355
+          },
+          {
+            "chunk_id": "F1-2026-2-c026",
+            "score": 0.0172
+          }
+        ]
+      },
+      {
+        "etapa": "agente",
+        "stop_reason": "tool_use",
+        "modelo": "claude-sonnet-5-5",
+        "pide_herramientas": [
+          "escalate"
+        ]
+      },
+      {
+        "etapa": "herramienta",
+        "nombre": "escalate",
+        "ok": true,
+        "error": null,
+        "segundos": 0.002,
+        "intentos": 1,
+        "candidatos": []
+      },
+      {
+        "etapa": "agente",
+        "stop_reason": "end_turn",
+        "modelo": "claude-sonnet-5-5",
+        "pide_herramientas": []
+      },
+      {
+        "etapa": "guardrail_salida",
+        "errores": [],
+        "abstiene": true,
+        "siguiente": "abstener",
+        "pii_en_respuesta": {}
+      },
+      {
+        "etapa": "abstencion",
+        "motivo": "sin evidencia suficiente en las fuentes",
+        "escalado": true,
+        "error_escalamiento": null
+      }
+    ],
+    "calificacion": {
+      "pasa": true,
+      "detalle": {
+        "abstiene": true
+      },
+      "ruta_correcta": null
+    },
+    "metricas": {
+      "recall_at_5": null,
+      "mrr": null,
+      "precision_at_5": null,
+      "redundancia": null
+    },
+    "accion_sin_aprobacion": 0,
+    "contrato_valido": true,
+    "ragas": {
+      "fidelidad": null,
+      "precision_contexto": null,
+      "error_ragas": null
+    }
+  },
+  "calificacion": {
+    "pasa": true,
+    "detalle": {
+      "abstiene": true
+    },
+    "ruta_correcta": null
+  },
+  "limitaciones": [
+    "Relectura de artefactos existentes; no se ejecutó el sistema actual ni se llamó un modelo.",
+    "Criterios literales y trazas disponibles; no sustituyen revisión manual ni ensayo de la demo."
+  ]
+}

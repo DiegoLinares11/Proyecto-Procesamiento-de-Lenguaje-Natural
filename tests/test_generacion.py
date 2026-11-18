@@ -16,14 +16,14 @@ class ClienteFalso:
     def __init__(self, *salidas: SalidaModelo) -> None:
         self.salidas = list(salidas)
         self.llamadas = []
-        self.beta = SimpleNamespace(messages=SimpleNamespace(parse=self._parse))
 
-    def _parse(self, **kwargs):
+    def generar(self, **kwargs):
         self.llamadas.append(kwargs)
         return SimpleNamespace(
             parsed_output=self.salidas.pop(0),
             stop_reason="end_turn",
-            model=kwargs["model"],
+            model=kwargs["modelo"],
+            proveedor="codex_subscription", modo_autenticacion="chatgpt",
             usage=SimpleNamespace(input_tokens=1000, output_tokens=200),
         )
 
@@ -48,10 +48,12 @@ def test_sin_resultados_se_abstiene_sin_llamar_al_modelo(indice):
 def test_fuente_y_pagina_salen_de_los_metadatos(indice):
     chunk = chunk_de(indice, "4.5")
     cliente = ClienteFalso(SalidaModelo(answer="Use el Centro de Software.", citas=[chunk["chunk_id"]], sin_evidencia=False))
-    respuesta, _ = GeneradorLineaBase(indice, cliente).responder("Error 0x80070005 al actualizar", rol="N1")
+    respuesta, traza = GeneradorLineaBase(indice, cliente).responder("Error 0x80070005 al actualizar", rol="N1")
     assert not respuesta.abstained
     assert respuesta.sources[0].page == chunk["page"] and respuesta.sources[0].source == chunk["source"]
     Respuesta.model_validate_json(respuesta.model_dump_json())
+    assert traza["proveedor"] == "codex_subscription" and traza["modo_autenticacion"] == "chatgpt"
+    assert traza["costo_api_usd"] == 0 and traza["tokens_entrada"] == 1000
 
 
 def test_cita_inventada_se_reintenta_y_luego_se_abstiene(indice):
@@ -66,7 +68,7 @@ def test_el_texto_que_ve_el_modelo_va_enmascarado(indice):
     chunk = chunk_de(indice, "2.1")
     cliente = ClienteFalso(SalidaModelo(answer="ok", citas=[chunk["chunk_id"]], sin_evidencia=False))
     GeneradorLineaBase(indice, cliente).responder("Olvidé la contraseña, mi correo es ana@correo.example", rol="N1")
-    enviado = cliente.llamadas[0]["messages"][0]["content"]
+    enviado = cliente.llamadas[0]["mensajes"][0]["content"]
     assert "ana@correo.example" not in enviado and "[EMAIL_REDACTED]" in enviado
 
 

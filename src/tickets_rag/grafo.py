@@ -29,19 +29,20 @@ from contextlib import contextmanager
 from functools import lru_cache
 from typing import Annotated, TypedDict
 
-import anthropic
+from langchain_core.runnables.config import merge_configs
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from langgraph.types import Command, interrupt
+from langgraph.types import Command, Overwrite, interrupt
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr, StringConstraints, ValidationError
 
 from tickets_rag import acciones, config
 from tickets_rag.contrato import Fuente, Respuesta
 from tickets_rag.generacion import SalidaModelo
-from tickets_rag.guardrails import DecisionEntrada, revisar_entrada, revisar_salida, validar_sesion
+from tickets_rag.guardrails import RE_TICKET, revisar_entrada, revisar_salida, validar_sesion
 from tickets_rag.herramientas import Contexto, Recursos, _limpiar, definiciones_api, ejecutar
+from tickets_rag.modelo import ClienteModelo, ErrorModelo
+from tickets_rag.privacidad import sanear_bloques
 
-BETA_RESPALDO = "server-side-fallback-2026-07-01"
 MAX_REINTENTOS_SALIDA = 1
 
 RUTAS = {
@@ -128,19 +129,19 @@ class Estado(TypedDict, total=False):
     llamadas: int
     reintentos_salida: int
     salida_modelo: dict | None
-    error_modelo: str     # la API falló: el grafo responde de forma controlada en vez de reventar
+    error_modelo: str | None  # se limpia al iniciar un ticket y cuando el modelo vuelve a responder
     errores_salida: list[str]
     siguiente: str
     solicitudes: list[dict]
     notas_accion: list[str]
-    respuesta: dict
+    respuesta: dict | None
     herramientas: Annotated[list[str], operator.add]
     revision: Annotated[list[str], operator.add]
     traza: Annotated[list[dict], operator.add]
     uso: Annotated[list[dict], operator.add]
 
 
-def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpointer, modelo: str = config.MODELO_GENERADOR):
+def construir_grafo(recursos: Recursos, cliente: ClienteModelo, checkpointer, modelo: str = config.MODELO_GENERADOR):
     esquema_salida = _limpiar(SalidaModelo.model_json_schema())
 
     def contexto(e: Estado) -> Contexto:
@@ -177,7 +178,10 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
             "ruta": t["tipo"],
             "herramientas": ["classify"],
             "revision": revision,
-            "uso": [{"modelo": config.MODELO_CLASIFICADOR, "costo_usd": t["costo_usd"]}],
+            "uso": [{"modelo": config.MODELO_CLASIFICADOR, "entrada": t.get("tokens_entrada", 0),
+                     "salida": t.get("tokens_salida", 0), "costo_usd": t["costo_usd"], "costo_api_usd": 0.0,
+                     "proveedor": t.get("proveedor", "codex_subscription"),
+                     "modo_autenticacion": t.get("modo_autenticacion", "chatgpt")}],
             "traza": [{"etapa": "router", "triage": {k: t[k] for k in ("categoria", "prioridad", "tipo", "confianza")},
                        "ruta": t["tipo"], "permitidas": RUTAS[t["tipo"]]}],
         }
@@ -192,44 +196,45 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
                          f"rol_usuario=\"{e['rol']}\" />\n<ticket>\n{e['texto_seguro']}\n</ticket>"}]
         agotadas = e.get("llamadas", 0) >= config.MAX_LLAMADAS_HERRAMIENTAS
         try:
-            r = cliente.beta.messages.create(
-                model=modelo,
-                max_tokens=8000,
-                system=f"{SISTEMA}\n\nRuta: {ruta}. {INSTRUCCIONES_RUTA[ruta]}",
-                messages=mensajes,
-                tools=definiciones_api(RUTAS[ruta]),
-                tool_choice={"type": "none"} if agotadas else {"type": "auto"},
-                output_config={"effort": "medium", "format": {"type": "json_schema", "schema": esquema_salida}},
-                cache_control={"type": "ephemeral"},
-                betas=[BETA_RESPALDO],
-                fallbacks="default",
+            r = cliente.generar(
+                modelo=modelo,
+                sistema=f"{SISTEMA}\n\nRuta: {ruta}. {INSTRUCCIONES_RUTA[ruta]}",
+                mensajes=mensajes,
+                herramientas=definiciones_api(RUTAS[ruta]),
+                permitir_herramientas=not agotadas,
+                esquema=esquema_salida,
+                esfuerzo="medium",
             )
-        except anthropic.APIError as error:
-            # Sin red, timeout, 429, 5xx...: el SDK ya reintentó. En la traza va solo el tipo y el código,
-            # nunca el texto del ticket.
-            tipo = type(error).__name__
-            codigo = getattr(error, "status_code", None)
-            motivo = f"{tipo} {codigo}" if codigo else tipo
+        except ErrorModelo as error:
+            # El proveedor entrega un código saneado; no se persiste el texto de la solicitud.
+            motivo = error.codigo
             return {"error_modelo": motivo, "revision": [f"el modelo no respondió ({motivo})"],
                     "traza": [{"etapa": "agente", "error": motivo}]}
         u = r.usage
         uso = {"modelo": r.model, "entrada": u.input_tokens, "salida": u.output_tokens,
                "escritura": getattr(u, "cache_creation_input_tokens", 0) or 0,
-               "lectura": getattr(u, "cache_read_input_tokens", 0) or 0}
-        precio = r.model if r.model in config.PRECIOS else modelo
-        uso["costo_usd"] = round(config.costo_usd(precio, uso["entrada"], uso["salida"], uso["escritura"], uso["lectura"]), 5)
-        mensajes = mensajes + [{"role": "assistant", "content": [b.to_dict() for b in r.content]}]
+               "lectura": getattr(u, "cache_read_input_tokens", 0) or 0,
+               "proveedor": getattr(r, "proveedor", "codex_subscription"),
+               "modo_autenticacion": getattr(r, "modo_autenticacion", "chatgpt"),
+               "costo_usd": 0.0, "costo_api_usd": 0.0}
+        # El checkpoint del nodo agente se escribe antes de validar_salida: no guardar PII cruda
+        # en respuestas ni argumentos que el modelo pueda haber añadido por su cuenta.
+        pii_salida = {}
+        bloques = sanear_bloques([b.to_dict() for b in r.content], pii_salida)
+        mensajes = mensajes + [{"role": "assistant", "content": bloques}]
         salida = None
         if r.stop_reason == "refusal":
             salida = {"answer": "El modelo rechazó la solicitud.", "citas": [], "sin_evidencia": True}
         elif not any(b.type == "tool_use" for b in r.content):
-            texto = "".join(b.text for b in r.content if b.type == "text")
+            texto = "".join(b["text"] for b in bloques if b["type"] == "text")
             try:
                 salida = SalidaModelo.model_validate_json(texto).model_dump()
             except ValueError:
                 salida = {"answer": texto, "citas": [], "sin_evidencia": False, "_formato_invalido": True}
-        return {"mensajes": mensajes, "salida_modelo": salida, "uso": [uso],
+        return {"mensajes": mensajes, "salida_modelo": salida, "error_modelo": None, "uso": [uso],
+                "revision": ["la salida del modelo contenía datos personales y se enmascararon"] if pii_salida else [],
                 "traza": [{"etapa": "agente", "stop_reason": r.stop_reason, "modelo": r.model,
+                           "pii_en_salida": pii_salida,
                            "pide_herramientas": [b.name for b in r.content if b.type == "tool_use"]}]}
 
     def herramientas(e: Estado) -> dict:
@@ -380,40 +385,44 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
                 "traza": [{"etapa": "degradado", "error": e["error_modelo"], "fuentes": [f.chunk_id for f in fuentes]}]}
 
     def aprobacion_humana(e: Estado) -> dict:
-        notas, revision, traza = [], [], []
-        pendientes = []
-        for s in e.get("solicitudes") or []:
-            if s["estado"] != "pendiente":
-                continue
-            # Pausa: el grafo se guarda y espera a una persona. Antes del interrupt no hay efectos,
-            # porque al reanudar este nodo vuelve a correr desde el inicio.
-            decision = interrupt({"solicitud_id": s["solicitud_id"], "ticket_id": s["ticket_id"], "accion": s["accion"],
-                                  "pregunta": f"¿Apruebas '{s['accion']}' para el ticket {s['ticket_id']}?",
-                                  "formato": {"aprobada": "true o false (booleano)", "aprobador": "nombre", "rol": "N2"}})
+        solicitudes = list(e.get("solicitudes") or [])
+        s = next((s for s in solicitudes if s["estado"] == "pendiente"), None)
+        if s is None:
+            return {}
+        # Una sola solicitud por nodo: el resultado queda guardado antes del siguiente interrupt.
+        # Así reanudar la segunda acción no vuelve a ejecutar la primera.
+        decision = interrupt({"solicitud_id": s["solicitud_id"], "ticket_id": s["ticket_id"], "accion": s["accion"],
+                              "pregunta": f"¿Apruebas '{s['accion']}' para el ticket {s['ticket_id']}?",
+                              "formato": {"aprobada": "true o false (booleano)", "aprobador": "nombre", "rol": "N2"}})
+        motivo, resultado = None, None
+        try:
+            d = DecisionN2.model_validate(decision)
+        except ValidationError as error:
+            motivo = ("formato de decisión inválido: aprobada debe ser true o false (booleano), "
+                      "aprobador no vacío y rol N2" if decision == "DECISION_INVALIDA" else _motivos_validacion(error))
+        else:
             try:
-                # Antes, bool("false") era True y aprobaba (hallazgo 1 de la revisión de Diederich).
-                d = DecisionN2.model_validate(decision)
-            except ValidationError as error:
-                motivo = _motivos_validacion(error)
-                notas.append(f"Acción {s['accion']}: sigue pendiente (aprobación inválida: {motivo})")
-                revision.append(f"aprobación inválida: {motivo}")
-                traza.append({"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "error": motivo})
-                pendientes.append(s)
-                continue
-            try:
+                if d.rol != "N2":
+                    raise acciones.ErrorPermiso("Solo un técnico N2 puede aprobar o rechazar una acción.")
                 resultado = acciones.resolver_solicitud(recursos.conexion_acciones, s["solicitud_id"],
                                                         d.aprobada, d.rol, d.aprobador)
-                notas.append(f"Acción {s['accion']}: {resultado['nota']}")
-                traza.append({"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "estado": resultado["estado"],
-                              "aprobado_por": resultado["aprobado_por"]})
-                pendientes.append({**s, "estado": resultado["estado"]})
             except acciones.ErrorAccion as error:
-                notas.append(f"Acción {s['accion']}: sigue pendiente ({error})")
-                revision.append(f"aprobación inválida: {error}")
-                traza.append({"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "error": str(error)})
-                pendientes.append(s)
-        revision.append("acción sensible solicitada")
-        return {"notas_accion": notas, "solicitudes": pendientes, "revision": revision, "traza": traza}
+                motivo = str(error)
+        prefijo = f"Acción {s['accion']}:"
+        notas = [n for n in (e.get("notas_accion") or []) if not n.startswith(prefijo)]
+        revision = ["acción sensible solicitada"]
+        if resultado is None:
+            notas.append(f"{prefijo} sigue pendiente (aprobación inválida: {motivo})")
+            revision.append(f"aprobación inválida: {motivo}")
+            traza = {"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "error": motivo}
+        else:
+            notas.append(f"{prefijo} {resultado['nota']}")
+            # solicitar_accion es idempotente: puede haber referencias repetidas al mismo id.
+            solicitudes = [{**x, "estado": resultado["estado"]} if x["solicitud_id"] == s["solicitud_id"] else x
+                           for x in solicitudes]
+            traza = {"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "estado": resultado["estado"],
+                     "aprobado_por": resultado["aprobado_por"]}
+        return {"notas_accion": notas, "solicitudes": solicitudes, "revision": revision, "traza": [traza]}
 
     def responder(e: Estado) -> dict:
         s = e["salida_modelo"]
@@ -446,6 +455,9 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
     def tras_validar(e: Estado) -> str:
         return e["siguiente"]
 
+    def tras_aprobacion(e: Estado) -> str:
+        return "aprobacion_humana" if any(s["estado"] == "pendiente" for s in e.get("solicitudes") or []) else "responder"
+
     g = StateGraph(Estado)
     for nombre, nodo in [("guardrail_entrada", guardrail_entrada), ("rechazar", rechazar), ("clasificar", clasificar),
                          ("agente", agente), ("herramientas", herramientas), ("validar_salida", validar_salida),
@@ -462,7 +474,7 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
     g.add_conditional_edges("validar_salida", tras_validar, ["agente", "abstener", "aprobacion_humana", "responder"])
     g.add_edge("abstener", END)
     g.add_edge("degradar", END)
-    g.add_edge("aprobacion_humana", "responder")
+    g.add_conditional_edges("aprobacion_humana", tras_aprobacion, ["aprobacion_humana", "responder"])
     g.add_edge("responder", END)
     grafo = g.compile(checkpointer=checkpointer)
     grafo.__class__ = GrafoConEntradaSegura
@@ -472,16 +484,57 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
 # ---------------------------------------------------------------- entrada segura
 
 def _sanear_entrada(entrada):
-    """Aplica el guardrail de entrada y quita el texto original antes de que LangGraph lo reciba."""
-    if not isinstance(entrada, dict) or "texto" not in entrada:
-        return entrada  # Command(resume=...) o una entrada que ya viene saneada desde atender()
-    entrada = dict(entrada)
-    texto = entrada.pop("texto")
-    if not entrada.get("guardrail"):
-        decision = revisar_entrada(texto)
-        entrada["texto_seguro"] = decision.texto_seguro
-        entrada["guardrail"] = decision.para_traza()
-    return entrada
+    """El público envía solo ticket_id, rol y texto, o una decisión para reanudar.
+
+    Ni los dict que parecen saneados ni Command.update son entradas de confianza. Este límite
+    se aplica antes del primer checkpoint; los mensajes, citas y permisos los construye el grafo.
+    """
+    if isinstance(entrada, Command):
+        if entrada.update is not None or entrada.goto or entrada.graph is not None or entrada.resume is None:
+            raise ValueError("Solo se permite Command(resume=...) sin actualizaciones ni saltos de estado.")
+        return Command(resume=_sanear_decision(entrada.resume))
+    if not isinstance(entrada, dict) or set(entrada) != {"ticket_id", "rol", "texto"}:
+        raise ValueError("La entrada debe contener únicamente ticket_id, rol y texto.")
+    ticket_id, rol = entrada["ticket_id"], entrada["rol"]
+    if (not isinstance(ticket_id, str) or RE_TICKET.fullmatch(ticket_id) is None
+            or not isinstance(rol, str) or rol not in config.ROLES):
+        raise ValueError("La identificación del ticket o el rol no son válidos.")
+    decision = revisar_entrada(entrada["texto"])
+    return {
+        "ticket_id": ticket_id, "rol": rol, "texto": "", "texto_seguro": decision.texto_seguro,
+        "guardrail": decision.para_traza(),
+        # Un hilo puede atender otro ticket una vez terminado. Sus datos operativos no se heredan.
+        "triage": {}, "ruta": "", "mensajes": [], "evidencia": {}, "busqueda_suficiente": False,
+        "consultas_ok": 0, "llamadas": 0, "reintentos_salida": 0, "salida_modelo": None,
+        "error_modelo": None, "errores_salida": [], "siguiente": "", "solicitudes": [],
+        "notas_accion": [], "respuesta": None, "herramientas": Overwrite([]), "revision": Overwrite([]),
+        # La auditoría y el uso anteriores se conservan, separados por el inicio del nuevo ticket.
+        "traza": [{"etapa": "inicio_ticket", "ticket_id": ticket_id, "ejecucion_id": uuid.uuid4().hex}],
+    }
+
+
+def _sanear_decision(valor):
+    """No guarda decisiones inválidas ni secretos que hayan llegado dentro de resume."""
+    try:
+        decision = DecisionN2.model_validate(valor)
+    except ValidationError:
+        return "DECISION_INVALIDA"
+    aprobador = revisar_entrada(decision.aprobador)
+    if aprobador.decision == "BLOCK" or decision.rol not in config.ROLES:
+        return "DECISION_INVALIDA"
+    return {**decision.model_dump(), "aprobador": aprobador.texto_seguro}
+
+
+def _config_stream(base, args, kwargs):
+    cfg = merge_configs(base, args[0] if args else kwargs.get("config"))
+    cfg.setdefault("configurable", {})
+    return cfg
+
+
+def _exigir_hilo_disponible(estado) -> None:
+    pendientes = any(s.get("estado") == "pendiente" for s in (estado.values.get("solicitudes") or []))
+    if estado.next or pendientes:
+        raise ValueError("El hilo tiene una ejecución pendiente o una solicitud sin resolver; no puede iniciar otro ticket.")
 
 
 class GrafoConEntradaSegura(CompiledStateGraph):
@@ -493,20 +546,41 @@ class GrafoConEntradaSegura(CompiledStateGraph):
     """
 
     def stream(self, input, *args, **kwargs):  # noqa: A002 (mismo nombre que en LangGraph)
-        return super().stream(_sanear_entrada(input), *args, **kwargs)
+        entrada = _sanear_entrada(input)
+        cfg = _config_stream(self.config, args, kwargs)
+        if isinstance(input, dict):
+            try:
+                estado = self.get_state(cfg)
+            except ValueError as error:
+                if str(error) != "No checkpointer set":
+                    raise
+            else:
+                _exigir_hilo_disponible(estado)
+        return super().stream(entrada, *args, **kwargs)
 
-    def astream(self, input, *args, **kwargs):  # noqa: A002
-        return super().astream(_sanear_entrada(input), *args, **kwargs)
+    async def astream(self, input, *args, **kwargs):  # noqa: A002
+        entrada = _sanear_entrada(input)
+        cfg = _config_stream(self.config, args, kwargs)
+        if isinstance(input, dict):
+            try:
+                estado = await self.aget_state(cfg)
+            except ValueError as error:
+                if str(error) != "No checkpointer set":
+                    raise
+            else:
+                _exigir_hilo_disponible(estado)
+        async for evento in super().astream(entrada, *args, **kwargs):
+            yield evento
 
 
-def cliente_api() -> anthropic.Anthropic:
-    return anthropic.Anthropic(timeout=config.TIMEOUT_MODELO_S, max_retries=config.REINTENTOS_MODELO)
+def cliente_api() -> ClienteModelo:
+    return ClienteModelo()
 
 
 # ---------------------------------------------------------------- entrada de alto nivel
 
 @contextmanager
-def sistema(cliente: anthropic.Anthropic | None = None):
+def sistema(cliente: ClienteModelo | None = None):
     """Arma todo lo real: recursos, modelos cargados y checkpointer en PostgreSQL."""
     from langgraph.checkpoint.postgres import PostgresSaver
 
@@ -523,7 +597,7 @@ def sistema(cliente: anthropic.Anthropic | None = None):
 
 
 @lru_cache(maxsize=1)
-def _recursos_studio() -> tuple[Recursos, anthropic.Anthropic]:
+def _recursos_studio() -> tuple[Recursos, ClienteModelo]:
     from tickets_rag.ingesta import cargar_chunks
 
     config.cargar_entorno()
@@ -541,16 +615,15 @@ def grafo_para_studio(_config=None):
 
 
 def atender(grafo, ticket_id: str, rol: str, texto: str, hilo: str | None = None) -> tuple[dict, dict]:
-    """Corre el guardrail de entrada fuera del grafo y después el grafo. Devuelve (estado, config).
+    """Entrega el texto al límite seguro del grafo. Devuelve (estado, config).
 
     Si el estado trae "__interrupt__", el grafo está esperando la aprobación de N2: se reanuda con
     reanudar(grafo, config, aprobada, aprobador, rol).
     """
-    validar_sesion(ticket_id, rol)
-    decision: DecisionEntrada = revisar_entrada(texto)
     cfg = {"configurable": {"thread_id": hilo or f"{ticket_id}:{uuid.uuid4().hex[:8]}"}}
-    estado = grafo.invoke({"ticket_id": ticket_id, "rol": rol, "texto_seguro": decision.texto_seguro,
-                           "guardrail": decision.para_traza()}, cfg)
+    estado = grafo.invoke({"ticket_id": ticket_id, "rol": rol, "texto": texto}, cfg)
+    if estado.get("respuesta") is None:
+        estado = {k: v for k, v in estado.items() if k != "respuesta"}
     return estado, cfg
 
 

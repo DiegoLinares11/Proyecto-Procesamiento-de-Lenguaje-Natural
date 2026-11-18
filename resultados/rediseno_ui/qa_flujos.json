@@ -1,0 +1,110 @@
+{
+  "tipo": "QA visual con SSE/API simulados, sin llamadas reales a modelos",
+  "pasos": [
+    {
+      "nombre": "Consulta, JSON y trazabilidad conservan contenido y contratos",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Rol N2 y enlace PDF conservan autorización y página",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Denegación y abstención se mantienen visibles",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Aprobación mantiene los cuatro payloads y la pausa tras valores inválidos",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Falla seleccionada, error y ejemplo conservan sus solicitudes",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Evaluación vacía, histórica y tablas preservan datos",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Móvil y tableta sin overflow; menú accesible, Escape y foco",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Movimiento reducido respeta la preferencia del usuario",
+      "estado": "correcto"
+    }
+  ],
+  "errores_js": [],
+  "solicitudes_capturadas": [
+    {
+      "texto": "CONSULTA_NOMINAL_VISUAL",
+      "rol": "N1",
+      "falla": null
+    },
+    {
+      "fragmento": "/api/fragmentos/F1-2026-2-c012",
+      "rol": "N1"
+    },
+    {
+      "texto": "CONSULTA_N2_VISUAL",
+      "rol": "N2",
+      "falla": null
+    },
+    {
+      "fragmento": "/api/fragmentos/F1-2026-2-c012",
+      "rol": "N2"
+    },
+    {
+      "fragmento": "/api/fragmentos/F1-2026-2-c012",
+      "rol": "N2"
+    },
+    {
+      "texto": "ABSTENCION_VISUAL",
+      "rol": "N2",
+      "falla": null
+    },
+    {
+      "texto": "APROBACION_VISUAL",
+      "rol": "N2",
+      "falla": null
+    },
+    {
+      "texto": "APROBACION_VISUAL",
+      "rol": "N2",
+      "falla": null
+    },
+    {
+      "texto": "FALLO_VISUAL",
+      "rol": "N2",
+      "falla": "vectores"
+    },
+    {
+      "texto": "Outlook se queda en «Procesando» y nunca termina de abrir",
+      "rol": "N1",
+      "falla": null
+    }
+  ],
+  "decisiones_capturadas": [
+    {
+      "aprobada": true,
+      "aprobador": "Agente N1",
+      "rol": "N1"
+    },
+    {
+      "aprobada": "true",
+      "aprobador": "Técnico N2",
+      "rol": "N2"
+    },
+    {
+      "aprobada": false,
+      "aprobador": "Técnico N2",
+      "rol": "N2"
+    },
+    {
+      "aprobada": true,
+      "aprobador": "QA N2",
+      "rol": "N2"
+    }
+  ],
+  "modelos_reales": 0
+}

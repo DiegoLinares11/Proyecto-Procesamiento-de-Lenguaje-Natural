@@ -10,8 +10,11 @@ Lo que nunca decide el modelo:
 - Qué herramientas puede usar: el router define la lista permitida de cada ruta.
 - Aprobar una acción: take_action solo la deja pendiente; aprueba una persona N2.
 
-Ejecución: cada llamada tiene un límite de 10 s y un reintento ante fallas pasajeras (red, base de
-datos o API). Los errores se devuelven como texto para que el modelo corrija, nunca como excepción.
+Ejecución: cada llamada tiene un límite de 10 s y una segunda ventana ante fallas pasajeras (red,
+base de datos o modelo). Si el worker sigue activo, espera la misma ejecución sin duplicarla;
+si terminó con una excepción pasajera, puede ejecutarla de nuevo. classify espera sus cinco votos con el plazo propio de cada llamada al modelo;
+no se envía al pool ni se reintenta como herramienta, para evitar inferencias duplicadas en segundo
+plano. Los errores se devuelven como texto para que el modelo corrija, nunca como excepción.
 """
 
 from __future__ import annotations
@@ -20,17 +23,17 @@ import copy
 import json
 import re
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as TimeoutFuturo
 from dataclasses import dataclass, field
 from typing import Annotated, Literal
 
-import anthropic
 import psycopg
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from tickets_rag import acciones, config, historial
+from tickets_rag.modelo import ClienteModelo, ErrorModelo
 from tickets_rag.lexico import IndiceBM25
 
 
@@ -138,9 +141,14 @@ class Recursos:
     conexion_acciones: psycopg.Connection | None = None
     clasificador: object | None = None
     chunk_ids: set[str] = field(default_factory=set)
+    # Variantes internas por solicitud (p. ej., simulaciones), sin alterar el registro compartido.
+    herramientas_locales: Mapping[str, Herramienta] | None = None
+    # La evaluación puede conservar el resultado observado, incluido timeout/reintentos.
+    # Ninguna solicitud de producción instala este hook.
+    ejecutor_observado: Callable | None = None
 
     @classmethod
-    def crear(cls, chunks: list[dict], cliente: anthropic.Anthropic | None = None) -> Recursos:
+    def crear(cls, chunks: list[dict], cliente: ClienteModelo | None = None) -> Recursos:
         from tickets_rag import vectores
         from tickets_rag.clasificador_llm import ClasificadorLLM
         from tickets_rag.recuperacion import Configuracion, RecuperadorHibrido
@@ -319,7 +327,7 @@ def _limpiar(nodo):
 
 
 def definiciones_api(nombres: list[str]) -> list[dict]:
-    """Definiciones para el parámetro `tools` de la API, en orden fijo para no romper la caché."""
+    """Definiciones de las herramientas del proyecto para el cliente de modelo, en orden fijo."""
     return [{"name": n, "description": HERRAMIENTAS[n].descripcion, "strict": True,
              "input_schema": _limpiar(copy.deepcopy(HERRAMIENTAS[n].entrada.model_json_schema()))}
             for n in nombres]
@@ -327,8 +335,7 @@ def definiciones_api(nombres: list[str]) -> list[dict]:
 
 # ---------------------------------------------------------------- Ejecución con límites
 
-PASAJERAS = (TimeoutFuturo, psycopg.OperationalError, anthropic.APIConnectionError, anthropic.APITimeoutError,
-             anthropic.RateLimitError, anthropic.InternalServerError)
+PASAJERAS = (TimeoutFuturo, psycopg.OperationalError, ErrorModelo)
 _POOL = ThreadPoolExecutor(max_workers=4, thread_name_prefix="herramienta")
 
 
@@ -347,6 +354,8 @@ class ResultadoHerramienta:
 
 def ejecutar(recursos: Recursos, contexto: Contexto, nombre: str, argumentos: dict, permitidas: set[str],
              timeout: float = config.TIMEOUT_HERRAMIENTA_S) -> ResultadoHerramienta:
+    if recursos.ejecutor_observado is not None:
+        return recursos.ejecutor_observado(recursos, contexto, nombre, argumentos, permitidas, timeout)
     inicio = time.perf_counter()
 
     def fallo(mensaje: str, intentos: int = 0) -> ResultadoHerramienta:
@@ -356,7 +365,7 @@ def ejecutar(recursos: Recursos, contexto: Contexto, nombre: str, argumentos: di
         return fallo(f"La herramienta '{nombre}' no existe.")
     if nombre not in permitidas:
         return fallo(f"La herramienta '{nombre}' no está permitida en esta ruta. Permitidas: {', '.join(sorted(permitidas))}.")
-    herramienta = HERRAMIENTAS[nombre]
+    herramienta = (recursos.herramientas_locales or {}).get(nombre, HERRAMIENTAS[nombre])
     if contexto.rol not in herramienta.roles:
         return fallo(f"El rol {contexto.rol} no puede usar '{nombre}'.")
     try:
@@ -366,15 +375,29 @@ def ejecutar(recursos: Recursos, contexto: Contexto, nombre: str, argumentos: di
         return fallo(f"Argumentos inválidos: {detalle}")
 
     intentos = 0
+    futuro = None
     while True:
         intentos += 1
-        futuro = _POOL.submit(herramienta.funcion, recursos, contexto, entrada)
         try:
-            contenido = futuro.result(timeout=timeout)
+            if nombre == "classify":
+                contenido = herramienta.funcion(recursos, contexto, entrada)
+            else:
+                if futuro is None:
+                    futuro = _POOL.submit(herramienta.funcion, recursos, contexto, entrada)
+                contenido = futuro.result(timeout=timeout)
             return ResultadoHerramienta(nombre, True, contenido, None, round(time.perf_counter() - inicio, 3), intentos)
         except ErrorHerramienta as error:
             return fallo(str(error), intentos)
         except PASAJERAS as error:
-            if intentos > config.REINTENTOS_HERRAMIENTA:
-                motivo = "tardó más de 10 s" if isinstance(error, TimeoutFuturo) else type(error).__name__
+            if isinstance(error, ErrorModelo) and not error.transitorio:
+                return fallo(f"El modelo no respondió ({error.codigo}).", intentos)
+            if nombre == "classify" or intentos > config.REINTENTOS_HERRAMIENTA:
+                if futuro is not None:
+                    futuro.cancel()  # Solo cancela si seguía en cola; un worker activo puede terminar tarde.
+                motivo = ("tardó más de 10 s" if isinstance(error, TimeoutFuturo)
+                          else error.codigo if isinstance(error, ErrorModelo) else type(error).__name__)
                 return fallo(f"El servicio no respondió ({motivo}) después de {intentos} intentos.", intentos)
+            # Un timeout de espera no autoriza otra ejecución simultánea. Si la función
+            # realmente terminó con una excepción pasajera, sí se permite un nuevo intento.
+            if futuro is not None and futuro.done() and not futuro.cancelled() and futuro.exception() is not None:
+                futuro = None

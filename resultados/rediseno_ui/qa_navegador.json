@@ -1,0 +1,44 @@
+{
+  "tipo": "QA aislado con datos sintéticos y evaluación falsa",
+  "url_prueba": "http://127.0.0.1:8008",
+  "llamadas_modelo_reales": 0,
+  "pasos": [
+    {
+      "nombre": "Carga sin PostgreSQL y sin modelos",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Edición y navegación preservan cambios sin guardar",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Guardado por teclado y recarga persistente",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Conflicto entre pestañas no sobrescribe la versión guardada",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Validación incompleta muestra causas y no congela",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Veinte fixtures aislados, autoría de prueba y congelación",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Diseño tableta 768 y móvil 375 sin desbordamiento",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Congelación cierra edición y se conserva al recargar",
+      "estado": "correcto"
+    },
+    {
+      "nombre": "Evaluación falsa sólo con clic explícito, progreso y resultados",
+      "estado": "correcto"
+    }
+  ],
+  "errores_js": []
+}

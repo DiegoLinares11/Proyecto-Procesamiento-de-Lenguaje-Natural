@@ -1,0 +1,19 @@
+{
+  "estado": "incompleto",
+  "banco_sha256": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+  "proveedor": "codex_subscription",
+  "generaciones_completas": {
+    "agente": 12,
+    "rag": 0,
+    "linea_base": 0
+  },
+  "generaciones_planeadas": {
+    "agente": 42,
+    "rag": 23,
+    "linea_base": 23
+  },
+  "llamadas_modelo_fallidas": 0,
+  "fallos_modelo": [],
+  "tokens_intentos_fallidos": "desconocidos; no se registran como cero",
+  "no_son_metricas_finales": true
+}

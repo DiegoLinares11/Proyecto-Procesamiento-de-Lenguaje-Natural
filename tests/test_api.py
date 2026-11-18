@@ -83,19 +83,44 @@ def _accion(cliente_con, falsas, chunk_manual):
     ({"aprobada": True, "aprobador": "Técnico N2", "rol": "N2"}, True),
     ({"aprobada": "true", "aprobador": "Técnico N2", "rol": "N2"}, False),
     ({"aprobada": True, "aprobador": "Agente N1", "rol": "N1"}, False),
+    ({"aprobada": True, "aprobador": "Técnico N2", "rol": "N2", "extra": "mi contraseña es Perrito123; ana@correo.example"}, False),
 ])
 def test_la_accion_se_pausa_y_solo_n2_con_un_booleano_la_aprueba(falsas, cliente_con, chunk_manual, decisiones, decision, aprueba):
-    cliente, _ = _accion(cliente_con, falsas, chunk_manual)
+    cliente, motor = _accion(cliente_con, falsas, chunk_manual)
     with cliente:
         eventos = _eventos(cliente.post("/api/tickets", json={"texto": "Perdí el teléfono, restablezcan mi MFA", "rol": "N1"}))
         pausa = eventos[-1]
         assert pausa["tipo"] == "pausa" and pausa["solicitudes"][0]["accion"] == "restablecer_mfa"
-        final_ = _eventos(cliente.post(f"/api/tickets/{pausa['hilo']}/decision", json=decision))[-1]
+        assert pausa["notas"] == []
+        llamadas_modelo = len(motor.cliente.llamadas)
+        llamadas_herramientas = {k: len(v) for k, v in falsas.llamadas.items()}
+        endpoint = f"/api/tickets/{pausa['hilo']}/decision"
+        decision_http = cliente.post(endpoint, json=decision)
+        assert "Perrito123" not in decision_http.text and "ana@correo.example" not in decision_http.text
+        reintento = _eventos(decision_http)
+        final_ = reintento[-1]
+        if not aprueba:
+            assert final_["tipo"] == "pausa"
+            assert not any(e["tipo"] == "respuesta" for e in reintento)
+            paso_aprobacion = next(e for e in reintento if e.get("nodo") == "aprobacion_humana")
+            assert paso_aprobacion["pendiente"] is True
+            assert final_["solicitudes"][0]["solicitud_id"] == pausa["solicitudes"][0]["solicitud_id"]
+            assert "sigue pendiente" in final_["notas"][-1]
+            if decision["rol"] == "N1":
+                assert "N2" in final_["notas"][-1]
+            else:
+                assert any(p in final_["notas"][-1] for p in ("decisión", "formato"))
+            assert (True, "N2") not in decisiones
+            # La decisión inválida conserva una pausa recuperable en el mismo hilo.
+            reintento = _eventos(cliente.post(endpoint, json={"aprobada": True, "aprobador": "Técnico N2", "rol": "N2"}))
+            final_ = reintento[-1]
+        paso_aprobacion = next(e for e in reintento if e.get("nodo") == "aprobacion_humana")
+        assert paso_aprobacion["pendiente"] is False
     assert final_["tipo"] == "respuesta"
-    respuesta = final_["respuesta"]["answer"]
-    assert ("Ejecutada en simulación" in respuesta) == aprueba
-    if not aprueba:
-        assert "sigue pendiente" in respuesta
+    assert "Ejecutada en simulación" in final_["respuesta"]["answer"]
+    assert decisiones.count((True, "N2")) == 1
+    assert len(motor.cliente.llamadas) == llamadas_modelo
+    assert {k: len(v) for k, v in falsas.llamadas.items()} == llamadas_herramientas
 
 
 def test_decidir_sobre_un_hilo_que_no_existe_da_404(falsas, cliente_con):
@@ -110,7 +135,7 @@ def test_la_api_caida_se_ve_como_respuesta_degradada(falsas, cliente_con):
         eventos = _eventos(cliente.post("/api/tickets", json={"texto": "Error 0x80070005 al actualizar", "rol": "N1",
                                                               "falla": "modelo"}))
     assert [e["nodo"] for e in eventos if e["tipo"] == "paso"][-1] == "degradar"
-    assert next(e for e in eventos if e.get("nodo") == "agente")["error_modelo"].startswith("APIConnectionError")
+    assert next(e for e in eventos if e.get("nodo") == "agente")["error_modelo"] == "transporte"
     assert eventos[-1]["respuesta"]["needs_human_review"] and eventos[-1]["respuesta"]["sources"]
 
 
@@ -121,16 +146,63 @@ def test_un_n1_no_puede_leer_un_fragmento_de_n2(cliente_con, chunks, chunk_manua
         assert cliente.get(f"/api/fragmentos/{restringido}?rol=N1").status_code == 403
         assert cliente.get(f"/api/fragmentos/{restringido}?rol=N2").status_code == 200
         f = cliente.get(f"/api/fragmentos/{chunk_manual['chunk_id']}").json()
-        assert f["texto"] == chunk_manual["text"] and f["url_pdf"].endswith(f"#page={chunk_manual['page']}")
+        assert f["texto"] == chunk_manual["text"] and f["url_pdf"] is None
+        assert f["pdf_restringido"] is True
         assert cliente.get("/api/fragmentos/F9-c999").status_code == 404
 
 
 def test_solo_sirve_los_pdf_del_corpus(cliente_con):
     cliente, _ = cliente_con(ModeloFalso(final("x", [])))
     with cliente:
-        assert cliente.get("/api/pdf/manual_mesa_ayuda_v2026-2.pdf").headers["content-type"] == "application/pdf"
+        assert cliente.get("/api/pdf/manual_mesa_ayuda_v2026-2.pdf?rol=N2").headers["content-type"] == "application/pdf"
         assert cliente.get("/api/pdf/..%2F.env").status_code == 404
         assert cliente.get("/api/pdf/.env").status_code == 404
+
+
+@pytest.mark.parametrize("nombre", ["manual_mesa_ayuda_v2026-1.pdf", "manual_mesa_ayuda_v2026-2.pdf"])
+def test_el_pdf_completo_del_manual_solo_se_entrega_a_n2(cliente_con, nombre):
+    cliente, _ = cliente_con(ModeloFalso(final("x", [])))
+    with cliente:
+        assert cliente.get(f"/api/pdf/{nombre}").status_code == 403
+        assert cliente.get(f"/api/pdf/{nombre}?rol=N1").status_code == 403
+        r = cliente.get(f"/api/pdf/{nombre}?rol=N2")
+    assert r.status_code == 200 and r.headers["content-type"] == "application/pdf"
+
+
+def test_el_pdf_publico_de_microsoft_sigue_disponible_para_ambos_roles(cliente_con):
+    cliente, _ = cliente_con(ModeloFalso(final("x", [])))
+    with cliente:
+        for sufijo in ("", "?rol=N1", "?rol=N2"):
+            r = cliente.get("/api/pdf/f2_microsoft_soporte.pdf" + sufijo)
+            assert r.status_code == 200 and r.headers["content-type"] == "application/pdf"
+
+
+def test_la_politica_pdf_no_depende_del_subset_de_fragmentos(cliente_con):
+    cliente, motor = cliente_con(ModeloFalso(final("x", [])))
+    motor.chunks = {}
+    with cliente:
+        for version in ("2026-1", "2026-2"):
+            assert cliente.get(f"/api/pdf/manual_mesa_ayuda_v{version}.pdf?rol=N1").status_code == 403
+        assert cliente.get("/api/pdf/f2_microsoft_soporte.pdf?rol=N1").status_code == 200
+
+
+def test_un_fragmento_permitido_conserva_cita_y_texto_sin_exponer_el_manual_a_n1(cliente_con, chunk_manual):
+    cliente, _ = cliente_con(ModeloFalso(final("x", [])))
+    with cliente:
+        n1 = cliente.get(f"/api/fragmentos/{chunk_manual['chunk_id']}?rol=N1").json()
+        n2 = cliente.get(f"/api/fragmentos/{chunk_manual['chunk_id']}?rol=N2").json()
+    for fragmento in (n1, n2):
+        assert fragmento["chunk_id"] == chunk_manual["chunk_id"]
+        assert fragmento["texto"] == chunk_manual["text"] and fragmento["page"] == chunk_manual["page"]
+    assert n1["url_pdf"] is None and n1["pdf_restringido"] is True
+    assert n2["url_pdf"] == f"/api/pdf/{chunk_manual['source']}?rol=N2#page={chunk_manual['page']}"
+    assert n2["pdf_restringido"] is False
+
+
+def test_el_rol_invalido_no_permite_solicitar_un_pdf(cliente_con):
+    cliente, _ = cliente_con(ModeloFalso(final("x", [])))
+    with cliente:
+        assert cliente.get("/api/pdf/f2_microsoft_soporte.pdf?rol=N3").status_code == 422
 
 
 def test_los_ejemplos_cubren_los_seis_puntos_de_la_demo():

@@ -5,17 +5,17 @@ from __future__ import annotations
 
 import copy
 import dataclasses
-import threading
-from contextlib import contextmanager, nullcontext
-from types import SimpleNamespace
+from collections.abc import Callable
+from contextlib import nullcontext
+from types import MappingProxyType
 from typing import Literal
 
-import anthropic
 import psycopg
 
 from tickets_rag import herramientas as H
 from tickets_rag.banco import INSTRUCCION_ENVENENADA
 from tickets_rag.grafo import construir_grafo
+from tickets_rag.modelo import ErrorModelo
 
 Falla = Literal["modelo", "vectores", "documento_envenenado"]
 FALLAS: tuple[str, ...] = ("modelo", "vectores", "documento_envenenado")
@@ -24,11 +24,8 @@ FALLAS: tuple[str, ...] = ("modelo", "vectores", "documento_envenenado")
 class ClienteCaido:
     """La API del generador no responde. El clasificador sigue con el cliente real."""
 
-    def __init__(self) -> None:
-        self.beta = SimpleNamespace(messages=SimpleNamespace(create=self._create))
-
-    def _create(self, **_):
-        raise anthropic.APIConnectionError(message="falla simulada: la API del generador no responde", request=None)
+    def generar(self, **_):
+        raise ErrorModelo("transporte", transitorio=True)
 
 
 class ConexionCaida:
@@ -40,30 +37,32 @@ class ConexionCaida:
         return falla
 
 
-_CANDADO_ENVENENADO = threading.Lock()
+@dataclasses.dataclass(frozen=True)
+class _BusquedaEnvenenada:
+    """Modifica una copia de la salida, nunca los chunks ni el resultado del recuperador compartido."""
+
+    original: Callable
+
+    def __call__(self, recursos, contexto, entrada):
+        resultado = copy.deepcopy(self.original(recursos, contexto, entrada))
+        fragmentos = resultado.get("fragmentos") or []
+        if fragmentos:
+            fragmentos[0]["text"] += INSTRUCCION_ENVENENADA
+        return resultado
 
 
-@contextmanager
-def documento_envenenado():
-    """El primer fragmento que devuelve search_docs trae instrucciones para el asistente.
+def _recursos_envenenados(recursos: H.Recursos) -> H.Recursos:
+    """Configura la herramienta solo en los recursos del grafo que solicita la simulación.
 
-    Cambia el registro global de herramientas mientras dura, así que el candado evita que dos tickets
-    simultáneos lo vean a medias.
+    El pool recibe estos recursos explícitamente, por lo que no depende de variables de contexto
+    que puedan perderse al cambiar de hilo. El mapa es una copia inmutable y conserva los overrides
+    que ya tuviera el llamador. Construir otra variante sobre ella no duplica la instrucción.
     """
-    with _CANDADO_ENVENENADO:
-        original = H.HERRAMIENTAS["search_docs"]
-
-        def envenenada(recursos, contexto, entrada):
-            r = original.funcion(recursos, contexto, entrada)
-            if r["fragmentos"]:
-                r["fragmentos"][0] = {**r["fragmentos"][0], "text": r["fragmentos"][0]["text"] + INSTRUCCION_ENVENENADA}
-            return r
-
-        H.HERRAMIENTAS["search_docs"] = dataclasses.replace(original, funcion=envenenada)
-        try:
-            yield
-        finally:
-            H.HERRAMIENTAS["search_docs"] = original
+    locales = dict(recursos.herramientas_locales or {})
+    original = locales.get("search_docs", H.HERRAMIENTAS["search_docs"])
+    if not isinstance(original.funcion, _BusquedaEnvenenada):
+        locales["search_docs"] = dataclasses.replace(original, funcion=_BusquedaEnvenenada(original.funcion))
+    return dataclasses.replace(recursos, herramientas_locales=MappingProxyType(locales))
 
 
 def grafo_con_falla(recursos: H.Recursos, cliente, checkpointer, falla: Falla | None = None):
@@ -74,9 +73,15 @@ def grafo_con_falla(recursos: H.Recursos, cliente, checkpointer, falla: Falla | 
         procedimientos, casos = copy.copy(recursos.procedimientos), copy.copy(recursos.casos)
         procedimientos.conexion = casos.conexion = ConexionCaida()
         return construir_grafo(dataclasses.replace(recursos, procedimientos=procedimientos, casos=casos), cliente, checkpointer)
+    if falla == "documento_envenenado":
+        return construir_grafo(_recursos_envenenados(recursos), cliente, checkpointer)
     return construir_grafo(recursos, cliente, checkpointer)
 
 
 def contexto_de_falla(falla: Falla | None):
-    """Lo que hay que tener activo mientras corre el grafo (solo el documento envenenado lo necesita)."""
-    return documento_envenenado() if falla == "documento_envenenado" else nullcontext()
+    """Compatibilidad con la demo y el benchmark: las fallas las aplica grafo_con_falla.
+
+    Este contexto no modifica registros globales ni requiere limpieza o un candado entre solicitudes.
+    Puede anidarse o terminar por una excepción sin afectar a otros grafos.
+    """
+    return nullcontext()

@@ -1,0 +1,565 @@
+{
+  "fecha_utc": "2026-11-18T10:11:57.055076+00:00",
+  "autoria_informe": "IA (Codex); análisis técnico, no revisión humana independiente",
+  "corrida_id": "6cc46dfe-2946-4c55-84ed-f5621804f8ce",
+  "plan_sha256": "cbb19ef307a67010ceab7a75c53703ed23ffdf20d1ad5e793cbb355eea8b515b",
+  "autoria_casos": {
+    "tipo": "IA",
+    "herramienta": "Codex",
+    "modelo_redactor": "no_expuesto_en_esta_sesion",
+    "persona_autora": null,
+    "revision_humana": "pendiente"
+  },
+  "cumple_requisito_20_humanos": false,
+  "humanos_acreditados": 0,
+  "modelo": "gpt-6.2-sol",
+  "variante": "juegos_criterios",
+  "ajustes": {
+    "corridas": 5,
+    "juegos_distintos": true,
+    "reglas_extra": true,
+    "effort": "low"
+  },
+  "timeout_modelo_s": 240,
+  "reintentos_modelo_python": 0,
+  "entrenamiento_tfidf": 240,
+  "metricas_recalculadas": {
+    "tfidf": {
+      "macro_f1": {
+        "categoria": 0.883598,
+        "prioridad": 0.699941
+      },
+      "aciertos": {
+        "categoria": 18,
+        "prioridad": 14
+      },
+      "ambos_campos_correctos": 13
+    },
+    "llm": {
+      "macro_f1": {
+        "categoria": 1.0,
+        "prioridad": 1.0
+      },
+      "aciertos": {
+        "categoria": 20,
+        "prioridad": 20
+      },
+      "ambos_campos_correctos": 20
+    }
+  },
+  "tickets_tfidf_con_error": 7,
+  "errores_etiqueta_tfidf": 8,
+  "procedencia_reportada": {
+    "tickets": 20,
+    "corridas_validas_reportadas": 100,
+    "cinco_votos_cada_ticket": true,
+    "suma_votos_por_campo": {
+      "categoria": 100,
+      "prioridad": 100,
+      "tipo": 100
+    },
+    "proveedor_codex_subscription": 20,
+    "autenticacion_chatgpt": 20,
+    "tickets_unanimes_tres_campos": 20,
+    "revision_humana_sugerida": 0,
+    "tipo_correcto_auxiliar": 20,
+    "alcance": "100 votos válidos reportados por resultados y sumas por campo; no 300 inferencias ni auditoría independiente de 100 streams CLI."
+  },
+  "uso_reportado": {
+    "tokens_entrada": 773129,
+    "tokens_salida": 2775,
+    "costo_api_usd": 0.0,
+    "no_incluye": "precio de la suscripción ni tokens no reportados del intento anterior fallido",
+    "interpretacion": "Cargo incremental API de esta ruta: US$0; sí consume cuota incluida. No equivale a uso gratuito o ilimitado."
+  },
+  "analisis_fallos_tfidf": [
+    {
+      "ticket_id": "SYN-02",
+      "fila_dataset": 2,
+      "linea_resultado_journal": 4,
+      "texto": "Desde ayer mi cuenta de red se bloquea después de iniciar la laptop. La desbloqueo por autoservicio y logro seguir, pero al rato vuelve a pasar y pierdo como veinte minutos cada vez. ¿Me ayudan a revisar qué la está bloqueando?",
+      "campos_errados": [
+        "prioridad"
+      ],
+      "esperado": {
+        "categoria": "ACCESO",
+        "prioridad": "MEDIA"
+      },
+      "tfidf": {
+        "categoria": "ACCESO",
+        "prioridad": "BAJA"
+      },
+      "llm": {
+        "categoria": "ACCESO",
+        "prioridad": "MEDIA"
+      },
+      "criterio_manual": "1.4",
+      "analisis_contenido": "El desbloqueo por autoservicio permite seguir temporalmente, pero el bloqueo recurrente hace perder veinte minutos: corresponde MEDIA, no una consulta menor.",
+      "patron_observado": "MEDIA→BAJA: no refleja el impacto recurrente con alternativa temporal.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    },
+    {
+      "ticket_id": "SYN-07",
+      "fila_dataset": 7,
+      "linea_resultado_journal": 14,
+      "texto": "no me entra el audio en Teams desde mi equpo. La reunión de trabajo sigue y me conecté por llamada de teléfono para no perderla, pero así no puedo presentar con normalidad. No es solo que esté bajito el volumen.",
+      "campos_errados": [
+        "prioridad"
+      ],
+      "esperado": {
+        "categoria": "CORREO",
+        "prioridad": "MEDIA"
+      },
+      "tfidf": {
+        "categoria": "CORREO",
+        "prioridad": "BAJA"
+      },
+      "llm": {
+        "categoria": "CORREO",
+        "prioridad": "MEDIA"
+      },
+      "criterio_manual": "1.4",
+      "analisis_contenido": "La reunión está afectada y se usa llamada telefónica como alternativa, sin poder presentar normalmente. Teams pertenece a CORREO.",
+      "patron_observado": "MEDIA→BAJA: confunde una alternativa temporal con ausencia de impacto.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    },
+    {
+      "ticket_id": "SYN-09",
+      "fila_dataset": 9,
+      "linea_resultado_journal": 18,
+      "texto": "La computadora prende el ventilador pero el monitor solo dice sin señal. Revisé que el cable esté firme y sigue igual. Este es mi único puesto, no hay equipo de préstamo disponible y no puedo empezar las tareas.",
+      "campos_errados": [
+        "prioridad"
+      ],
+      "esperado": {
+        "categoria": "EQUIPOS",
+        "prioridad": "ALTA"
+      },
+      "tfidf": {
+        "categoria": "EQUIPOS",
+        "prioridad": "BAJA"
+      },
+      "llm": {
+        "categoria": "EQUIPOS",
+        "prioridad": "ALTA"
+      },
+      "criterio_manual": "1.4",
+      "analisis_contenido": "El único equipo no entrega imagen; no existe préstamo y la persona no puede empezar tareas.",
+      "patron_observado": "ALTA→BAJA: subprioriza un bloqueo total sin alternativa.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    },
+    {
+      "ticket_id": "SYN-12",
+      "fila_dataset": 12,
+      "linea_resultado_journal": 24,
+      "texto": "hola, el mouse todavía funciona. ¿Hay forma de solicitar uno más cómodo para la próxima entrega de accesorios? No necesito que lo cambien hoy ni tengo tareas bloqueadas.",
+      "campos_errados": [
+        "categoria",
+        "prioridad"
+      ],
+      "esperado": {
+        "categoria": "EQUIPOS",
+        "prioridad": "BAJA"
+      },
+      "tfidf": {
+        "categoria": "ACCESO",
+        "prioridad": "ALTA"
+      },
+      "llm": {
+        "categoria": "EQUIPOS",
+        "prioridad": "BAJA"
+      },
+      "criterio_manual": "1.3 y 1.4",
+      "analisis_contenido": "El objeto es un mouse que funciona; el cambio es programable y se niegan tareas bloqueadas. Periférico implica EQUIPOS; ausencia de bloqueo y programación implican BAJA.",
+      "patron_observado": "EQUIPOS→ACCESO y BAJA→ALTA: falla tanto el objeto principal como el impacto explícito.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    },
+    {
+      "ticket_id": "SYN-13",
+      "fila_dataset": 13,
+      "linea_resultado_journal": 26,
+      "texto": "A varios puestos de esta esquina se les fue internet al mismo tiempo, por cable y por wifi. Los equipos sí encienden pero no abren ni las páginas internas. Seguimos igual después de volver a conectar; el área está parada.",
+      "campos_errados": [
+        "prioridad"
+      ],
+      "esperado": {
+        "categoria": "RED",
+        "prioridad": "ALTA"
+      },
+      "tfidf": {
+        "categoria": "RED",
+        "prioridad": "MEDIA"
+      },
+      "llm": {
+        "categoria": "RED",
+        "prioridad": "ALTA"
+      },
+      "criterio_manual": "1.4",
+      "analisis_contenido": "Varios puestos pierden cable y Wi-Fi; el área queda detenida. Afectar a varias personas basta para ALTA.",
+      "patron_observado": "ALTA→MEDIA: no respeta el alcance colectivo descrito.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    },
+    {
+      "ticket_id": "SYN-18",
+      "fila_dataset": 18,
+      "linea_resultado_journal": 36,
+      "texto": "¿Me ayudan a programar la instalación de un lector de PDF del catálogo? La próxima semana empezaré a revisar documentos con él. Por ahora no tengo ningún archivo pendiente que dependa de eso.",
+      "campos_errados": [
+        "prioridad"
+      ],
+      "esperado": {
+        "categoria": "APLICACIONES",
+        "prioridad": "BAJA"
+      },
+      "tfidf": {
+        "categoria": "APLICACIONES",
+        "prioridad": "MEDIA"
+      },
+      "llm": {
+        "categoria": "APLICACIONES",
+        "prioridad": "BAJA"
+      },
+      "criterio_manual": "1.4",
+      "analisis_contenido": "La instalación del lector PDF se programa para la siguiente semana y no hay archivos actuales bloqueados.",
+      "patron_observado": "BAJA→MEDIA: prioriza como afectación actual una solicitud programable.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    },
+    {
+      "ticket_id": "SYN-20",
+      "fila_dataset": 20,
+      "linea_resultado_journal": 40,
+      "texto": "buenas, necesito saber a dónde pedir una constancia de vacaciones. Me pasaron este chat pero quizá no era aquí. La necesito hasta fin de mes, ¿me orientan con el área?",
+      "campos_errados": [
+        "categoria"
+      ],
+      "esperado": {
+        "categoria": "OTRO",
+        "prioridad": "BAJA"
+      },
+      "tfidf": {
+        "categoria": "CORREO",
+        "prioridad": "BAJA"
+      },
+      "llm": {
+        "categoria": "OTRO",
+        "prioridad": "BAJA"
+      },
+      "criterio_manual": "1.3",
+      "analisis_contenido": "La petición es una constancia de vacaciones y orientación al área administrativa. El canal chat no convierte el contenido en correo o TI.",
+      "patron_observado": "OTRO→CORREO: falla la detección de una solicitud fuera del dominio de soporte.",
+      "limite_causal": "No se inspeccionaron coeficientes ni se hicieron contrafactuales; no se atribuye el fallo a una palabra o typo concreto."
+    }
+  ],
+  "manual": {
+    "1.3": {
+      "chunk_id": "F1-2026-2-c003",
+      "linea": 41,
+      "texto": "1.3 Categorías de ticket\nCada ticket se clasifica en una sola categoría principal:\nACCESO: cuentas de red, contraseñas, bloqueos, MFA y permisos sobre carpetas o sistemas.\nCORREO: Outlook, buzón de correo, Teams y correos sospechosos.\nEQUIPOS: computadoras, impresoras, periféricos y actualizaciones del sistema operativo.\nRED: conexión a internet, Wi-Fi, VPN y cableado de la oficina.\nAPLICACIONES: instalación de software, el ERP SIRA, Microsoft Office y navegadores.\nOTRO: solicitudes que no encajan en las categorías anteriores o que están fuera del alcance de la mesa de ayuda.\nSi un ticket menciona dos problemas, la categoría principal es la del problema que impide trabajar. El segundo problema se anota en las notas del ticket o se registra como un ticket aparte."
+    },
+    "1.4": {
+      "chunk_id": "F1-2026-2-c004",
+      "linea": 42,
+      "texto": "1.4 Prioridades y tiempos de atención\nLa prioridad se asigna según el impacto, no según la insistencia del usuario.\nALTA: detiene el trabajo de una persona sin ninguna alternativa, afecta a varias personas o a un proceso crítico como facturación o nómina, o es un posible incidente de seguridad. Tiempo de primera respuesta: 30 minutos. Tiempo objetivo de resolución: 4 horas.\nMEDIA: afecta el trabajo, pero existe una alternativa temporal, por ejemplo usar otro equipo o el correo desde el navegador. Primera respuesta: 2 horas. Resolución: 1 día hábil.\nBAJA: consultas, solicitudes que se pueden programar o inconvenientes menores. Primera respuesta: 1 día hábil. Resolución: 3 días hábiles."
+    }
+  },
+  "latencias": {
+    "definicion_activa": "Campo latencia_llm_s del evaluador, medido con perf_counter; comprende cinco votos y trabajo del adaptador. No es tiempo CPU puro ni latencia exclusiva del servidor.",
+    "definicion_pared": "Diferencia UTC entre eventos inicio y resultado del mismo ticket en el journal.",
+    "por_caso": [
+      {
+        "ticket_id": "SYN-01",
+        "linea_inicio": 1,
+        "linea_resultado": 2,
+        "inicio_utc": "2026-11-18T09:37:34.450049+00:00",
+        "fin_utc": "2026-11-18T09:54:23.929504+00:00",
+        "latencia_activa_reportada_s": 111.52245037499233,
+        "latencia_pared_journal_s": 1009.479455,
+        "diferencia_pared_menos_activa_s": 897.9570046250077,
+        "afectado_suspension": true
+      },
+      {
+        "ticket_id": "SYN-02",
+        "linea_inicio": 3,
+        "linea_resultado": 4,
+        "inicio_utc": "2026-11-18T09:54:24.059821+00:00",
+        "fin_utc": "2026-11-18T09:55:02.468591+00:00",
+        "latencia_activa_reportada_s": 38.40779054100858,
+        "latencia_pared_journal_s": 38.40877,
+        "diferencia_pared_menos_activa_s": 0.000979458991416493,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-03",
+        "linea_inicio": 5,
+        "linea_resultado": 6,
+        "inicio_utc": "2026-11-18T09:55:02.493168+00:00",
+        "fin_utc": "2026-11-18T09:55:30.130158+00:00",
+        "latencia_activa_reportada_s": 27.63626433297759,
+        "latencia_pared_journal_s": 27.63699,
+        "diferencia_pared_menos_activa_s": 0.0007256670224116135,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-04",
+        "linea_inicio": 7,
+        "linea_resultado": 8,
+        "inicio_utc": "2026-11-18T09:55:30.143747+00:00",
+        "fin_utc": "2026-11-18T09:56:20.299510+00:00",
+        "latencia_activa_reportada_s": 50.15463287499733,
+        "latencia_pared_journal_s": 50.155763,
+        "diferencia_pared_menos_activa_s": 0.0011301250026676257,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-05",
+        "linea_inicio": 9,
+        "linea_resultado": 10,
+        "inicio_utc": "2026-11-18T09:56:20.319682+00:00",
+        "fin_utc": "2026-11-18T09:57:10.956089+00:00",
+        "latencia_activa_reportada_s": 50.63460720900912,
+        "latencia_pared_journal_s": 50.636407,
+        "diferencia_pared_menos_activa_s": 0.0017997909908800125,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-06",
+        "linea_inicio": 11,
+        "linea_resultado": 12,
+        "inicio_utc": "2026-11-18T09:57:11.005870+00:00",
+        "fin_utc": "2026-11-18T09:57:41.164417+00:00",
+        "latencia_activa_reportada_s": 30.157792292011436,
+        "latencia_pared_journal_s": 30.158547,
+        "diferencia_pared_menos_activa_s": 0.0007547079885625863,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-07",
+        "linea_inicio": 13,
+        "linea_resultado": 14,
+        "inicio_utc": "2026-11-18T09:57:41.177513+00:00",
+        "fin_utc": "2026-11-18T09:58:27.000893+00:00",
+        "latencia_activa_reportada_s": 45.82229116698727,
+        "latencia_pared_journal_s": 45.82338,
+        "diferencia_pared_menos_activa_s": 0.001088833012730106,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-08",
+        "linea_inicio": 15,
+        "linea_resultado": 16,
+        "inicio_utc": "2026-11-18T09:58:27.019381+00:00",
+        "fin_utc": "2026-11-18T09:59:19.156786+00:00",
+        "latencia_activa_reportada_s": 52.136255333025474,
+        "latencia_pared_journal_s": 52.137405,
+        "diferencia_pared_menos_activa_s": 0.0011496669745270083,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-09",
+        "linea_inicio": 17,
+        "linea_resultado": 18,
+        "inicio_utc": "2026-11-18T09:59:19.171390+00:00",
+        "fin_utc": "2026-11-18T10:00:09.484894+00:00",
+        "latencia_activa_reportada_s": 50.31205529201543,
+        "latencia_pared_journal_s": 50.313504,
+        "diferencia_pared_menos_activa_s": 0.001448707984572195,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-10",
+        "linea_inicio": 19,
+        "linea_resultado": 20,
+        "inicio_utc": "2026-11-18T10:00:09.499715+00:00",
+        "fin_utc": "2026-11-18T10:00:39.669645+00:00",
+        "latencia_activa_reportada_s": 30.169232167012524,
+        "latencia_pared_journal_s": 30.16993,
+        "diferencia_pared_menos_activa_s": 0.0006978329874769429,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-11",
+        "linea_inicio": 21,
+        "linea_resultado": 22,
+        "inicio_utc": "2026-11-18T10:00:39.679641+00:00",
+        "fin_utc": "2026-11-18T10:01:10.197057+00:00",
+        "latencia_activa_reportada_s": 30.516647583979648,
+        "latencia_pared_journal_s": 30.517416,
+        "diferencia_pared_menos_activa_s": 0.0007684160203531576,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-12",
+        "linea_inicio": 23,
+        "linea_resultado": 24,
+        "inicio_utc": "2026-11-18T10:01:10.209894+00:00",
+        "fin_utc": "2026-11-18T10:01:37.850017+00:00",
+        "latencia_activa_reportada_s": 27.63935262497398,
+        "latencia_pared_journal_s": 27.640123,
+        "diferencia_pared_menos_activa_s": 0.0007703750260183995,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-13",
+        "linea_inicio": 25,
+        "linea_resultado": 26,
+        "inicio_utc": "2026-11-18T10:01:37.864420+00:00",
+        "fin_utc": "2026-11-18T10:02:11.503401+00:00",
+        "latencia_activa_reportada_s": 33.63811983302003,
+        "latencia_pared_journal_s": 33.638981,
+        "diferencia_pared_menos_activa_s": 0.0008611669799734045,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-14",
+        "linea_inicio": 27,
+        "linea_resultado": 28,
+        "inicio_utc": "2026-11-18T10:02:11.521644+00:00",
+        "fin_utc": "2026-11-18T10:02:39.291072+00:00",
+        "latencia_activa_reportada_s": 27.768740625004284,
+        "latencia_pared_journal_s": 27.769428,
+        "diferencia_pared_menos_activa_s": 0.0006873749957172492,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-15",
+        "linea_inicio": 29,
+        "linea_resultado": 30,
+        "inicio_utc": "2026-11-18T10:02:39.302542+00:00",
+        "fin_utc": "2026-11-18T10:03:13.785837+00:00",
+        "latencia_activa_reportada_s": 34.48239683301654,
+        "latencia_pared_journal_s": 34.483295,
+        "diferencia_pared_menos_activa_s": 0.0008981669834611239,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-16",
+        "linea_inicio": 31,
+        "linea_resultado": 32,
+        "inicio_utc": "2026-11-18T10:03:13.802313+00:00",
+        "fin_utc": "2026-11-18T10:03:43.037409+00:00",
+        "latencia_activa_reportada_s": 29.234341750008753,
+        "latencia_pared_journal_s": 29.235096,
+        "diferencia_pared_menos_activa_s": 0.0007542499912460698,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-17",
+        "linea_inicio": 33,
+        "linea_resultado": 34,
+        "inicio_utc": "2026-11-18T10:03:43.055458+00:00",
+        "fin_utc": "2026-11-18T10:04:14.225883+00:00",
+        "latencia_activa_reportada_s": 31.169640958018135,
+        "latencia_pared_journal_s": 31.170425,
+        "diferencia_pared_menos_activa_s": 0.0007840419818663236,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-18",
+        "linea_inicio": 35,
+        "linea_resultado": 36,
+        "inicio_utc": "2026-11-18T10:04:14.240619+00:00",
+        "fin_utc": "2026-11-18T10:04:42.034467+00:00",
+        "latencia_activa_reportada_s": 27.79309229197679,
+        "latencia_pared_journal_s": 27.793848,
+        "diferencia_pared_menos_activa_s": 0.000755708023209678,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-19",
+        "linea_inicio": 37,
+        "linea_resultado": 38,
+        "inicio_utc": "2026-11-18T10:04:42.048248+00:00",
+        "fin_utc": "2026-11-18T10:05:15.686251+00:00",
+        "latencia_activa_reportada_s": 33.637152416980825,
+        "latencia_pared_journal_s": 33.638003,
+        "diferencia_pared_menos_activa_s": 0.0008505830191722907,
+        "afectado_suspension": false
+      },
+      {
+        "ticket_id": "SYN-20",
+        "linea_inicio": 39,
+        "linea_resultado": 40,
+        "inicio_utc": "2026-11-18T10:05:15.700219+00:00",
+        "fin_utc": "2026-11-18T10:05:43.256901+00:00",
+        "latencia_activa_reportada_s": 27.555977707990678,
+        "latencia_pared_journal_s": 27.556682,
+        "diferencia_pared_menos_activa_s": 0.0007042920093205396,
+        "afectado_suspension": false
+      }
+    ],
+    "resumen": {
+      "latencia_activa_reportada_s": {
+        "suma": 790.3888342090067,
+        "media": 39.51944171045034,
+        "mediana": 32.40339668749948,
+        "p95_lineal": 55.10556508512386,
+        "maximo": 111.52245037499233
+      },
+      "latencia_pared_journal_s": {
+        "suma": 1688.363448,
+        "media": 84.4181724,
+        "mediana": 32.404213999999996,
+        "p95_lineal": 100.00450750000067,
+        "maximo": 1009.479455
+      },
+      "duracion_pared_registro_completo_s": 1689.091729,
+      "activa_sin_SYN01_media_s": 35.72980967547444
+    },
+    "incidente_registrado": {
+      "fuente": "pmset -g log, consulta local de solo lectura",
+      "fecha": "2026-11-18",
+      "inicio_local": "03:38:54 -0600",
+      "fin_local": "03:53:54 -0600",
+      "causa_registrada": "Maintenance Sleep",
+      "segundos_suspension": 900,
+      "caso_afectado": "SYN-01 de corrida6cc46dfe-2946-4c55-84ed-f5621804f8ce",
+      "latencia_activa_s": 111.52,
+      "latencia_pared_aproximada_s": 1009.48,
+      "mitigacion": "caffeinate -is asociado solo al PID de evaluación; sin cambios permanentes de energía",
+      "limite": "No demuestra la causa de los timeouts90s anteriores. No se modifica ninguna respuesta ni etiqueta."
+    },
+    "limite_incidente": "SYN-01 tiene 897.957 s adicionales de pared frente al reloj activo, coherentes con la suspensión registrada de 900 s. Se conservan ambas mediciones y no se resta manualmente 900 a los datos. La suspensión no demuestra la causa de los timeouts anteriores.",
+    "limite_timeout": "El timeout configurado se aplica por llamada individual al modelo. La latencia de un ticket acumula cinco votos y sus preflights; no es una sola llamada ni el timeout de todo el ticket."
+  },
+  "intento_anterior_preservado": {
+    "corrida_id": "59ee02ab-1fc7-4248-8bff-b6500e4fde6e",
+    "estado": "incompleto",
+    "tickets_medidos": 0,
+    "macro_f1": null,
+    "plan_sha256": "9c5d607f2c3a08b282f4f7964546917189a33e394f5b6118e9717a74d943212b",
+    "ultimo_error": {
+      "ticket_id": "SYN-01",
+      "codigo": "timeout"
+    },
+    "timeout_modelo_s_en_plan": null,
+    "timeout_90_contexto": "El primer intento usó el límite anterior de 90 s; su plan no almacenaba ese campo. Se conserva esa ausencia, no se rellena retrospectivamente.",
+    "duracion_pared_inicio_a_error_s": 116.104295,
+    "tokens_no_cuantificados": true,
+    "prompts_sha256_iguales_a_corrida_final": true,
+    "tickets_sha256_igual": true,
+    "limite": "0 tickets completos no equivale a 0 llamadas ni 0 cuota consumida. No se mezcla con el UUID final ni se reemplaza el fallo histórico."
+  },
+  "hipotesis_reglas_extra": {
+    "estado": "no_confirmada_en_esta_corrida",
+    "descripcion": "La regla extra sobre poder seguir trabajando puede entrar en tensión con MEDIA por alternativa temporal del manual 1.4.",
+    "evidencia": "LLM acierta las seis etiquetas MEDIA y las veinte prioridades; no apareció el fallo predicho. No se puede inferir qué instrucción pesó ni ajustar el prompt con estos veinte reservados."
+  },
+  "limites": [
+    "Veinte textos y etiquetas de IA, sin revisión humana independiente: no sustituyen el requisito de veinte humanos, que sigue en 0/20.",
+    "No hay muestreo representativo ni independencia humana de las anotaciones; F1=1 no demuestra generalización o confiabilidad productiva.",
+    "La unanimidad mide acuerdo entre votos, no probabilidad calibrada ni prueba de ausencia general de errores.",
+    "No se hicieron nuevas inferencias, entrenamientos, cambios de etiquetas/prompts/código ni interacción con el proceso del banco oficial."
+  ],
+  "huellas_entradas": {
+    "evaluacion/tickets_sinteticos/tickets.jsonl": "b58f6b0775067b85d7c46ab838d4430eb67fc9cbbc25c866089865d7e69a1325",
+    "evaluacion/tickets_sinteticos/manifiesto.json": "3169638b83e992a3934e3c2f692081a593e94a2cce2c71e08d82927ad4b29a05",
+    "indices/chunks.jsonl": "8e18a3fad5fa8d14681ddb9ed3b2a5568260e86b06909402962915e3fcf85dd4",
+    "resultados/cierre_tecnico/incidente_suspension.json": "cf574efac4e4d640b52a30babe535f96190847eaa45e1a2df6abd1457fe509f9",
+    "resultados/codex_suscripcion/clasificador_sinteticos/6cc46dfe-2946-4c55-84ed-f5621804f8ce/corrida.json": "2faea10956ac04f4a42863c08cbb2a245edd6c3095905e2b18e4d4ac3d42a0e3",
+    "resultados/codex_suscripcion/clasificador_sinteticos/6cc46dfe-2946-4c55-84ed-f5621804f8ce/resumen.json": "f02ad3d63d2bcec6e88cd7f02caa18ae17cd22fbbc62081ba9157db8fbc25358",
+    "resultados/codex_suscripcion/clasificador_sinteticos/6cc46dfe-2946-4c55-84ed-f5621804f8ce/mediciones_parciales.jsonl": "bf71fcebf53a8824a71080ac204439d052611816c768232da5f4f2b4dcf07f3a",
+    "resultados/codex_suscripcion/clasificador_sinteticos/59ee02ab-1fc7-4248-8bff-b6500e4fde6e/corrida.json": "01790853b3624292bf7f67ca767c4f74890108d26162e2e2d299a4aa4741258b",
+    "resultados/codex_suscripcion/clasificador_sinteticos/59ee02ab-1fc7-4248-8bff-b6500e4fde6e/resumen.json": "ae1922e1f600df27f8053d9ef29dc27bc7224e7354be3184324ac3e2313933dd",
+    "resultados/codex_suscripcion/clasificador_sinteticos/59ee02ab-1fc7-4248-8bff-b6500e4fde6e/mediciones_parciales.jsonl": "9122c1502670773fb3d31adb4fee054e87465d121318f0e4325ba37c604d39c3"
+  }
+}

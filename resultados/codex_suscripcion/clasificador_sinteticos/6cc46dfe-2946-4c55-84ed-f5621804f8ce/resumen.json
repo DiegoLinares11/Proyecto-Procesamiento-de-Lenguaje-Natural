@@ -1,0 +1,95 @@
+{
+  "corrida_id": "6cc46dfe-2946-4c55-84ed-f5621804f8ce",
+  "plan_sha256": "cbb19ef307a67010ceab7a75c53703ed23ffdf20d1ad5e793cbb355eea8b515b",
+  "conjunto": "tickets_sinteticos_ia",
+  "autoria": "IA",
+  "cumple_requisito_20_humanos": false,
+  "alcance": "evaluacion_tecnica_sintetica; no sustituye medicion humana ni representa poblacion real",
+  "estado": "completo",
+  "tickets_objetivo": 20,
+  "tickets_medidos": 20,
+  "metricas_parciales": false,
+  "macro_f1": {
+    "tfidf": {
+      "categoria": 0.883598,
+      "prioridad": 0.699941
+    },
+    "llm": {
+      "categoria": 1.0,
+      "prioridad": 1.0
+    }
+  },
+  "modelo": "gpt-6.2-sol",
+  "variante": "juegos_criterios",
+  "configuracion": {
+    "corridas": 5,
+    "juegos_distintos": true,
+    "reglas_extra": true,
+    "effort": "low"
+  },
+  "proveedor": "codex_subscription",
+  "tokens_entrada_tickets_completos": 773129,
+  "tokens_salida_tickets_completos": 2775,
+  "latencia_llm_tickets_completos_s": 790.389,
+  "costo_api_usd_tickets_completos": 0.0,
+  "costo_medido": "API incremental; no incluye precio del plan. Consume cuota de ChatGPT/Codex.",
+  "uso_de_intentos_incompletos": "no cuantificado; un intento interrumpido puede haber consumido cuota",
+  "errores": [
+    {
+      "ticket_id": "SYN-02",
+      "campo": "prioridad",
+      "sistema": "tfidf",
+      "esperado": "MEDIA",
+      "observado": "BAJA"
+    },
+    {
+      "ticket_id": "SYN-07",
+      "campo": "prioridad",
+      "sistema": "tfidf",
+      "esperado": "MEDIA",
+      "observado": "BAJA"
+    },
+    {
+      "ticket_id": "SYN-09",
+      "campo": "prioridad",
+      "sistema": "tfidf",
+      "esperado": "ALTA",
+      "observado": "BAJA"
+    },
+    {
+      "ticket_id": "SYN-12",
+      "campo": "categoria",
+      "sistema": "tfidf",
+      "esperado": "EQUIPOS",
+      "observado": "ACCESO"
+    },
+    {
+      "ticket_id": "SYN-12",
+      "campo": "prioridad",
+      "sistema": "tfidf",
+      "esperado": "BAJA",
+      "observado": "ALTA"
+    },
+    {
+      "ticket_id": "SYN-13",
+      "campo": "prioridad",
+      "sistema": "tfidf",
+      "esperado": "ALTA",
+      "observado": "MEDIA"
+    },
+    {
+      "ticket_id": "SYN-18",
+      "campo": "prioridad",
+      "sistema": "tfidf",
+      "esperado": "BAJA",
+      "observado": "MEDIA"
+    },
+    {
+      "ticket_id": "SYN-20",
+      "campo": "categoria",
+      "sistema": "tfidf",
+      "esperado": "OTRO",
+      "observado": "CORREO"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "inicio_utc": "2026-11-18T07:15:54.844966+00:00",
+  "fin_utc": "2026-11-18T07:16:20.699281+00:00",
+  "exit_code": 0,
+  "duracion_s": 25.855,
+  "comando": [
+    "/tmp/cc3103-fase4-clean-zgnh99y8/venv/bin/python",
+    "-m",
+    "pytest",
+    "-q"
+  ],
+  "modelo_real_ejecutado": false,
+  "entorno": "aislado, sin system-site-packages; lock de fase4"
+}

@@ -28,7 +28,15 @@ Thumbs.db
 
 # Corridas parciales de la evaluación (--casos)
 resultados/evaluacion/*/parcial/
+resultados/codex_suscripcion/evaluacion/*/parcial/
 
 # Demo: dependencias y página armada (se generan con npm install y npm run build)
-demo/node_modules/
+demo/node_modules
 demo/dist/
+
+# Captura humana local: borradores y registro privado del proceso web
+evaluacion/tickets_manuales/borrador_local/
+evaluacion/tickets_manuales/congelado/
+resultados/codex_suscripcion/herramientas/.web/
+# Estado privado para reanudar evaluaciones; no publicar salidas crudas.
+.progreso/

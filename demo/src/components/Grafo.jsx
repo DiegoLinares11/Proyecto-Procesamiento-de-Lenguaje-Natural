@@ -30,18 +30,19 @@ function aristas() {
     ['validar_salida', 'abstener', `M${v.x + 10} ${v.y + H} L${ab.cx + 10} ${ab.y - 4}`],
     ['validar_salida', 'aprobacion_humana', `M${v.cx} ${v.y + H} V${ap.y - 4}`],
     ['validar_salida', 'responder', `M${v.x + v.w} ${v.cy} H${v.x + v.w + 28} V${re.cy} H${re.x + re.w + 4}`],
+    ['aprobacion_humana', 'aprobacion_humana', `M${ap.x + ap.w} ${ap.cy} C${ap.x + ap.w + 32} ${ap.cy}, ${ap.x + ap.w + 32} ${ap.y - 18}, ${ap.x + ap.w - 12} ${ap.y - 18} V${ap.y - 4}`],
     ['aprobacion_humana', 'responder', `M${ap.cx} ${ap.y + H} V${re.y - 4}`],
   ]
 }
 
 const FINALES = { responder: 'emerald', abstener: 'amber', degradar: 'amber', rechazar: 'rose' }
 const COLOR = {
-  emerald: { relleno: 'rgb(16 185 129 / .18)', borde: 'rgb(52 211 153)', texto: 'rgb(167 243 208)' },
-  amber: { relleno: 'rgb(245 158 11 / .18)', borde: 'rgb(251 191 36)', texto: 'rgb(253 230 138)' },
-  rose: { relleno: 'rgb(244 63 94 / .18)', borde: 'rgb(251 113 133)', texto: 'rgb(254 205 211)' },
-  indigo: { relleno: 'rgb(99 102 241 / .16)', borde: 'rgb(129 140 248)', texto: 'rgb(199 210 254)' },
-  violeta: { relleno: 'rgb(139 92 246 / .3)', borde: 'rgb(196 181 253)', texto: 'rgb(237 233 254)' },
-  apagado: { relleno: 'rgb(30 41 59 / .55)', borde: 'rgb(51 65 85)', texto: 'rgb(100 116 139)' },
+  emerald: { relleno: '#ecfdf3', borde: '#16794d', texto: '#16794d' },
+  amber: { relleno: '#fffbeb', borde: '#d6a347', texto: '#92400e' },
+  rose: { relleno: '#fef3f2', borde: '#b42318', texto: '#b42318' },
+  indigo: { relleno: 'var(--brand-soft)', borde: 'var(--brand)', texto: 'var(--brand-strong)' },
+  violeta: { relleno: 'var(--brand)', borde: 'var(--brand)', texto: '#ffffff' },
+  apagado: { relleno: 'var(--surface)', borde: 'var(--border)', texto: 'var(--foreground-muted)' },
 }
 
 export default function Grafo({ pasos, corriendo, enPausa }) {
@@ -49,14 +50,17 @@ export default function Grafo({ pasos, corriendo, enPausa }) {
   const visitas = secuencia.reduce((m, n) => ({ ...m, [n]: (m[n] || 0) + 1 }), {})
   const recorridas = new Set(secuencia.slice(1).map((n, i) => `${secuencia[i]}>${n}`))
   if (enPausa && secuencia.at(-1) === 'validar_salida') recorridas.add('validar_salida>aprobacion_humana')
+  if (enPausa && secuencia.at(-1) === 'aprobacion_humana') recorridas.add('aprobacion_humana>aprobacion_humana')
   const activo = enPausa ? 'aprobacion_humana' : corriendo ? siguiente(pasos) : null
 
   return (
-    <svg viewBox="0 0 480 462" className="w-full h-auto select-none">
+    <svg viewBox="0 0 480 462" className="h-auto w-full select-none" role="img" aria-labelledby="grafo-titulo grafo-descripcion">
+      <title id="grafo-titulo">Flujo de PILAS</title>
+      <desc id="grafo-descripcion">Los nodos recorridos aparecen en azul suave y el nodo activo en azul intenso. Verde indica respuesta; ámbar, pausa, abstención o degradación; rojo, rechazo.</desc>
       <defs>
         {['gris', 'azul'].map((id) => (
           <marker key={id} id={`flecha-${id}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0 0 L10 5 L0 10 z" fill={id === 'azul' ? 'rgb(129 140 248)' : 'rgb(71 85 105)'} />
+            <path d="M0 0 L10 5 L0 10 z" fill={id === 'azul' ? 'var(--brand)' : '#98a2b3'} />
           </marker>
         ))}
       </defs>
@@ -64,7 +68,7 @@ export default function Grafo({ pasos, corriendo, enPausa }) {
         const hecha = recorridas.has(`${o}>${d}`)
         return (
           <path key={`${o}-${d}`} d={ruta} fill="none" strokeWidth={hecha ? 2 : 1.3}
-            stroke={hecha ? 'rgb(129 140 248)' : 'rgb(51 65 85)'} strokeDasharray={hecha ? '' : '4 4'}
+            stroke={hecha ? 'var(--brand)' : 'var(--border)'} strokeDasharray={hecha ? '' : '4 4'}
             markerEnd={`url(#flecha-${hecha ? 'azul' : 'gris'})`} className="transition-all duration-300" />
         )
       })}
@@ -78,19 +82,20 @@ export default function Grafo({ pasos, corriendo, enPausa }) {
         const Icono = NODOS[n].icono
         return (
           <g key={n} className={n === activo ? 'animar-brillo' : ''}>
+            <title>{NODOS[n].nombre}: {NODOS[n].detalle}</title>
             <rect x={x} y={y} width={w} height={H} rx="10" fill={c.relleno} stroke={c.borde} strokeWidth={fueVisitado || n === activo ? 1.6 : 1} />
             <foreignObject x={x} y={y} width={w} height={H}>
-              <div className="h-full flex items-center gap-2 px-2.5" style={{ color: c.texto }}>
+              <div className="flex h-full items-center gap-2 px-2.5" style={{ color: c.texto }}>
                 <Icono size={15} strokeWidth={2} className="shrink-0" />
                 <div className="leading-tight min-w-0">
-                  <div className="text-[11.5px] font-semibold truncate">{NODOS[n].nombre}</div>
-                  <div className="text-[9.5px] opacity-70 truncate">{n === activo && enPausa ? 'Esperando a N2…' : NODOS[n].detalle}</div>
+                  <div className="text-[11.5px] font-extrabold truncate">{NODOS[n].nombre}</div>
+                  <div className="truncate text-[9.5px]">{n === activo && enPausa ? 'Esperando a N2…' : NODOS[n].detalle}</div>
                 </div>
               </div>
             </foreignObject>
             {visitas[n] > 1 && (
               <g>
-                <circle cx={x + w - 4} cy={y + 4} r="9" fill="rgb(99 102 241)" />
+                <circle cx={x + w - 4} cy={y + 4} r="9" fill="var(--brand)" />
                 <text x={x + w - 4} y={y + 7.5} textAnchor="middle" fontSize="10" fontWeight="700" fill="white">×{visitas[n]}</text>
               </g>
             )}
@@ -119,7 +124,7 @@ function siguiente(pasos) {
     case 'validar_salida':
       return ultimo.traza?.find((t) => t.etapa === 'guardrail_salida')?.siguiente ?? null
     case 'aprobacion_humana':
-      return 'responder'
+      return ultimo.pendiente ? 'aprobacion_humana' : 'responder'
     default:
       return null
   }

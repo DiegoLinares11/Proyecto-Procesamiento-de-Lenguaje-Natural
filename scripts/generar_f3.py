@@ -1,12 +1,13 @@
-"""Genera F3: tickets resueltos sintéticos. La semilla fija los parámetros; Haiku 5.5 redacta.
+"""Genera F3: tickets resueltos sintéticos. La semilla fija los parámetros; Codex redacta.
 
 Uso:
-    uv run python scripts/generar_f3.py --simular      # muestra el prompt de un ticket, sin API
+    uv run python scripts/generar_f3.py --simular      # muestra el prompt de un ticket, sin modelo
     uv run python scripts/generar_f3.py --muestra 5    # redacta 5 tickets en muestra.jsonl
     uv run python scripts/generar_f3.py                # redacta los 300 en tickets.jsonl
 
-Necesita ANTHROPIC_API_KEY en el .env. El resultado se guarda en el repo: no se regenera en
-cada corrida, porque el texto del modelo no es determinista.
+Necesita Codex CLI autenticado con ChatGPT y cuota incluida verificable. No usa API keys.
+El resultado se guarda en el repo: no se regenera en cada corrida, porque el texto del modelo
+no es determinista. Un error de autenticación, cuota o proveedor detiene el lote y conserva el parcial.
 """
 
 from __future__ import annotations
@@ -16,15 +17,15 @@ import hashlib
 import json
 import re
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from datetime import date
 
-import anthropic
 from pydantic import BaseModel, Field, ValidationError
 
 from tickets_rag import config
 from tickets_rag.f3 import DESCRIPCION_PERFIL, SEMILLA, Parametros, generar_parametros
 from tickets_rag.ingesta import cargar_chunks
+from tickets_rag.modelo import ClienteModelo, ErrorModelo
 
 CARPETA = config.DATOS / "f3_tickets"
 MODELO = config.MODELO_CLASIFICADOR
@@ -94,25 +95,22 @@ def problemas(p: Parametros, t: TicketRedactado) -> list[str]:
     return errores
 
 
-def redactar(cliente: anthropic.Anthropic, p: Parametros, referencia: str) -> tuple[dict | None, dict]:
+def redactar(cliente: ClienteModelo, p: Parametros, referencia: str) -> tuple[dict | None, dict]:
     uso = {"entrada": 0, "salida": 0, "intentos": 0}
     mensajes = [{"role": "user", "content": prompt(p, referencia)}]
     for _ in range(INTENTOS):
         uso["intentos"] += 1
         try:
-            r = cliente.messages.parse(
-                model=MODELO,
-                max_tokens=6000,
-                system=SISTEMA,
-                messages=mensajes,
-                output_format=TicketRedactado,
-                output_config={"effort": "low"},
+            r = cliente.generar(
+                modelo=MODELO,
+                sistema=SISTEMA,
+                mensajes=mensajes,
+                esquema=TicketRedactado,
+                esfuerzo="low",
             )
         except ValidationError:  # respuesta cortada o JSON incompleto: se intenta de nuevo
             continue
-        except (anthropic.APIConnectionError, anthropic.APIStatusError) as error:
-            print(f"{p.ticket_id}: {type(error).__name__}", file=sys.stderr)
-            continue
+        # ErrorModelo se propaga: no se reintenta una cuota/auth fallida ni se cambia de proveedor.
         uso["entrada"] += r.usage.input_tokens
         uso["salida"] += r.usage.output_tokens
         if r.stop_reason == "refusal" or r.parsed_output is None:
@@ -129,10 +127,12 @@ def redactar(cliente: anthropic.Anthropic, p: Parametros, referencia: str) -> tu
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--simular", action="store_true", help="imprime el prompt de un ticket sin llamar a la API")
+    parser.add_argument("--simular", action="store_true", help="imprime el prompt de un ticket sin llamar al modelo")
     parser.add_argument("--muestra", type=int, default=0, help="redacta solo N tickets en muestra.jsonl")
-    parser.add_argument("--hilos", type=int, default=8)
+    parser.add_argument("--hilos", type=int, default=1, help="tickets simultáneos; 1 por defecto para cuidar la cuota")
     args = parser.parse_args()
+    if args.hilos < 1 or args.muestra < 0:
+        parser.error("--hilos debe ser positivo y --muestra no puede ser negativo")
 
     chunks = cargar_chunks()
     parametros = generar_parametros()
@@ -142,13 +142,13 @@ def main() -> None:
         return
 
     config.cargar_entorno()
-    cliente = anthropic.Anthropic()
+    cliente = ClienteModelo()
     lote = parametros[: args.muestra] if args.muestra else parametros
     salida = CARPETA / ("muestra.jsonl" if args.muestra else "tickets.jsonl")
     parcial = salida.with_suffix(".parcial.jsonl")
     CARPETA.mkdir(parents=True, exist_ok=True)
 
-    # Lo ya redactado en una corrida anterior que se cortó no se vuelve a pagar.
+    # Lo ya redactado en una corrida anterior que se cortó no vuelve a consumir cuota.
     tickets = {}
     if parcial.exists():
         for linea in parcial.read_text(encoding="utf-8").splitlines():
@@ -161,22 +161,44 @@ def main() -> None:
     fallidos = []
     totales = {"entrada": 0, "salida": 0, "intentos": 0}
     with ThreadPoolExecutor(max_workers=args.hilos) as pool, parcial.open("a", encoding="utf-8", newline="\n") as f:
-        futuros = {
-            pool.submit(redactar, cliente, p, procedimiento(chunks, p.seccion, p.version_manual)): p.ticket_id
-            for p in pendientes
-        }
-        for n, futuro in enumerate(as_completed(futuros), start=1):
-            ticket, uso = futuro.result()
-            for k in totales:
-                totales[k] += uso[k]
-            if ticket:
-                tickets[ticket["ticket_id"]] = ticket
-                f.write(json.dumps(ticket, ensure_ascii=False) + "\n")
-                f.flush()
-            else:
-                fallidos.append(futuros[futuro])
-            if n % 25 == 0 or n == len(pendientes):
-                print(f"{n}/{len(pendientes)} redactados", file=sys.stderr)
+        por_enviar = iter(pendientes)
+        futuros = {}
+
+        def enviar_siguiente() -> None:
+            p = next(por_enviar, None)
+            if p is not None:
+                futuro = pool.submit(redactar, cliente, p, procedimiento(chunks, p.seccion, p.version_manual))
+                futuros[futuro] = p.ticket_id
+
+        for _ in range(min(args.hilos, len(pendientes))):
+            enviar_siguiente()
+        n = 0
+        try:
+            while futuros:
+                terminados, _ = wait(futuros, return_when=FIRST_COMPLETED)
+                for futuro in terminados:
+                    tid = futuros.pop(futuro)
+                    ticket, uso = futuro.result()
+                    for k in totales:
+                        totales[k] += uso[k]
+                    if ticket:
+                        tickets[ticket["ticket_id"]] = ticket
+                        f.write(json.dumps(ticket, ensure_ascii=False) + "\n")
+                        f.flush()
+                    else:
+                        fallidos.append(tid)
+                    n += 1
+                    if n % 25 == 0 or n == len(pendientes):
+                        print(f"{n}/{len(pendientes)} redactados", file=sys.stderr)
+                # No se encola el lote entero: tras un ErrorModelo no se envían tickets nuevos.
+                for _ in terminados:
+                    enviar_siguiente()
+        except ErrorModelo as error:
+            for futuro in futuros:
+                futuro.cancel()
+            # ErrorModelo contiene mensajes fijos del adaptador, nunca stderr ni credenciales.
+            raise SystemExit(f"Generación detenida: {error} "
+                             "El parcial se conserva; no se usó otro proveedor.") from None
 
     with salida.open("w", encoding="utf-8", newline="\n") as f:
         for tid in sorted(tickets):
@@ -184,8 +206,8 @@ def main() -> None:
     if not fallidos:
         parcial.unlink()
 
-    costo = config.costo_usd(MODELO, totales["entrada"], totales["salida"])
     metadatos = {
+        "proveedor": "codex_chatgpt",
         "modelo": MODELO,
         "semilla": SEMILLA,
         "solicitados": len(lote),
@@ -196,7 +218,9 @@ def main() -> None:
         "tokens_entrada": totales["entrada"],
         "tokens_salida": totales["salida"],
         "llamadas": totales["intentos"],
-        "costo_usd": round(costo, 4),
+        "costo_usd": 0.0,
+        "costo_api_incremental_usd": 0.0,
+        "consumo": "tokens y cuota incluida de la suscripción; sin precio API por token",
     }
     if not args.muestra:
         (CARPETA / "generacion.json").write_text(json.dumps(metadatos, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

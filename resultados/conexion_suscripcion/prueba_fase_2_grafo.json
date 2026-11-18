@@ -1,0 +1,67 @@
+{
+  "fase": 2,
+  "fecha_utc": "2026-11-18T05:27:14.551707+00:00",
+  "prueba": "correcta",
+  "alcance": "LangGraph y proveedor Codex reales; clasificador y search_docs sustituidos por datos de prueba; checkpointer en memoria; sin PostgreSQL ni embeddings.",
+  "llamadas_modelo": 2,
+  "herramientas_proyecto": [
+    "classify",
+    "search_docs"
+  ],
+  "proveedor": "codex_subscription",
+  "autenticacion": "chatgpt",
+  "segundos": 16.02,
+  "contrato_valido": true,
+  "abstuvo": false,
+  "citas": [
+    {
+      "source": "manual_mesa_ayuda_v2026-2.pdf",
+      "page": 9,
+      "chunk_id": "F1-2026-2-c022"
+    }
+  ],
+  "uso": [
+    {
+      "modelo": null,
+      "entrada": 0,
+      "salida": 0,
+      "costo_usd": 0.0,
+      "costo_api_usd": 0.0,
+      "proveedor": "doble_de_prueba",
+      "modo_autenticacion": "chatgpt",
+      "simulado": true
+    },
+    {
+      "modelo": "gpt-6.2-sol",
+      "entrada": 6686,
+      "salida": 95,
+      "escritura": 0,
+      "lectura": 0,
+      "proveedor": "codex_subscription",
+      "modo_autenticacion": "chatgpt",
+      "costo_usd": 0.0,
+      "costo_api_usd": 0.0
+    },
+    {
+      "modelo": "gpt-6.2-sol",
+      "entrada": 7076,
+      "salida": 179,
+      "escritura": 0,
+      "lectura": 0,
+      "proveedor": "codex_subscription",
+      "modo_autenticacion": "chatgpt",
+      "costo_usd": 0.0,
+      "costo_api_usd": 0.0
+    }
+  ],
+  "error_modelo": null,
+  "pasos": [
+    "guardrail_entrada",
+    "router",
+    "agente",
+    "herramienta",
+    "agente",
+    "guardrail_salida",
+    "respuesta"
+  ]
+}

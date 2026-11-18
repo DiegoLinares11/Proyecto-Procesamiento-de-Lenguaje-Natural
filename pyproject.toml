@@ -4,15 +4,18 @@ version = "0.1.0"
 description = "Asistente NLP/RAG agéntico para tickets de soporte de TI (CC3103, UVG)"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "anthropic>=2.7.0",
+    "en-core-web-md @ https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.8.0/en_core_web_md-3.8.0-py3-none-any.whl#sha256=5e6329fe3fecedb1d1a02c3ea2172ee0fede6cea6e4aefb6a02d832dba78a310",
+    "es-core-news-md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.8.0/es_core_news_md-3.8.0-py3-none-any.whl#sha256=478b8bb3f3e8eb149192f7d80e7cd64f990b7e9bccbc5329df41a57e86326be2",
     "fastapi>=0.163.2",
     "fpdf2>=2.9.0",
     "huggingface-hub>=2.4.0",
+    "jsonschema>=4.26.0",
     "langgraph>=1.2.22",
     "langgraph-checkpoint-postgres>=3.2.1",
     "markdown>=3.11.3",
     "numpy>=2.4.6",
     "pgvector>=0.5.1",
+    "presidio-analyzer==2.2.366",
     "psycopg[binary]>=3.3.8",
     "pydantic>=2.14.3",
     "pypdf>=7.0.0",
@@ -21,6 +24,7 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "scikit-learn>=1.9.1",
     "sentence-transformers>=6.2.0",
+    "spacy==3.8.18",
     "tokenizers>=0.23.3",
     "torch>=2.11.0",
     "uvicorn>=0.54.0",

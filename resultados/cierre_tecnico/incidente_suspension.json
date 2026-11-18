@@ -1,0 +1,13 @@
+{
+  "fuente": "pmset -g log, consulta local de solo lectura",
+  "fecha": "2026-11-18",
+  "inicio_local": "03:38:54 -0600",
+  "fin_local": "03:53:54 -0600",
+  "causa_registrada": "Maintenance Sleep",
+  "segundos_suspension": 900,
+  "caso_afectado": "SYN-01 de corrida6cc46dfe-2946-4c55-84ed-f5621804f8ce",
+  "latencia_activa_s": 111.52,
+  "latencia_pared_aproximada_s": 1009.48,
+  "mitigacion": "caffeinate -is asociado solo al PID de evaluación; sin cambios permanentes de energía",
+  "limite": "No demuestra la causa de los timeouts90s anteriores. No se modifica ninguna respuesta ni etiqueta."
+}

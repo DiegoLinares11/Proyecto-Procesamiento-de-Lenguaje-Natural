@@ -6,24 +6,24 @@ import {
 export const NODOS = {
   guardrail_entrada: { nombre: 'Guardrail de entrada', detalle: 'Secretos, datos personales e inyección', icono: ShieldCheck },
   rechazar: { nombre: 'Rechazo', detalle: 'El ticket trae un secreto', icono: ShieldX },
-  clasificar: { nombre: 'Router', detalle: 'Haiku 5.5, 5 votos', icono: GitBranch },
-  agente: { nombre: 'Agente', detalle: 'Sonnet 5.5', icono: Bot },
+  clasificar: { nombre: 'Router', detalle: 'Codex · clasificación estructurada', icono: GitBranch },
+  agente: { nombre: 'Agente', detalle: 'Codex · sesión de ChatGPT', icono: Bot },
   herramientas: { nombre: 'Herramientas', detalle: 'Solo las de la ruta', icono: Wrench },
   validar_salida: { nombre: 'Guardrail de salida', detalle: 'Citas, rol y datos personales', icono: ListChecks },
   aprobacion_humana: { nombre: 'Aprobación N2', detalle: 'Pausa con interrupt', icono: UserCheck },
   responder: { nombre: 'Respuesta', detalle: 'Contrato validado', icono: MessageSquareText },
   abstener: { nombre: 'Abstención', detalle: 'Sin evidencia: escala', icono: CircleSlash },
-  degradar: { nombre: 'Modo degradado', detalle: 'La API no respondió', icono: TriangleAlert },
+  degradar: { nombre: 'Modo degradado', detalle: 'El modelo no está disponible', icono: TriangleAlert },
 }
 
 export const FALLAS = [
   { valor: null, nombre: 'Normal' },
-  { valor: 'modelo', nombre: 'API caída' },
+  { valor: 'modelo', nombre: 'Modelo no disponible' },
   { valor: 'vectores', nombre: 'Base vectorial caída' },
   { valor: 'documento_envenenado', nombre: 'Documento envenenado' },
 ]
 
-const PII = { EMAIL: 'correo', PHONE: 'teléfono', DPI: 'DPI', CARD: 'tarjeta' }
+const PII = { PERSON: 'nombre de persona', EMAIL: 'correo', PHONE: 'teléfono', DPI: 'DPI', CARD: 'tarjeta' }
 
 export function describirGuardrail(g) {
   if (!g) return ''
@@ -64,7 +64,7 @@ export function resumirPaso(paso) {
       return `${r.triage.categoria} · ${r.triage.prioridad} · ruta ${r.ruta} · acuerdo ${(conf * 100).toFixed(0)} %`
     }
     case 'agente': {
-      if (paso.error_modelo) return `La API no respondió (${paso.error_modelo})`
+      if (paso.error_modelo) return `El modelo no está disponible (${paso.error_modelo})`
       if (paso.llamadas?.length) return `Pide ${paso.llamadas.map((l) => l.nombre).join(', ')}`
       return 'Redacta la respuesta final'
     }

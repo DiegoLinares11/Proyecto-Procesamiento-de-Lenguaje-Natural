@@ -1,0 +1,16 @@
+{
+  "python": "3.11.13",
+  "prefix": "/private/tmp/cc3103-fase4-clean-zgnh99y8/venv",
+  "base_prefix": "/opt/homebrew/opt/python@3.11/Frameworks/Python.framework/Versions/3.11",
+  "pyvenv_cfg": "home = /opt/homebrew/opt/python@3.11/bin\nimplementation = CPython\nuv = 0.13.9\nversion_info = 3.11.13\ninclude-system-site-packages = false\n",
+  "torchvision_instalado": false,
+  "versiones": {
+    "torch": "2.15.0",
+    "spacy": "3.8.18",
+    "presidio-analyzer": "2.2.366",
+    "es-core-news-md": "3.8.0",
+    "en-core-web-md": "3.8.0",
+    "pytest": "9.2.0"
+  },
+  "paquetes_instalados": 183
+}

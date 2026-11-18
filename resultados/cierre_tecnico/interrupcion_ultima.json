@@ -1,0 +1,20 @@
+{
+  "estado_observado": "ejecución interrumpida; proceso evaluador no activo",
+  "generaciones_completas": {
+    "agente": 42,
+    "rag": 23,
+    "linea_base": 10
+  },
+  "generaciones_pendientes": 13,
+  "juez_ragas_completo": false,
+  "operaciones_sin_desenlace": [
+    {
+      "sistema": "linea_base",
+      "caso": "R11",
+      "etapa": "generacion",
+      "estado": "iniciado",
+      "archivo": "d794f5af5681e65eaee5868117d824f21e2b1f69ef7751f87fe75b17d108ba36.json"
+    }
+  ],
+  "no_modifica_manifiesto_original": true
+}

@@ -1,0 +1,102 @@
+{
+  "estado": "valido_tecnicamente",
+  "version_banco": "1.0.0",
+  "sha256_banco": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
+  "procedencia": {
+    "descripcion": "Reescritura y revisión técnica asistidas por Codex; borrador original de Claude; no atribuidas a un integrante humano",
+    "redaccion_original": "Claude, borrador conservado",
+    "reescritura": "Codex, asistencia de IA",
+    "autor_f3_historico": "Claude Haiku 5.5 según metadatos de F3",
+    "independencia_humana": "pendiente de declaración y revisión por integrante que no redactó la fuente correspondiente"
+  },
+  "revision_humana": {
+    "estado": "pendiente",
+    "registro": "evaluacion/revision_humana_banco.csv",
+    "revisor": null,
+    "fecha": null,
+    "alcance": "42 casos contra fuentes; no equivale a revisión de respuestas de la fase 6"
+  },
+  "inferencias_ejecutadas": 0,
+  "mide_desempeno": false,
+  "casos": 42,
+  "grupos": {
+    "rag": 20,
+    "herramientas": 10,
+    "adversario": 12
+  },
+  "composicion": {
+    "rag": {
+      "directa": [
+        5,
+        5
+      ],
+      "parafrasis": [
+        3,
+        3
+      ],
+      "identificador": [
+        3,
+        3
+      ],
+      "compuesta": [
+        3,
+        3
+      ],
+      "ambigua": [
+        2,
+        2
+      ],
+      "sin_respuesta": [
+        2,
+        2
+      ],
+      "vigencia": [
+        2,
+        2
+      ]
+    },
+    "herramientas": {
+      "nominal": [
+        2,
+        2
+      ],
+      "herramienta_erronea": [
+        2,
+        2
+      ],
+      "fuera_de_rango": [
+        2,
+        2
+      ],
+      "confirmacion_humana": [
+        2,
+        2
+      ],
+      "servicio_caido": [
+        2,
+        2
+      ]
+    },
+    "adversario": {
+      "inyeccion": [
+        3,
+        3
+      ],
+      "permisos": [
+        3,
+        3
+      ],
+      "accion_critica": [
+        3,
+        3
+      ],
+      "alucinacion": [
+        3,
+        3
+      ]
+    }
+  },
+  "duplicados_exactos_normalizados": 0,
+  "fuentes_roles_paginas": "validos",
+  "oraculos_semanticos": "revision_documentada_no_certificacion_automatica"
+}
