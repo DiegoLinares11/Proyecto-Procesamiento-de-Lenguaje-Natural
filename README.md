@@ -8,9 +8,11 @@ acciones críticas sin aprobación humana. Todos los datos son ficticios o públ
 
 **Equipo:** Diego Linares, Christian Echeverría, Andy Fuentes y Diederich Solis.
 
-**Estado:** fase de herramientas terminada: router, 6 herramientas, aprobación humana y grafo en LangGraph.
-Reportes por fase: [línea base](resultados/linea_base/reporte_linea_base.md), [RAG](resultados/rag/reporte_rag.md)
-y [herramientas](resultados/herramientas/reporte_herramientas.md).
+**Estado:** fase de herramientas terminada, con las cuatro correcciones de la revisión del 17 de noviembre.
+El sistema de evaluación ya está armado y corre con un banco borrador. Reportes por fase:
+[línea base](resultados/linea_base/reporte_linea_base.md), [RAG](resultados/rag/reporte_rag.md),
+[herramientas](resultados/herramientas/reporte_herramientas.md) y
+[evaluación con el banco borrador](resultados/evaluacion/banco_borrador/reporte.md).
 
 ## Para el equipo
 
@@ -25,7 +27,7 @@ y [herramientas](resultados/herramientas/reporte_herramientas.md).
 
   | Fase | Responsable | Fecha | Qué falta |
   |---|---|---|---|
-  | Evaluación | Andy | 20 nov | Banco oficial de 42 casos, fidelidad con Ragas, juez LLM de citas y reporte comparativo |
+  | Evaluación | Andy | 20 nov | Revisar y reescribir el banco borrador como `evaluacion/banco.jsonl` (guía en [evaluacion/LEEME_banco.md](evaluacion/LEEME_banco.md)), correrlo, revisar a mano una muestra y analizar las fallas |
   | Seguridad | Diederich | 23 nov | Nombres con Presidio y 12 pruebas adversarias documentadas |
   | Entrega | Todos | — | Documento técnico de 10 a 15 páginas y demo de 15 minutos |
 
@@ -49,10 +51,12 @@ graph TD;
 	herramientas(herramientas)
 	validar_salida(validar_salida)
 	abstener(abstener)
+	degradar(degradar)
 	aprobacion_humana(aprobacion_humana)
 	responder(responder)
 	__end__([<p>__end__</p>]):::last
 	__start__ --> guardrail_entrada;
+	agente -.-> degradar;
 	agente -.-> herramientas;
 	agente -.-> validar_salida;
 	aprobacion_humana --> responder;
@@ -65,6 +69,7 @@ graph TD;
 	validar_salida -.-> aprobacion_humana;
 	validar_salida -.-> responder;
 	abstener --> __end__;
+	degradar --> __end__;
 	rechazar --> __end__;
 	responder --> __end__;
 	classDef default fill:#f2f0ff,line-height:1.2
@@ -85,7 +90,12 @@ y el servidor de desarrollo, que es asíncrono, las rechaza por defecto.
 Después abre en Chrome `https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024` e inicia sesión
 con una cuenta gratuita de LangSmith. Con `LANGSMITH_TRACING=false` en el `.env`, los datos no salen de la
 máquina. La entrada es `ticket_id`, `rol` y `texto`; si el grafo pide aprobar una acción, Studio muestra la
-pausa y se reanuda con `{"aprobada": true, "aprobador": "...", "rol": "N2"}`.
+pausa y se reanuda con `{"aprobada": true, "aprobador": "...", "rol": "N2"}`. `aprobada` tiene que ser un
+booleano: `"true"` entre comillas no aprueba.
+
+Usen Studio solo con tickets de prueba. El grafo enmascara el texto antes de guardarlo, pero el servidor de
+desarrollo guarda por su cuenta la entrada de cada corrida en `.langgraph_api/`, que no se sube. Borrar el
+hilo en Studio la borra.
 
 Con las mismas 37 consultas de validación:
 
@@ -112,9 +122,11 @@ sintéticos. Estos números salen de un set de validación interno; los definiti
 | `src/tickets_rag/` | Código: ingesta, PII, búsqueda, clasificador, herramientas, guardrails y el grafo (`grafo.py`) |
 | `scripts/` | Pasos del pipeline, en el orden de abajo |
 | `evaluacion/validacion_dev.jsonl` | 37 consultas de validación interna. No es el banco oficial de la fase 4 |
+| `evaluacion/banco_borrador.jsonl` | Borrador de los 42 casos de la fase 4, para que Andy lo revise; guía en `evaluacion/LEEME_banco.md` |
 | `resultados/linea_base/` | Fase 2: métricas de la línea base, calculadas con las primeras 22 consultas |
 | `resultados/rag/` | Fase 3: comparación de configuraciones y generación de ambos sistemas con las 37 consultas |
 | `resultados/herramientas/` | Clasificador few-shot (desarrollo y prueba) y demostración del grafo de punta a punta |
+| `resultados/evaluacion/` | Fase 4: métricas del banco con los tres sistemas, juez LLM y Ragas |
 | `docker-compose.yml` | PostgreSQL con pgvector, solo en 127.0.0.1:5433; también guarda el historial y el checkpointer |
 | `tests/` | Pruebas automáticas, sin llamadas a la API; las de pgvector se saltan si la base no está levantada |
 
@@ -134,7 +146,7 @@ docker compose up -d                          # PostgreSQL con pgvector
 uv run python scripts/ingestar.py             # escribe los chunks en indices/
 uv run python scripts/indexar_vectores.py     # embeddings en pgvector; la primera vez descarga los modelos
 uv run python scripts/preparar_bd.py          # historial, tablas de acciones y roles (genera sus claves en el .env)
-uv run pytest                                 # unas 80 pruebas, ninguna gasta tokens
+uv run pytest                                 # unas 105 pruebas, ninguna gasta tokens
 uv run python scripts/atender_ticket.py "Outlook se queda en Procesando" --rol N1
 ```
 
@@ -154,6 +166,7 @@ uv run python scripts/evaluar_generacion.py --sistema linea_base   # requiere AP
 uv run python scripts/evaluar_generacion.py --sistema rag          # requiere API key
 uv run python scripts/evaluar_clasificador_llm.py --conjunto desarrollo   # requiere API key
 uv run python scripts/demo_grafo.py                             # 7 tickets de punta a punta (requiere API key)
+uv run python scripts/evaluar_banco.py --juez-en agente         # fase 4: banco de 42 casos (requiere API key; unos US$5)
 ```
 
 **Regenerar las fuentes, solo si cambian:**
