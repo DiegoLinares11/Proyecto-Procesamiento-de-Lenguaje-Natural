@@ -35,6 +35,9 @@ UMBRAL_TAU = 0.0045
 TIMEOUT_HERRAMIENTA_S = 10
 REINTENTOS_HERRAMIENTA = 1
 MAX_LLAMADAS_HERRAMIENTAS = 5
+# Cliente de la API: sin esto, una llamada colgada espera hasta 10 minutos (valor por defecto del SDK)
+TIMEOUT_MODELO_S = 90
+REINTENTOS_MODELO = 2
 CORRIDAS_CLASIFICADOR = 5
 # Revisión humana si algún voto discrepa (confianza < 1). Con el 0.6 del anteproyecto ningún ticket
 # llegaba a revisión; con esto, en los 40 de desarrollo se revisa el 28 % y se atrapan 5 de 8 errores.
@@ -43,11 +46,14 @@ CONFIANZA_MINIMA = 1.0
 # Modelos (sección 9 del anteproyecto)
 MODELO_GENERADOR = "claude-sonnet-5-5"
 MODELO_CLASIFICADOR = "claude-haiku-5-5"
+# Juez de la evaluación: un modelo distinto del generador, para no calificar sus propias respuestas
+MODELO_JUEZ = "claude-opus-5-5"
 
 # Precios en US$ por millón de tokens (entrada, salida, escritura en caché de 5 min, lectura de caché),
 # según platform.claude.com/docs/en/about-claude/pricing, consultado el 2026-11-08.
 # El de Haiku 5.5 aplica a prompts de hasta 100 000 tokens.
 PRECIOS = {
+    "claude-opus-5-5": (4.00, 20.00, 5.00, 0.20),      # juez de la evaluación
     "claude-sonnet-5-5": (2.00, 10.00, 2.50, 0.10),
     "claude-haiku-5-5": (0.10, 0.50, 0.125, 0.01),
 }

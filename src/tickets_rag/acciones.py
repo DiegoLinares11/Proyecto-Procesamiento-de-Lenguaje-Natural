@@ -125,6 +125,9 @@ def solicitar_accion(conexion: psycopg.Connection, ticket_id: str, accion: str, 
 def resolver_solicitud(conexion: psycopg.Connection, solicitud_id: int, aprobada: bool,
                        rol_aprobador: str, aprobador: str) -> dict:
     """La decisión de una persona N2. No es una herramienta del agente: la llama el grafo al reanudar."""
+    # Segunda barrera: el grafo ya valida la decisión, pero esta función nunca convierte "false" en True.
+    if type(aprobada) is not bool:
+        raise ErrorAccion(f"La decisión debe ser true o false (booleano), no {aprobada!r}.")
     if rol_aprobador != "N2":
         raise ErrorPermiso("Solo un técnico N2 puede aprobar o rechazar una acción.")
     fila = conexion.execute(

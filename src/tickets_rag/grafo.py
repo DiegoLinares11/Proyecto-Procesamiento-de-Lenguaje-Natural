@@ -5,6 +5,7 @@
       clasificar (router)
           │
         agente ⇄ herramientas          (razonar → actuar → observar; máximo 5 herramientas)
+          │    └──la API falla──> degradar (resultados de BM25 para revisión humana) ──> FIN
           │
       validar_salida ──no válida (1 reintento)──> agente
           │        └──sin evidencia o 2.º fallo──> abstener (y escalar) ──> FIN
@@ -14,14 +15,15 @@
       responder ──> FIN
 
 El router no deja que el modelo elija libremente: cada ruta tiene su lista de herramientas.
-El texto que entra al grafo ya pasó el guardrail de entrada, así que el checkpointer nunca guarda
-datos personales ni contraseñas del ticket original.
+El texto original nunca llega al estado: GrafoConEntradaSegura le aplica el guardrail de entrada
+antes de que LangGraph lo reciba, así que ningún checkpoint guarda datos personales ni contraseñas.
 """
 
 from __future__ import annotations
 
 import json
 import operator
+import re
 import uuid
 from contextlib import contextmanager
 from functools import lru_cache
@@ -29,7 +31,9 @@ from typing import Annotated, TypedDict
 
 import anthropic
 from langgraph.graph import END, START, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Command, interrupt
+from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr, StringConstraints, ValidationError
 
 from tickets_rag import acciones, config
 from tickets_rag.contrato import Fuente, Respuesta
@@ -81,11 +85,32 @@ INSTRUCCIONES_RUTA = {
                         "solicitudes fuera de alcance). Si no hay nada, marca sin_evidencia.",
 }
 
+# El modelo no puede anunciar un escalamiento que no hizo (hallazgo 4 de la revisión de Diederich).
+# Solo frases en primera persona o que dan el escalamiento por hecho: "escale a N2" (indicación al
+# agente) y "en un caso parecido se escaló" no cuentan.
+RE_ANUNCIA_ESCALAMIENTO = re.compile(
+    r"(?i)\b(escalé|he escalado|hemos escalado|ya se escaló|ya fue escalado|ya está escalado|ya quedó escalado"
+    r"|se escaló (?:el|este|su) ticket|(?:el|este|su) ticket (?:ya )?(?:fue|ha sido|quedó|está) escalado)\b")
+
+
+class DecisionN2(BaseModel):
+    """Lo que manda la persona al reanudar el grafo. Estricto: "false", 1 o "sí" no son un booleano."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    aprobada: StrictBool
+    aprobador: Annotated[str, StringConstraints(strict=True, strip_whitespace=True, min_length=1, max_length=100)]
+    rol: StrictStr
+
+
+def _motivos_validacion(error: ValidationError) -> str:
+    return "; ".join(f"{'.'.join(map(str, e['loc'])) or 'decisión'}: {e['msg']}" for e in error.errors())
+
 
 class Estado(TypedDict, total=False):
     ticket_id: str
     rol: str
-    texto: str            # solo en LangGraph Studio: el guardrail lo enmascara y lo vacía en el primer nodo
+    texto: str            # solo como campo de entrada (Studio); GrafoConEntradaSegura lo quita antes del grafo
     texto_seguro: str
     guardrail: dict
     triage: dict
@@ -97,6 +122,7 @@ class Estado(TypedDict, total=False):
     llamadas: int
     reintentos_salida: int
     salida_modelo: dict | None
+    error_modelo: str     # la API falló: el grafo responde de forma controlada en vez de reventar
     errores_salida: list[str]
     siguiente: str
     solicitudes: list[dict]
@@ -117,15 +143,11 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
     # ---------------------------------------------------------------- nodos
 
     def guardrail_entrada(e: Estado) -> dict:
-        cambios: dict = {}
-        if not e.get("guardrail"):
-            # Entrada desde LangGraph Studio: se revisa aquí y el texto original se vacía del estado.
-            validar_sesion(e["ticket_id"], e["rol"])
-            decision = revisar_entrada(e.get("texto", ""))
-            cambios = {"texto": "", "texto_seguro": decision.texto_seguro, "guardrail": decision.para_traza()}
-        g = cambios.get("guardrail") or e["guardrail"]
+        # El guardrail ya corrió antes de entrar (GrafoConEntradaSegura o atender); aquí solo se decide la ruta.
+        validar_sesion(e["ticket_id"], e["rol"])
+        g = e["guardrail"]
         revision = ["posible inyección de instrucciones"] if g["decision"] == "WARN" else []
-        return {**cambios, "revision": revision, "traza": [{"etapa": "guardrail_entrada", **g}]}
+        return {"revision": revision, "traza": [{"etapa": "guardrail_entrada", **g}]}
 
     def rechazar(e: Estado) -> dict:
         respuesta = Respuesta(
@@ -163,18 +185,27 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
                          f"<clasificacion categoria=\"{t.get('categoria')}\" prioridad=\"{t.get('prioridad')}\" "
                          f"rol_usuario=\"{e['rol']}\" />\n<ticket>\n{e['texto_seguro']}\n</ticket>"}]
         agotadas = e.get("llamadas", 0) >= config.MAX_LLAMADAS_HERRAMIENTAS
-        r = cliente.beta.messages.create(
-            model=modelo,
-            max_tokens=8000,
-            system=f"{SISTEMA}\n\nRuta: {ruta}. {INSTRUCCIONES_RUTA[ruta]}",
-            messages=mensajes,
-            tools=definiciones_api(RUTAS[ruta]),
-            tool_choice={"type": "none"} if agotadas else {"type": "auto"},
-            output_config={"effort": "medium", "format": {"type": "json_schema", "schema": esquema_salida}},
-            cache_control={"type": "ephemeral"},
-            betas=[BETA_RESPALDO],
-            fallbacks="default",
-        )
+        try:
+            r = cliente.beta.messages.create(
+                model=modelo,
+                max_tokens=8000,
+                system=f"{SISTEMA}\n\nRuta: {ruta}. {INSTRUCCIONES_RUTA[ruta]}",
+                messages=mensajes,
+                tools=definiciones_api(RUTAS[ruta]),
+                tool_choice={"type": "none"} if agotadas else {"type": "auto"},
+                output_config={"effort": "medium", "format": {"type": "json_schema", "schema": esquema_salida}},
+                cache_control={"type": "ephemeral"},
+                betas=[BETA_RESPALDO],
+                fallbacks="default",
+            )
+        except anthropic.APIError as error:
+            # Sin red, timeout, 429, 5xx...: el SDK ya reintentó. En la traza va solo el tipo y el código,
+            # nunca el texto del ticket.
+            tipo = type(error).__name__
+            codigo = getattr(error, "status_code", None)
+            motivo = f"{tipo} {codigo}" if codigo else tipo
+            return {"error_modelo": motivo, "revision": [f"el modelo no respondió ({motivo})"],
+                    "traza": [{"etapa": "agente", "error": motivo}]}
         u = r.usage
         uso = {"modelo": r.model, "entrada": u.input_tokens, "salida": u.output_tokens,
                "escritura": getattr(u, "cache_creation_input_tokens", 0) or 0,
@@ -255,6 +286,9 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
             abstiene = True  # ninguna búsqueda pasó el umbral τ: no hay evidencia, aunque el modelo responda
         if e["ruta"] == "datos" and not abstiene and not e.get("consultas_ok"):
             errores.append("en la ruta de datos hay que responder con una consulta a query_tickets")
+        if RE_ANUNCIA_ESCALAMIENTO.search(s["answer"]) and "escalate" not in (e.get("herramientas") or []):
+            errores.append("la respuesta dice que el ticket se escaló, pero escalate no se completó; "
+                           "no anuncies acciones que no hiciste")
         reintentos = e.get("reintentos_salida", 0)
         if abstiene:
             siguiente = "abstener"
@@ -291,13 +325,40 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
                     "traza": [{"etapa": "abstencion", "motivo": "fuera de dominio", "escalado": False}]}
         fuentes = [c for c in (e.get("evidencia") or {}) if not c.startswith("sql-")][:10]
         r = ejecutar(recursos, contexto(e), "escalate", {"motivo": f"Abstención: {motivo}", "fuentes": fuentes}, {"escalate"})
+        # Solo se anuncia el escalamiento si quedó registrado (hallazgo 4 de la revisión de Diederich).
+        usadas = e.get("herramientas", []) + (["escalate"] if r.ok else [])
+        revision = ["abstención"]
+        if r.ok:
+            cierre = "Lo escalé a N2 para su revisión."
+        else:
+            cierre = "No se pudo registrar el escalamiento a N2: escálelo manualmente desde la mesa de ayuda."
+            revision.append(f"el escalamiento a N2 falló: {r.error}")
         respuesta = Respuesta(
-            answer="No encontré evidencia suficiente para responder este ticket con las fuentes disponibles. "
-                   "Lo escalé a N2 para su revisión.",
-            sources=[], abstained=True, tool_used=", ".join(dict.fromkeys(e.get("herramientas", []) + ["escalate"])),
-            needs_human_review=True)
+            answer=f"No encontré evidencia suficiente para responder este ticket con las fuentes disponibles. {cierre}",
+            sources=[], abstained=True, tool_used=", ".join(dict.fromkeys(usadas)) or None, needs_human_review=True)
         return {"respuesta": respuesta.model_dump(), "herramientas": ["escalate"] if r.ok else [],
-                "revision": ["abstención"], "traza": [{"etapa": "abstencion", "motivo": motivo, "escalado": r.ok}]}
+                "revision": revision, "traza": [{"etapa": "abstencion", "motivo": motivo, "escalado": r.ok,
+                                                 "error_escalamiento": r.error}]}
+
+    def degradar(e: Estado) -> dict:
+        """La API del modelo no respondió: en vez de reventar, devuelve lo que encuentra BM25 (sin modelo,
+        filtrado por rol y vigencia) para que el agente lo revise. Sección 8 del anteproyecto."""
+        resultados = []
+        if recursos.bm25 is not None:
+            resultados = recursos.bm25.buscar(e["texto_seguro"], e["rol"], top_k=3, tipos=["manual", "articulo"])
+        fuentes = [Fuente(source=r.chunk["source"], page=r.chunk["page"], chunk_id=r.chunk["chunk_id"]) for r in resultados]
+        if resultados:
+            lista = "\n".join(f"- {r.chunk['source']}, página {r.chunk['page']}: {r.chunk['titulo_seccion']}" for r in resultados)
+            detalle = f"Estos son los fragmentos más parecidos según la búsqueda por palabras; revíselos antes de responder:\n{lista}"
+        else:
+            detalle = "La búsqueda por palabras tampoco encontró fragmentos relacionados."
+        respuesta = Respuesta(
+            answer=f"El modelo de lenguaje no está disponible en este momento, así que no se generó una respuesta. "
+                   f"{detalle}\nVuelva a intentarlo en unos minutos o atienda el ticket manualmente.",
+            sources=fuentes, abstained=True,
+            tool_used=", ".join(dict.fromkeys(e.get("herramientas", []))) or None, needs_human_review=True)
+        return {"respuesta": respuesta.model_dump(),
+                "traza": [{"etapa": "degradado", "error": e["error_modelo"], "fuentes": [f.chunk_id for f in fuentes]}]}
 
     def aprobacion_humana(e: Estado) -> dict:
         notas, revision, traza = [], [], []
@@ -308,11 +369,21 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
             # Pausa: el grafo se guarda y espera a una persona. Antes del interrupt no hay efectos,
             # porque al reanudar este nodo vuelve a correr desde el inicio.
             decision = interrupt({"solicitud_id": s["solicitud_id"], "ticket_id": s["ticket_id"], "accion": s["accion"],
-                                  "pregunta": f"¿Apruebas '{s['accion']}' para el ticket {s['ticket_id']}?"})
+                                  "pregunta": f"¿Apruebas '{s['accion']}' para el ticket {s['ticket_id']}?",
+                                  "formato": {"aprobada": "true o false (booleano)", "aprobador": "nombre", "rol": "N2"}})
+            try:
+                # Antes, bool("false") era True y aprobaba (hallazgo 1 de la revisión de Diederich).
+                d = DecisionN2.model_validate(decision)
+            except ValidationError as error:
+                motivo = _motivos_validacion(error)
+                notas.append(f"Acción {s['accion']}: sigue pendiente (aprobación inválida: {motivo})")
+                revision.append(f"aprobación inválida: {motivo}")
+                traza.append({"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "error": motivo})
+                pendientes.append(s)
+                continue
             try:
                 resultado = acciones.resolver_solicitud(recursos.conexion_acciones, s["solicitud_id"],
-                                                        bool(decision.get("aprobada")), decision.get("rol", ""),
-                                                        decision.get("aprobador", "desconocido"))
+                                                        d.aprobada, d.rol, d.aprobador)
                 notas.append(f"Acción {s['accion']}: {resultado['nota']}")
                 traza.append({"etapa": "aprobacion", "solicitud_id": s["solicitud_id"], "estado": resultado["estado"],
                               "aprobado_por": resultado["aprobado_por"]})
@@ -349,6 +420,8 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
         return "rechazar" if e["guardrail"]["decision"] == "BLOCK" else "clasificar"
 
     def tras_agente(e: Estado) -> str:
+        if e.get("error_modelo"):
+            return "degradar"
         return "validar_salida" if e.get("salida_modelo") is not None else "herramientas"
 
     def tras_validar(e: Estado) -> str:
@@ -357,19 +430,58 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
     g = StateGraph(Estado)
     for nombre, nodo in [("guardrail_entrada", guardrail_entrada), ("rechazar", rechazar), ("clasificar", clasificar),
                          ("agente", agente), ("herramientas", herramientas), ("validar_salida", validar_salida),
-                         ("abstener", abstener), ("aprobacion_humana", aprobacion_humana), ("responder", responder)]:
+                         ("abstener", abstener), ("degradar", degradar), ("aprobacion_humana", aprobacion_humana),
+                         ("responder", responder)]:
         g.add_node(nombre, nodo)
     g.add_edge(START, "guardrail_entrada")
     g.add_conditional_edges("guardrail_entrada", tras_guardrail, {"rechazar": "rechazar", "clasificar": "clasificar"})
     g.add_edge("rechazar", END)
     g.add_edge("clasificar", "agente")
-    g.add_conditional_edges("agente", tras_agente, {"herramientas": "herramientas", "validar_salida": "validar_salida"})
+    g.add_conditional_edges("agente", tras_agente,
+                            {"herramientas": "herramientas", "validar_salida": "validar_salida", "degradar": "degradar"})
     g.add_edge("herramientas", "agente")
     g.add_conditional_edges("validar_salida", tras_validar, ["agente", "abstener", "aprobacion_humana", "responder"])
     g.add_edge("abstener", END)
+    g.add_edge("degradar", END)
     g.add_edge("aprobacion_humana", "responder")
     g.add_edge("responder", END)
-    return g.compile(checkpointer=checkpointer)
+    grafo = g.compile(checkpointer=checkpointer)
+    grafo.__class__ = GrafoConEntradaSegura
+    return grafo
+
+
+# ---------------------------------------------------------------- entrada segura
+
+def _sanear_entrada(entrada):
+    """Aplica el guardrail de entrada y quita el texto original antes de que LangGraph lo reciba."""
+    if not isinstance(entrada, dict) or "texto" not in entrada:
+        return entrada  # Command(resume=...) o una entrada que ya viene saneada desde atender()
+    entrada = dict(entrada)
+    texto = entrada.pop("texto")
+    if not entrada.get("guardrail"):
+        decision = revisar_entrada(texto)
+        entrada["texto_seguro"] = decision.texto_seguro
+        entrada["guardrail"] = decision.para_traza()
+    return entrada
+
+
+class GrafoConEntradaSegura(CompiledStateGraph):
+    """El grafo compilado, pero el texto del ticket pasa por el guardrail antes de entrar.
+
+    LangGraph guarda la entrada en el primer checkpoint antes de correr cualquier nodo, así que un nodo
+    guardrail llega tarde (hallazgo 2 de la revisión de Diederich). invoke, ainvoke y LangGraph Studio
+    terminan llamando a stream o astream, así que basta con sanear ahí.
+    """
+
+    def stream(self, input, *args, **kwargs):  # noqa: A002 (mismo nombre que en LangGraph)
+        return super().stream(_sanear_entrada(input), *args, **kwargs)
+
+    def astream(self, input, *args, **kwargs):  # noqa: A002
+        return super().astream(_sanear_entrada(input), *args, **kwargs)
+
+
+def cliente_api() -> anthropic.Anthropic:
+    return anthropic.Anthropic(timeout=config.TIMEOUT_MODELO_S, max_retries=config.REINTENTOS_MODELO)
 
 
 # ---------------------------------------------------------------- entrada de alto nivel
@@ -383,7 +495,7 @@ def sistema(cliente: anthropic.Anthropic | None = None):
     from tickets_rag.ingesta import cargar_chunks
 
     config.cargar_entorno()
-    cliente = cliente or anthropic.Anthropic()
+    cliente = cliente or cliente_api()
     recursos = Recursos.crear(cargar_chunks(), cliente)
     recursos.calentar()
     with PostgresSaver.from_conn_string(vectores.url_bd()) as checkpointer:
@@ -396,7 +508,7 @@ def _recursos_studio() -> tuple[Recursos, anthropic.Anthropic]:
     from tickets_rag.ingesta import cargar_chunks
 
     config.cargar_entorno()
-    cliente = anthropic.Anthropic()
+    cliente = cliente_api()
     recursos = Recursos.crear(cargar_chunks(), cliente)
     recursos.calentar()
     return recursos, cliente

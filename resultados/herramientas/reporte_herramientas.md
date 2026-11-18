@@ -30,7 +30,8 @@ Fecha: 15 de noviembre de 2026.
   hasta que una persona N2 decide.
 - **El guardrail de entrada corre antes del grafo.** El checkpointer guarda todo el estado en PostgreSQL;
   así solo guarda el texto enmascarado y nunca una contraseña. Con un secreto, el ticket se rechaza sin
-  llamar a ningún modelo.
+  llamar a ningún modelo. Desde el 17 de noviembre también se aplica cuando se entra por Studio (ver
+  correcciones).
 - **Abstención en tres niveles.** El umbral τ sobre el reranker, el modelo que declara que no hay
   evidencia y la validación de citas, con un reintento. Al abstenerse, el ticket se escala a N2, salvo
   que esté fuera de dominio.
@@ -93,6 +94,23 @@ un poco de la de 10 s.
 
 **Costo:** el caso de F2 cuesta US$0.033 y se pasa de la meta de US$0.03, por los fragmentos largos en
 inglés.
+
+## Correcciones de la revisión del 17 de noviembre
+
+Diederich revisó el grafo y encontró cuatro fallos. Los cuatro eran reales. Cada uno tiene ahora una prueba
+en `tests/test_hallazgos.py` que reproduce el fallo: las 16 pruebas de fallos fallaban con el código anterior
+y pasan con la corrección.
+
+| Fallo | Qué pasaba | Corrección |
+|---|---|---|
+| La aprobación no era estricta | El grafo hacía `bool(decision["aprobada"])`, y `bool("false")` es `True`: un `"false"` mandado desde Studio aprobaba la acción | La decisión se valida con Pydantic (`StrictBool`, aprobador no vacío, sin campos extra). Si no es válida, la acción sigue pendiente. `resolver_solicitud` también rechaza lo que no sea booleano |
+| El texto original quedaba en un checkpoint | Al entrar por Studio o con `grafo.invoke` directo, LangGraph guarda la entrada en el primer checkpoint antes de correr cualquier nodo. El nodo guardrail llegaba tarde. Por `atender()` no pasaba | El grafo compilado sanea la entrada en `stream` y `astream`, por donde pasan `invoke` y Studio, antes de que LangGraph la reciba. Comprobado también con el servidor de Studio: el historial del hilo no tiene ni la contraseña ni el correo |
+| Una falla de la API reventaba el grafo | La llamada a Sonnet no tenía manejo de errores; un timeout o un 5xx terminaba en excepción | Si la API falla, después de los reintentos del SDK, el grafo va al nodo `degradar`. Devuelve los 3 fragmentos que encuentra BM25, filtrados por rol y vigencia, con `needs_human_review`. El cliente ahora tiene timeout de 90 s, porque antes eran 10 minutos |
+| Anunciaba escalamientos que no se hicieron | Al abstenerse, la respuesta decía «Lo escalé a N2» aunque `escalate` hubiera fallado | El mensaje y `tool_used` dependen de que el escalamiento quedara registrado. Si falló, se pide escalar a mano y se marca para revisión. El guardrail de salida también rechaza una respuesta del modelo que diga que escaló sin haber llamado a `escalate` |
+
+Lo que queda fuera de nuestro control: el servidor de desarrollo de Studio guarda por su cuenta la entrada
+de cada corrida en `.langgraph_api/`, que está en el `.gitignore`. Al borrar el hilo en Studio, la borra.
+Studio es solo para desarrollo y solo se usa con tickets de prueba.
 
 ## Limitaciones y pendientes
 
