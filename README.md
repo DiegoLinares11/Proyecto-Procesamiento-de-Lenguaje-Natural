@@ -36,6 +36,27 @@ El sistema de evaluación ya está armado y corre con un banco borrador. Reporte
 - **Cada quien usa su propia API key de Anthropic.** Va en su `.env`, que nunca se sube. No la compartan
   por chat.
 
+## La demo
+
+Una página para ver el sistema funcionando: el grafo se ilumina paso a paso mientras corre, la respuesta
+trae sus citas (cada una abre el fragmento y el PDF en la página exacta) y, cuando hay una acción sensible,
+aparece la ventana de aprobación de N2. Trae ejemplos para los seis puntos que pide el enunciado: consulta
+nominal, trazabilidad de citas, abstención, herramientas, seguridad y fallas. La pestaña Evaluación muestra
+las métricas del banco y el diagnóstico de una falla real.
+
+```bash
+docker compose up -d
+cd demo && npm install && npm run build && cd ..   # una vez, o cuando cambie la página (necesita Node 20+)
+uv run uvicorn tickets_rag.api:app --host 127.0.0.1 --port 8000
+```
+
+Después abran `http://127.0.0.1:8000`. El backend es FastAPI (`src/tickets_rag/api.py`) y manda cada paso
+del grafo con Server-Sent Events. La página es React con Vite y Tailwind (`demo/`). Para cambiar la página
+con recarga en vivo: dejen corriendo uvicorn, corran `npm run dev` en `demo/` y abran `http://127.0.0.1:5173`.
+
+Cada ticket gasta tokens de su API key, unos US$0.01 a US$0.03. Los de contraseña y de API caída casi
+no gastan.
+
 ## El grafo
 
 Generado desde el código con `scripts/dibujar_grafo.py`. Las flechas punteadas son decisiones del grafo.
@@ -127,6 +148,7 @@ sintéticos. Estos números salen de un set de validación interno; los definiti
 | `resultados/rag/` | Fase 3: comparación de configuraciones y generación de ambos sistemas con las 37 consultas |
 | `resultados/herramientas/` | Clasificador few-shot (desarrollo y prueba) y demostración del grafo de punta a punta |
 | `resultados/evaluacion/` | Fase 4: métricas del banco con los tres sistemas, juez LLM y Ragas |
+| `demo/` | Página de la demo (React + Vite + Tailwind); el backend está en `src/tickets_rag/api.py` |
 | `docker-compose.yml` | PostgreSQL con pgvector, solo en 127.0.0.1:5433; también guarda el historial y el checkpointer |
 | `tests/` | Pruebas automáticas, sin llamadas a la API; las de pgvector se saltan si la base no está levantada |
 
@@ -146,7 +168,7 @@ docker compose up -d                          # PostgreSQL con pgvector
 uv run python scripts/ingestar.py             # escribe los chunks en indices/
 uv run python scripts/indexar_vectores.py     # embeddings en pgvector; la primera vez descarga los modelos
 uv run python scripts/preparar_bd.py          # historial, tablas de acciones y roles (genera sus claves en el .env)
-uv run pytest                                 # unas 115 pruebas, ninguna gasta tokens
+uv run pytest                                 # unas 130 pruebas, ninguna gasta tokens
 uv run python scripts/atender_ticket.py "Outlook se queda en Procesando" --rol N1
 ```
 

@@ -28,3 +28,7 @@ Thumbs.db
 
 # Corridas parciales de la evaluación (--casos)
 resultados/evaluacion/*/parcial/
+
+# Demo: dependencias y página armada (se generan con npm install y npm run build)
+demo/node_modules/
+demo/dist/

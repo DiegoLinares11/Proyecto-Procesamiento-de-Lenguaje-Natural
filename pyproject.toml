@@ -5,6 +5,7 @@ description = "Asistente NLP/RAG agéntico para tickets de soporte de TI (CC3103
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "anthropic>=2.7.0",
+    "fastapi>=0.163.2",
     "fpdf2>=2.9.0",
     "huggingface-hub>=2.4.0",
     "langgraph>=1.2.22",
@@ -22,6 +23,7 @@ dependencies = [
     "sentence-transformers>=6.2.0",
     "tokenizers>=0.23.3",
     "torch>=2.11.0",
+    "uvicorn>=0.54.0",
 ]
 
 [build-system]
