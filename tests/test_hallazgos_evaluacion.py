@@ -8,6 +8,8 @@ H06: query_tickets decía truncado = false aunque la consulta se hubiera cortado
      afirmó que no había más tickets (devolvió 20 de 25).
 """
 
+from types import SimpleNamespace
+
 import psycopg
 import pytest
 
@@ -102,3 +104,57 @@ def test_truncado_cuando_la_consulta_se_corta_en_su_limite(conexion):
 def test_truncado_tambien_en_tickets_por_procedimiento(conexion):
     pocos = query_tickets(conexion, "tickets_por_procedimiento", {"seccion": "2.1", "limite": 1})
     assert len(pocos["filas"]) == 1 and pocos["truncado"]
+
+
+# ---------------------------------------------------------------- Escalamientos innecesarios
+
+# Motivos reales de la evaluación: el modelo llamaba a escalate para decir que no escalaba
+MOTIVOS_FALSOS = ["placeholder", "No procede escalar: el procedimiento 4.3 se resuelve en N1.",
+                  "No corresponde escalar, se responde con los pasos del manual", "x"]
+
+
+@pytest.fixture
+def escalamientos(monkeypatch, chunks):
+    registrados = []
+    monkeypatch.setattr(H.acciones, "escalar",
+                        lambda conexion, ticket_id, motivo, fuentes, rol: registrados.append(motivo) or
+                        {"ticket_id": ticket_id, "escalado": True, "nuevo": True})
+    return SimpleNamespace(registrados=registrados, recursos=H.Recursos(chunks=chunks, bm25=None))
+
+
+@pytest.mark.parametrize("motivo", MOTIVOS_FALSOS)
+def test_un_motivo_que_dice_que_no_hay_que_escalar_no_escala(escalamientos, motivo):
+    r = H.ejecutar(escalamientos.recursos, H.Contexto(TICKET, "N1"), "escalate",
+                   {"causa": "pasos_agotados", "motivo": motivo}, {"escalate"})
+    assert not r.ok and "no llames a escalate" in r.error
+    assert escalamientos.registrados == []  # se rechaza antes de escribir en la base
+
+
+def test_escalar_exige_una_causa_del_procedimiento_8_1(escalamientos):
+    sin_causa = H.ejecutar(escalamientos.recursos, H.Contexto(TICKET, "N1"), "escalate",
+                           {"motivo": "El usuario ya reinició y sigue la pantalla azul"}, {"escalate"})
+    assert not sin_causa.ok and "causa" in sin_causa.error
+    ok = H.ejecutar(escalamientos.recursos, H.Contexto(TICKET, "N1"), "escalate",
+                    {"causa": "pasos_agotados", "motivo": "El usuario ya reinició y sigue la pantalla azul"}, {"escalate"})
+    assert ok.ok and escalamientos.registrados == ["[pasos_agotados] El usuario ya reinició y sigue la pantalla azul"]
+    # La causa va primero en el esquema, por lo que aprendimos con query_tickets
+    esquema = H.definiciones_api(["escalate"])[0]["input_schema"]
+    assert list(esquema["properties"])[0] == "causa" and "causa" in esquema["required"]
+
+
+def test_el_modelo_no_puede_usar_la_causa_reservada_para_la_abstencion(falsas, chunks, chunk_manual):
+    modelo = ModeloFalso(pide(("search_docs", {"query": "outlook"})),
+                         pide(("escalate", {"causa": "sin_evidencia", "motivo": "No encontré el procedimiento exacto"})),
+                         final("Siga el 3.1.", [chunk_manual["chunk_id"]]))
+    estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "Outlook no abre")
+    rechazo = modelo.llamadas[2]["messages"][-1]["content"][0]
+    assert rechazo["is_error"] and "la usa el sistema" in rechazo["content"]
+    assert "escalate" not in falsas.llamadas and "escalate" not in (estado["respuesta"]["tool_used"] or "")
+
+
+def test_la_abstencion_sigue_escalando_con_su_causa(falsas, chunks):
+    falsas.cfg["suficiente"] = False
+    modelo = ModeloFalso(pide(("search_docs", {"query": "impresora 3D"})), final("No hay evidencia.", [], sin_evidencia=True))
+    estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "¿Cómo configuro la impresora 3D?")
+    assert [e.causa for e in falsas.llamadas["escalate"]] == ["sin_evidencia"]
+    assert "Lo escalé a N2" in estado["respuesta"]["answer"]

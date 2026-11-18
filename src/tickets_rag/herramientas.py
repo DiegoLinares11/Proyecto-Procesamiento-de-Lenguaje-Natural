@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
@@ -101,7 +102,23 @@ class EntradaAccion(_Entrada):
     motivo: str = Field(description="Por qué hace falta, citando el procedimiento del manual que lo indica.")
 
 
+# Causas de escalamiento del procedimiento 8.1 del manual. sin_evidencia la usa el grafo al abstenerse;
+# el modelo no puede usarla (lo bloquea el nodo de herramientas).
+CausaEscalamiento = Literal["procedimiento_exclusivo_n2", "pasos_agotados", "incidente_seguridad", "varias_personas",
+                            "accion_sensible", "sin_evidencia"]
+# Motivos que en realidad dicen que no hay que escalar, o que están vacíos. En la evaluación del 17 de
+# noviembre el modelo llamó a escalate con «placeholder» y con «No procede escalar: el 4.3 se resuelve en N1».
+RE_NO_ESCALA = re.compile(
+    r"(?i)\bno\s+(?:procede|corresponde|hace\s+falta|es\s+necesario|se\s+requiere|amerita)\s+(?:escalar|el\s+escalamiento)"
+    r"|\bno\s+(?:escalar|se\s+escala|escalo)\b|\bplaceholder\b|\bpor\s+completar\b")
+
+
 class EntradaEscalar(_Entrada):
+    causa: CausaEscalamiento = Field(
+        description="Causa del procedimiento 8.1 que se cumple hoy para lo que describe el ticket: el procedimiento es "
+                    "exclusivo de N2, el ticket dice que ya se aplicaron los pasos y el problema sigue, posible incidente "
+                    "de seguridad, afecta a varias personas o a un proceso crítico, o hace falta una acción que solo N2 "
+                    "aprueba. sin_evidencia está reservada para el sistema.")
     motivo: str = Field(description="Diagnóstico breve: qué se intentó y por qué hace falta N2. Sin datos personales.")
     fuentes: list[str] = Field(default_factory=list, max_length=10,
                                description="chunk_id de la evidencia revisada, máximo 10.")
@@ -217,11 +234,15 @@ def take_action(recursos: Recursos, contexto: Contexto, e: EntradaAccion) -> dic
 
 
 def escalate(recursos: Recursos, contexto: Contexto, e: EntradaEscalar) -> dict:
+    if len(e.motivo.strip()) < 15 or RE_NO_ESCALA.search(e.motivo):
+        raise ErrorHerramienta("No se escaló: el motivo está vacío o dice que no hace falta escalar. Si no hace falta, "
+                               "no llames a escalate y responde con los pasos del procedimiento.")
     desconocidas = [f for f in e.fuentes if f not in recursos.chunk_ids]
     if desconocidas:
         raise ErrorHerramienta(f"Fuentes que no existen en el índice: {desconocidas}. Usa chunk_id de la evidencia.")
     try:
-        return acciones.escalar(recursos.conexion_acciones, contexto.ticket_id, e.motivo, e.fuentes, contexto.rol)
+        return acciones.escalar(recursos.conexion_acciones, contexto.ticket_id, f"[{e.causa}] {e.motivo}", e.fuentes,
+                                contexto.rol)
     except acciones.ErrorAccion as error:
         raise ErrorHerramienta(str(error)) from None
 
@@ -260,7 +281,10 @@ HERRAMIENTAS: dict[str, Herramienta] = {h.nombre: h for h in (
                 "no se ejecuta nada al llamarla.",
                 EntradaAccion, take_action),
     Herramienta("escalate",
-                "Pasa el ticket en curso a N2 con el diagnóstico y la evidencia revisada.",
+                "Pasa el ticket en curso a N2 en este momento, con la causa del procedimiento 8.1, el diagnóstico y la "
+                "evidencia revisada. Úsala solo si hoy se cumple una de esas causas. Un paso condicional del "
+                "procedimiento («si el problema sigue, escale a N2») no es motivo: va en la respuesta como indicación. "
+                "Si decides no escalar, no la llames.",
                 EntradaEscalar, escalate),
 )}
 

@@ -218,8 +218,8 @@ def test_take_action_usa_el_ticket_de_la_sesion_y_queda_pendiente(recursos_bd):
 
 
 def test_escalate_valida_las_fuentes(recursos_bd):
-    r = H.ejecutar(recursos_bd, CTX, "escalate", {"motivo": "Sin evidencia", "fuentes": ["F9-c999"]}, TODAS)
+    r = H.ejecutar(recursos_bd, CTX, "escalate", {"causa": "pasos_agotados", "motivo": "El usuario ya aplicó los pasos", "fuentes": ["F9-c999"]}, TODAS)
     assert not r.ok and "no existen" in r.error
     fuente = recursos_bd.chunks[0]["chunk_id"]
-    r = H.ejecutar(recursos_bd, CTX, "escalate", {"motivo": "Sin evidencia", "fuentes": [fuente]}, TODAS)
+    r = H.ejecutar(recursos_bd, CTX, "escalate", {"causa": "pasos_agotados", "motivo": "El usuario ya aplicó los pasos", "fuentes": [fuente]}, TODAS)
     assert r.ok and r.contenido["escalado"]

@@ -6,7 +6,7 @@ Claude. Andy todavía no lo revisa. Métricas completas en [reporte.md](reporte.
 El juez y Ragas solo calificaron al agente, para no gastar en un banco que todavía va a cambiar. El juez y
 Ragas costaron US$3.57; el sistema, unos US$1.4.
 
-Las fallas 1 y 2 ya están corregidas, cada una con sus pruebas en `tests/test_hallazgos_evaluacion.py`.
+Las fallas 1, 2 y 3 ya están corregidas, cada una con sus pruebas en `tests/test_hallazgos_evaluacion.py`.
 Las métricas de [reporte.md](reporte.md) son de antes de la corrección.
 
 ## Lo que ya cumple
@@ -34,15 +34,38 @@ Las métricas de [reporte.md](reporte.md) son de antes de la corrección.
    máximo de 100. El modelo afirmó que no había más tickets, pero había 25. El juez lo detectó: cobertura 0.
    Ahora la consulta pide una fila más que su límite, marca `truncado` y agrega una nota para pedir un límite
    mayor. Con la corrección, H06 reporta los 25.
-3. **Escalamientos innecesarios.** El agente llamó a `escalate` por su cuenta en 10 casos. Algunos lo
-   justifican (R12, phishing con contraseña, y R13, pantalla azul repetida), pero otros no: R03, R06, R08,
-   R09 y H09 son consultas que el procedimiento resuelve. El prompt ya pide no escalar de forma preventiva,
-   y no basta. El anteproyecto cuenta los escalamientos innecesarios como costo del problema.
+3. **Escalamientos innecesarios (corregido).** El agente llamó a `escalate` por su cuenta en 10 casos.
+   Algunos lo justifican (R12, phishing con contraseña, y R13, pantalla azul repetida), pero otros no:
+   R03, R06, R08, R09 y H09 son consultas que el procedimiento resuelve. Al capturar el motivo de cada
+   llamada se vio que la mayoría no eran escalamientos de verdad: el modelo llamaba a `escalate` con
+   «placeholder» o con «No procede escalar: el 4.3 se resuelve en N1», y la herramienta lo registraba.
+
+   La corrección tiene tres partes:
+   - `escalate` exige una `causa` del procedimiento 8.1 del manual: procedimiento exclusivo de N2, pasos
+     agotados, incidente de seguridad, varias personas o acción sensible.
+   - Rechaza los motivos que dicen que no hay que escalar, o que están vacíos, antes de escribir en la base.
+   - La descripción y el prompt aclaran que un paso condicional («si el problema sigue, escale a N2») va
+     en la respuesta y no se ejecuta ahora.
+
+   Resultados con el sistema real:
+   - En los 5 casos que no debían escalar, los escalamientos registrados bajaron de 5 de 10 corridas a
+     0 de 16.
+   - R12 y R13 siguen escalando: 4 de 4.
+   - En los 42 casos, los escalamientos del agente bajaron de 10 a 4 (R09, R12, R13 y A01), todos con una
+     causa del manual. El más discutible es R09: el agente decidió que restablecer el MFA lo hace N2.
+
+   Queda un detalle: en 4 de 42 casos el modelo todavía intenta una llamada basura. Se rechaza sin efecto,
+   pero gasta un turno.
 4. **Saltos de línea escritos como texto.** En algunas respuestas, como R10 y A03, aparece `\n` literal en
    lugar del salto de línea. El modelo escapa dos veces dentro del JSON. Se ve mal en la interfaz.
-5. **Latencia media del agente: 10.9 s**, contra la meta de 10 s. El P95, 16.8 s, sí cumple. Los casos más
-   lentos son los que llaman a `buscar_casos_similares` y `escalate` sin necesidad: arreglar el punto 3
-   también baja la latencia.
+5. **Latencia media del agente: 10.9 s**, contra la meta de 10 s. El P95, 16.8 s, sí cumple. Con la
+   corrección del punto 3 bajó a 10.3 s, con P95 de 16.2 s y US$0.024 por ticket. Sigue arriba de la meta.
+   Lo que más pesa ahora es `buscar_casos_similares`: el agente lo llama en 13 de 27 casos de
+   procedimiento, aunque el manual ya basta. Esos casos tardan 11.4 s en promedio, contra 9.9 s los demás.
+
+En esa misma corrida, Recall@5 del agente salió 0.93 en lugar de 0.97. No tiene que ver con la corrección.
+En R13 y R15 el agente formuló distinto su primera búsqueda, y Recall@5 solo mide la primera. Es variación
+entre corridas: conviene correr el banco oficial más de una vez y reportar el promedio.
 
 ## Sobre la fidelidad (0.79 con Ragas)
 
