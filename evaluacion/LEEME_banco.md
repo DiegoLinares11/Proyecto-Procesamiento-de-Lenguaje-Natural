@@ -72,7 +72,9 @@ uv run python scripts/evaluar_banco.py --banco evaluacion/banco.jsonl           
 ```
 
 Sin `--banco`, el script usa el borrador. Los resultados quedan en `resultados/evaluacion/<banco>/`:
-`reporte.md`, `resumen.json` y un `casos_<sistema>.jsonl` por sistema.
+`reporte.md`, `resumen.json` y un `casos_<sistema>.jsonl` por sistema. Una corrida con `--casos` escribe en
+`parcial/`, que no se sube, para no pisar la completa. Para rehacer el reporte sin gastar tokens, por
+ejemplo después de cambiar un criterio, usen `--solo-reporte`.
 
 **Costo aproximado de la corrida completa:** el agente cuesta unos US$0.03 por caso, y RAG y línea base unos
 US$0.008. El juez y Ragas (Opus 5.5) cuestan más: unos US$0.015 por llamada y hasta 8 llamadas por respuesta.

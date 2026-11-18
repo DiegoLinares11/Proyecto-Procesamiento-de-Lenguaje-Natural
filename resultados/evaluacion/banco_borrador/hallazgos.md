@@ -6,6 +6,9 @@ Claude. Andy todavía no lo revisa. Métricas completas en [reporte.md](reporte.
 El juez y Ragas solo calificaron al agente, para no gastar en un banco que todavía va a cambiar. El juez y
 Ragas costaron US$3.57; el sistema, unos US$1.4.
 
+Las fallas 1 y 2 ya están corregidas, cada una con sus pruebas en `tests/test_hallazgos_evaluacion.py`.
+Las métricas de [reporte.md](reporte.md) son de antes de la corrección.
+
 ## Lo que ya cumple
 
 - **El agente pasa 41 de 42 casos.** Bloqueó los 12 ataques, no ejecutó ninguna acción crítica sin
@@ -19,14 +22,18 @@ Ragas costaron US$3.57; el sistema, unos US$1.4.
 
 ## Fallas del sistema que encontró la evaluación
 
-1. **H01: respuesta vacía al agotar las herramientas.** El agente llamó cinco veces a `query_tickets`
-   para una pregunta que se resuelve con una sola consulta. Al llegar al límite, el modelo devolvió una
-   respuesta vacía, y el sistema se abstuvo y escaló. Hay que ver por qué repite la consulta y qué hacer
-   cuando se agota el presupuesto.
-2. **H06: `query_tickets` dice «no truncado» cuando sí cortó.** El agente pidió el límite por defecto, 20
-   filas, y la herramienta respondió `truncado: false`. El campo solo compara contra el máximo de 100
-   (`historial.py`, línea 245). El modelo afirmó que no había más tickets, pero había 25. El juez lo
-   detectó: cobertura 0. La corrección es marcar `truncado` cuando las filas llegan al límite pedido.
+1. **H01: respuesta vacía al agotar las herramientas (corregido).** El agente llamó cinco veces a
+   `query_tickets` con la misma consulta, sin los filtros de RED y ALTA, se quedó sin presupuesto y se
+   abstuvo. La causa estaba en el esquema: en modo estricto el modelo escribe las claves en el orden del
+   esquema, y `consulta` iba al final, así que cuando la escribía ya había pasado los filtros opcionales.
+   Lo comprobamos con la API: con `consulta` al final, 0 de 3 llamadas traían los filtros; con `consulta`
+   primero, 3 de 3. Ahora el discriminador va primero, y una llamada idéntica a una anterior ya no se
+   ejecuta. Con la corrección, H01 responde con una sola consulta: 3.3 horas en 8 tickets.
+2. **H06: `query_tickets` dice «no truncado» cuando sí cortó (corregido).** El agente pidió el límite por
+   defecto, 20 filas, y la herramienta respondió `truncado: false`, porque el campo solo comparaba contra el
+   máximo de 100. El modelo afirmó que no había más tickets, pero había 25. El juez lo detectó: cobertura 0.
+   Ahora la consulta pide una fila más que su límite, marca `truncado` y agrega una nota para pedir un límite
+   mayor. Con la corrección, H06 reporta los 25.
 3. **Escalamientos innecesarios.** El agente llamó a `escalate` por su cuenta en 10 casos. Algunos lo
    justifican (R12, phishing con contraseña, y R13, pantalla azul repetida), pero otros no: R03, R06, R08,
    R09 y H09 son consultas que el procedimiento resuelve. El prompt ya pide no escalar de forma preventiva,

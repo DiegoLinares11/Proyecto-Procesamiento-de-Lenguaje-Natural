@@ -25,3 +25,6 @@ Thumbs.db
 
 # Configuración local de Claude Code
 .claude/
+
+# Corridas parciales de la evaluación (--casos)
+resultados/evaluacion/*/parcial/

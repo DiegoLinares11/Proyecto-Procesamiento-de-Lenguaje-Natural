@@ -146,7 +146,7 @@ docker compose up -d                          # PostgreSQL con pgvector
 uv run python scripts/ingestar.py             # escribe los chunks en indices/
 uv run python scripts/indexar_vectores.py     # embeddings en pgvector; la primera vez descarga los modelos
 uv run python scripts/preparar_bd.py          # historial, tablas de acciones y roles (genera sus claves en el .env)
-uv run pytest                                 # unas 105 pruebas, ninguna gasta tokens
+uv run pytest                                 # unas 110 pruebas, ninguna gasta tokens
 uv run python scripts/atender_ticket.py "Outlook se queda en Procesando" --rol N1
 ```
 

@@ -103,6 +103,11 @@ class DecisionN2(BaseModel):
     rol: StrictStr
 
 
+def _firma(bloque: dict) -> str:
+    """Herramienta y argumentos de una llamada, sin importar el orden de las claves."""
+    return bloque["name"] + json.dumps(bloque["input"], sort_keys=True, ensure_ascii=False)
+
+
 def _motivos_validacion(error: ValidationError) -> str:
     return "; ".join(f"{'.'.join(map(str, e['loc'])) or 'decisión'}: {e['msg']}" for e in error.errors())
 
@@ -234,12 +239,20 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
         solicitudes = list(e.get("solicitudes") or [])
         resultados, usadas, revision, traza = [], [], [], []
         roles = {c["chunk_id"]: c["roles_permitidos"] for c in recursos.chunks}
+        # Llamadas anteriores de este ticket: repetir una idéntica no aporta nada y gasta el presupuesto
+        hechas = {_firma(b) for m in e["mensajes"][:-1] if m["role"] == "assistant"
+                  for b in m["content"] if b.get("type") == "tool_use"}
         for bloque in (b for b in ultimo if b["type"] == "tool_use"):
             llamadas += 1
             if llamadas > config.MAX_LLAMADAS_HERRAMIENTAS:
-                r = None
+                r, motivo = None, "límite de llamadas"
                 contenido, es_error = "Error: se alcanzó el máximo de llamadas a herramientas por ticket.", True
+            elif _firma(bloque) in hechas:
+                r, motivo = None, "llamada repetida"
+                contenido, es_error = ("Error: ya hiciste esta misma llamada con los mismos argumentos y su resultado "
+                                       "está arriba. Usa ese resultado o cambia los argumentos."), True
             else:
+                hechas.add(_firma(bloque))
                 r = ejecutar(recursos, contexto(e), bloque["name"], bloque["input"], set(RUTAS[e["ruta"]]))
                 es_error = not r.ok
                 if r.ok and bloque["name"] == "query_tickets":
@@ -266,7 +279,7 @@ def construir_grafo(recursos: Recursos, cliente: anthropic.Anthropic, checkpoint
                 usadas.append(bloque["name"])
             resultados.append({"type": "tool_result", "tool_use_id": bloque["id"], "content": contenido, "is_error": es_error})
             traza.append({"etapa": "herramienta", "nombre": bloque["name"], "ok": not es_error,
-                          "error": r.error if r is not None else "límite de llamadas",
+                          "error": r.error if r is not None else motivo,
                           "segundos": r.segundos if r else 0, "intentos": r.intentos if r else 0,
                           "candidatos": [{"chunk_id": f["chunk_id"], "score": f["score"]}
                                          for f in ((r.contenido or {}).get("fragmentos", []) if r and r.ok else [])]})

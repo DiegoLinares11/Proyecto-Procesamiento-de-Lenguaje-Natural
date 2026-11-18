@@ -197,7 +197,7 @@ CATALOGO: dict[NombreConsulta, tuple[type[_Parametros], str, str]] = {
         ParamProcedimiento,
         """SELECT ticket_id, fecha_apertura, version_manual, estado, resumen, solucion
            FROM tickets WHERE seccion_manual = %(seccion)s
-           ORDER BY fecha_apertura DESC LIMIT %(limite)s""",
+           ORDER BY fecha_apertura DESC LIMIT %(limite)s + 1""",
         "Tickets más recientes resueltos con un procedimiento del manual.",
     ),
     NombreConsulta.escalados: (
@@ -205,7 +205,7 @@ CATALOGO: dict[NombreConsulta, tuple[type[_Parametros], str, str]] = {
         """SELECT ticket_id, fecha_apertura, categoria, prioridad, resumen
            FROM tickets
            WHERE escalado AND fecha_apertura >= %(desde)s AND fecha_apertura < %(hasta)s::date + 1
-           ORDER BY fecha_apertura DESC LIMIT %(limite)s""",
+           ORDER BY fecha_apertura DESC LIMIT %(limite)s + 1""",
         "Tickets escalados a N2 en un rango de fechas.",
     ),
 }
@@ -237,10 +237,20 @@ def query_tickets(conexion: psycopg.Connection, nombre: str, parametros: dict) -
     except ValidationError as error:
         detalle = "; ".join(f"{'.'.join(map(str, e['loc'])) or 'parametros'}: {e['msg']}" for e in error.errors())
         raise ErrorConsulta(f"Parámetros inválidos para {consulta.value}: {detalle}") from None
-    filas = conexion.execute(sentencia, validados.model_dump()).fetchmany(MAX_FILAS + 1)
-    return {
+    parametros = validados.model_dump()
+    # Se pide una fila más del tope para saber si hay más. Antes solo se comparaba contra MAX_FILAS, así que
+    # una consulta cortada por su `limite` decía truncado = false y el modelo afirmaba que no había más
+    # (caso H06 de la evaluación del 17 de noviembre: devolvió 20 de 25 escalados).
+    tope = parametros.get("limite", MAX_FILAS)
+    filas = conexion.execute(sentencia, parametros).fetchmany(tope + 1)
+    resultado = {
         "consulta": consulta.value,
         "parametros": json.loads(validados.model_dump_json()),
-        "filas": [{k: _json(v) for k, v in f.items()} for f in filas[:MAX_FILAS]],
-        "truncado": len(filas) > MAX_FILAS,
+        "filas": [{k: _json(v) for k, v in f.items()} for f in filas[:tope]],
+        "truncado": len(filas) > tope,
     }
+    if resultado["truncado"]:
+        resultado["nota"] = f"Hay más filas que las {tope} devueltas."
+        if "limite" in parametros and tope < MAX_FILAS:
+            resultado["nota"] += f" Repite la consulta con un límite mayor (máximo {MAX_FILAS}) para verlas."
+    return resultado

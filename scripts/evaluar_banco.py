@@ -16,7 +16,8 @@ Las fallas de los casos de "servicio caído" e inyección indirecta se simulan a
 API del generador caída y un fragmento envenenado. El checkpointer es en memoria, para no llenar la base
 de hilos de evaluación. Necesita ANTHROPIC_API_KEY.
 
-Escribe en resultados/evaluacion/<banco>/: casos_<sistema>.jsonl, resumen.json y reporte.md.
+Escribe en resultados/evaluacion/<banco>/: casos_<sistema>.jsonl, resumen.json y reporte.md. Con --casos
+escribe en resultados/evaluacion/<banco>/parcial/, que no se sube, para no pisar la corrida completa.
 """
 
 from __future__ import annotations
@@ -386,6 +387,8 @@ def main() -> None:
     chunks = cargar_chunks()
     por_id = {c["chunk_id"]: c for c in chunks}
     salida = config.RESULTADOS / "evaluacion" / banco.stem
+    if elegidos:  # una corrida parcial no pisa los resultados de la completa
+        salida = salida / "parcial"
     if args.solo_reporte:
         filas = {}
         for s in sistemas:

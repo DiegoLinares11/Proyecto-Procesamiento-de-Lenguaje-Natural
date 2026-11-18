@@ -269,13 +269,23 @@ _NO_ESTRICTO = {"title", "default", "pattern", "minimum", "maximum", "exclusiveM
 
 
 def _limpiar(nodo):
-    """Quita del esquema lo que el modo estricto no admite; Pydantic lo sigue validando."""
+    """Quita del esquema lo que el modo estricto no admite; Pydantic lo sigue validando.
+
+    También pone primero las propiedades con `const` (el discriminador, como `consulta`). En modo estricto
+    el modelo escribe las claves en el orden del esquema: con `consulta` al final, cuando la escribía ya
+    había pasado los filtros opcionales y no podía agregarlos. Pedía tiempo_resolucion de RED y ALTA y
+    la consulta salía sin filtros (caso H01 de la evaluación del 17 de noviembre).
+    """
     if isinstance(nodo, dict):
         limpio = {}
         for clave, valor in nodo.items():
             if clave in _NO_ESTRICTO and not (clave == "format" and valor in ("date", "date-time")):
                 continue
             limpio["anyOf" if clave == "oneOf" else clave] = _limpiar(valor)
+        if isinstance(limpio.get("properties"), dict):
+            props = limpio["properties"]
+            limpio["properties"] = {**{k: v for k, v in props.items() if isinstance(v, dict) and "const" in v},
+                                    **{k: v for k, v in props.items() if not (isinstance(v, dict) and "const" in v)}}
         if limpio.get("type") == "object":
             limpio["additionalProperties"] = False
         return limpio
