@@ -168,8 +168,17 @@ def esquema_paso(esquema: dict, herramientas: list[dict]) -> dict:
     ]}}, "required": ["paso"], "additionalProperties": False}
 
 
-def validar_cuota(cuenta: dict, cuotas: dict, modelo: str, modelos: list[dict], limite: float = 80) -> None:
-    """Falla cerrada: ni porcentajes ni fechas sustituyen el permiso explícito del backend."""
+def validar_cuota(cuenta: dict, cuotas: dict, modelo: str, modelos: list[dict], limite: float = 80,
+                  permitir_creditos: bool | None = None) -> None:
+    """Falla cerrada: ni porcentajes ni fechas sustituyen el permiso explícito del backend.
+
+    Por defecto no corre si la cuenta tiene créditos adicionales, para no gastarlos por accidente. Una
+    cuenta que sí los tiene puede permitirlos con CODEX_PERMITIR_CREDITOS=1 en su .env: el freno del
+    `limite` (80 % de la cuota incluida) sigue igual y detiene todo antes de que se agote, así que los
+    créditos, que solo se usan después, no se llegan a tocar.
+    """
+    if permitir_creditos is None:
+        permitir_creditos = os.environ.get("CODEX_PERMITIR_CREDITOS") == "1"
     if not isinstance(cuenta, dict) or cuenta.get("type") != "chatgpt":
         raise ErrorModelo("autenticacion")
     if not isinstance(cuotas, dict) or cuotas.get("ordinaryUsageAllowed") is not True:
@@ -192,7 +201,9 @@ def validar_cuota(cuenta: dict, cuotas: dict, modelo: str, modelos: list[dict], 
         if not isinstance(b, dict) or b.get("rateLimitReachedType") or b.get("spendControlReached") is True:
             raise ErrorModelo("cuota")
         creditos = b.get("credits")
-        if not isinstance(creditos, dict) or creditos.get("hasCredits") is not False or creditos.get("unlimited") is not False:
+        if not isinstance(creditos, dict) or creditos.get("unlimited") is not False:
+            raise ErrorModelo("cuota")
+        if creditos.get("hasCredits") is not False and not (permitir_creditos and creditos.get("hasCredits") is True):
             raise ErrorModelo("cuota")
         ventanas = [b.get(k) for k in ("primary", "secondary") if b.get(k) is not None]
         if not ventanas:
@@ -211,7 +222,7 @@ class _Servidor:
         for f in ("apps", "plugins", "hooks"):
             args.extend(["--disable", f])
         self.p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                  text=True, env=env, cwd=cwd)
+                                  text=True, encoding="utf-8", env=env, cwd=cwd)
         self.cola: queue.Queue = queue.Queue()
         self.timeout = timeout
         self.deadline = time.monotonic() + timeout
@@ -288,7 +299,9 @@ class ClienteModelo:
         with _CANDADO, tempfile.TemporaryDirectory(prefix="cc3103-codex-estado-") as tmp:
             self._preflight(_binario(self.ruta), entorno_codex(), tmp, modelo)
         return {"proveedor": "codex_subscription", "autenticacion": "chatgpt", "modelo": modelo,
-                "uso_incluido_permitido": True, "creditos_adicionales": False,
+                "uso_incluido_permitido": True,
+                "creditos_adicionales": ("permitidos, con el freno del 80 %"
+                                         if os.environ.get("CODEX_PERMITIR_CREDITOS") == "1" else False),
                 "umbral_uso_porcentaje": 80, "inferencia_ejecutada": False}
 
     def _preflight(self, binario: str, env: dict, cwd: str, modelo: str) -> dict:
@@ -405,7 +418,9 @@ class ClienteModelo:
         p = None
         try:
             p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                                 text=True, env=env, cwd=cwd, start_new_session=os.name != "nt")
+                                 # Codex lee y escribe UTF-8. Sin encoding, Windows usa cp1252 y un prompt con
+                                 # acentos («contraseña») llegaba corrupto: Codex fallaba con «transporte».
+                                 text=True, encoding="utf-8", env=env, cwd=cwd, start_new_session=os.name != "nt")
             cola: queue.Queue = queue.Queue()
 
             def escribir():

@@ -49,10 +49,28 @@ def test_se_detiene_ante_cuota_alta_o_no_verificable(valor):
 
 @pytest.mark.parametrize("creditos", [None, {}, {"hasCredits": True, "unlimited": False},
                                      {"hasCredits": False, "unlimited": True}])
-def test_no_continua_con_creditos_ni_saldo_desconocido(creditos):
+def test_no_continua_con_creditos_ni_saldo_desconocido(creditos, monkeypatch):
+    monkeypatch.delenv("CODEX_PERMITIR_CREDITOS", raising=False)  # el .env de quien corre las pruebas no cuenta
     cuotas = copy.deepcopy(CUOTAS)
     cuotas["rateLimitsByLimitId"]["codex"]["credits"] = creditos
     with pytest.raises(ErrorModelo):
+        validar_cuota(CUENTA, cuotas, "modelo_prueba", MODELOS)
+
+
+def test_creditos_permitidos_solo_por_opcion_explicita_y_con_el_freno_del_80(monkeypatch):
+    cuotas = copy.deepcopy(CUOTAS)
+    cuotas["rateLimitsByLimitId"]["codex"]["credits"] = {"hasCredits": True, "unlimited": False}
+    monkeypatch.delenv("CODEX_PERMITIR_CREDITOS", raising=False)
+    with pytest.raises(ErrorModelo):  # por defecto, igual que antes
+        validar_cuota(CUENTA, cuotas, "modelo_prueba", MODELOS)
+    monkeypatch.setenv("CODEX_PERMITIR_CREDITOS", "1")
+    validar_cuota(CUENTA, cuotas, "modelo_prueba", MODELOS)  # 28 % de uso: corre
+    cuotas["rateLimitsByLimitId"]["codex"]["primary"]["usedPercent"] = 80
+    with pytest.raises(ErrorModelo):  # el freno del 80 % sigue aunque se permitan créditos
+        validar_cuota(CUENTA, cuotas, "modelo_prueba", MODELOS)
+    cuotas["rateLimitsByLimitId"]["codex"]["primary"]["usedPercent"] = 28
+    cuotas["rateLimitsByLimitId"]["codex"]["credits"] = None
+    with pytest.raises(ErrorModelo):  # un saldo desconocido nunca se acepta
         validar_cuota(CUENTA, cuotas, "modelo_prueba", MODELOS)
 
 
