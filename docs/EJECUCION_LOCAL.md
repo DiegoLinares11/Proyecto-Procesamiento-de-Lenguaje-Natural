@@ -1,6 +1,6 @@
-# Ejecutar PILAS en esta Mac
+# Ejecutar PILAS localmente
 
-El entorno Python del proyecto está en `.venv/`. La configuración y las claves de PostgreSQL se guardan en `.env`, fuera de Git y con permisos `600`. Codex usa la sesión local de ChatGPT; no se configuraron API keys. Los modelos BGE-M3, MiniLM y el reranker están descargados en la caché local.
+En una copia nueva, preparar primero el entorno Python, PostgreSQL y los índices siguiendo el [README](../README.md#cómo-correrlo-desde-cero). Guardar la configuración y las claves de PostgreSQL en un `.env` local con permisos `600`. Codex usa una sesión local de ChatGPT. La búsqueda principal requiere BGE-M3 y el reranker en la caché de Hugging Face.
 
 ## Abrir la aplicación
 
@@ -13,19 +13,20 @@ docker compose up -d
 
 Después abrir `http://localhost:8000`. Si el servidor ya está ejecutándose, basta con abrir esa dirección. El motor de atención se carga al enviar el primer ticket; la captura y la consulta de casos sintéticos funcionan antes de esa carga.
 
-La reconstrucción de la UI requiere Node 24:
+Node 24 es la versión de referencia para reconstruir la interfaz:
 
 ```bash
-PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run build --prefix demo
+npm ci --prefix demo
+npm run build --prefix demo
 ```
 
 ## Perfil de esta evaluación
 
-La corrida actual usa CPU, modelos FP32, lotes de 16 en embeddings y 32 en reranking, con ocho hilos de PyTorch. La base dedicada es `tickets_rag_final_normal_20261118`: conserva 240 tickets y 564 fragmentos por índice; la base original y los intentos anteriores permanecen separados. El lanzador trabaja con los pesos descargados, en modo offline de Hugging Face por defecto. Para descargar pesos en otra instalación se debe preparar primero la caché o desactivar explícitamente ese modo.
+La corrida publicada del 18 de noviembre usó CPU, modelos FP32, lotes de 16 en embeddings y 32 en reranking, con ocho hilos de PyTorch. El manifiesto registra 240 tickets y 564 fragmentos vectorizados. El lanzador trabaja en modo offline de Hugging Face por defecto. Para una instalación nueva, preparar primero la caché o desactivar explícitamente ese modo durante la descarga.
 
 El control público de Outlook con la configuración normal completó clasificación, recuperación y generación con dos citas en 65.409 segundos; su única búsqueda terminó en 15.551. Un control previo de CPU con dos hilos/lote4 había tardado 97.177 segundos, con un timeout y una reformulación exitosa. Ese control previo también completó juez/Ragas y un replay idéntico sin nuevas inferencias. Son controles de integración, no las métricas del banco completo.
 
-Los ensayos de MPS y FP16 se conservan como diagnósticos; no se presentan como el perfil de la corrida final. En esta Mac de 8 GB, la medición se realiza con otros cinco contenedores locales pausados por autorización del usuario. Esos servicios se restaurarán al terminar; el registro está en `resultados/puesta_en_marcha/servicios_temporales.json`.
+Los ensayos de MPS y FP16 se conservan como diagnósticos. Al comparar resultados, registrar el dispositivo, la precisión y el perfil de ejecución de cada corrida.
 
 ## Qué datos son sintéticos
 
@@ -62,7 +63,7 @@ PYTHONPATH=src RAGAS_DO_NOT_TRACK=true caffeinate -is .venv/bin/python scripts/e
 
 Cada corrida anuncia su UUID. `--reanudar UUID` recupera sus resultados; un intento iniciado sin resultado requiere revisar el fallo antes de usar `--reintentar-pendiente`. Ese segundo intento puede consumir cuota adicional y queda registrado. El conjunto se mantiene fuera del entrenamiento, del índice y de los ejemplos del prompt.
 
-La configuración local amplía el plazo de inferencia a 240 segundos después de observar timeouts con 90; no modifica el plazo de las herramientas. Se mantienen las verificaciones de autenticación, uso incluido, ausencia de créditos y umbral del 80 %. Las inferencias consumen la cuota de la suscripción aunque el costo incremental de API sea cero.
+La configuración local amplía el plazo de inferencia a 240 segundos después de observar timeouts con 90. El plazo de las herramientas es independiente. Siempre se verifican la autenticación, el uso incluido y el umbral del 80 %. Por defecto también se rechazan cuentas con saldo de créditos. `CODEX_PERMITIR_CREDITOS=1` permite iniciar con saldo presente, con el mismo umbral. Las inferencias consumen la cuota incluida.
 
 Los reportes nuevos no sustituyen los resultados históricos de Anthropic. Las métricas parciales se identifican como tales. La revisión técnica de IA no se registra como revisión humana.
 

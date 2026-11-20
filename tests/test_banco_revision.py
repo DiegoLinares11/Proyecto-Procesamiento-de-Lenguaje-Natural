@@ -19,7 +19,8 @@ def casos():
 def test_banco_congelado_se_verifica_sin_acreditar_revision_humana():
     resumen = validar_oficial()
     assert resumen["casos"] == 42 and resumen["inferencias_ejecutadas"] == 0
-    assert resumen["revision_humana"]["estado"] == "pendiente"
+    manifiesto = json.loads(BANCO_OFICIAL.with_suffix(".manifiesto.json").read_text(encoding="utf-8"))
+    assert resumen["revision_humana"] == manifiesto["revision_humana"]
     assert resumen["mide_desempeno"] is False
 
 

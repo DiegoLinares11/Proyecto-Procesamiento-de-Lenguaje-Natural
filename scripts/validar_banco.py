@@ -15,6 +15,12 @@ def main() -> int:
     args = parser.parse_args()
     try:
         resumen = validar_oficial(args.banco)
+    except FileNotFoundError as error:
+        if error.filename and Path(error.filename).name == "chunks.jsonl":
+            print("Falta el índice de fragmentos. Ejecute primero: uv run python scripts/ingestar.py")
+            return 1
+        print("Falta un archivo requerido para validar el banco o su manifiesto.")
+        return 1
     except (OSError, ValueError, KeyError, TypeError):
         print("Banco no válido: revise congelación, composición, duplicados, fuentes, roles y páginas.")
         return 1

@@ -78,6 +78,41 @@ def test_servicio_lento_agota_dos_ventanas_sin_duplicar_el_worker(recursos_minim
     assert not r.ok and r.intentos == 2 and "no respondió" in r.error and len(llamadas) == 1
 
 
+@pytest.mark.parametrize("consulta,suficiente", [
+    ("¿Cuál es la cuota del buzón de correo?", True),
+    ("¿Qué días son feriado este año?", False),
+])
+def test_busqueda_lenta_usa_bm25_con_filtros_y_umbral(recursos_minimos, monkeypatch, consulta, suficiente):
+    liberar = threading.Event()
+    llamadas = []
+
+    def lenta(*args):
+        llamadas.append(1)
+        liberar.wait(2)
+        return {"fragmentos": []}
+
+    herramienta = dataclasses.replace(H.HERRAMIENTAS["search_docs"], funcion=lenta)
+    recursos_minimos.herramientas_locales = {"search_docs": herramienta}
+    with H.ThreadPoolExecutor(max_workers=1) as pool:
+        monkeypatch.setattr(H, "_POOL", pool)
+        try:
+            resultado = H.ejecutar(recursos_minimos, CTX, "search_docs",
+                                   {"query": consulta, "version": "2026-1", "top_k": 3},
+                                   {"search_docs"}, timeout=0.05)
+        finally:
+            liberar.set()
+    assert resultado.ok and resultado.intentos == 1 and llamadas == [1]
+    contenido = resultado.contenido
+    assert contenido["degradado"] and contenido["metodo_recuperacion"] == "bm25_por_timeout"
+    assert contenido["evidencia_suficiente"] is suficiente
+    por_id = {c["chunk_id"]: c for c in recursos_minimos.chunks}
+    assert len(contenido["fragmentos"]) <= 3
+    assert all(f["version"] == "2026-1" and f["tipo"] == "manual"
+               and "N1" in por_id[f["chunk_id"]]["roles_permitidos"] for f in contenido["fragmentos"])
+    if suficiente:
+        assert contenido["fragmentos"] and por_id[contenido["fragmentos"][0]["chunk_id"]]["seccion"] == "3.2"
+
+
 def test_falla_pasajera_se_reintenta_y_luego_funciona(recursos_minimos, falsa):
     estado = {"n": 0}
 
@@ -289,9 +324,6 @@ def recursos_bd(chunks):
     H._POOL.submit = enviar
     ocupados = []
     try:
-        # Igual que producción: el primer ticket se mide con pesos ya cargados.
-        # Se deja fuera del except de BD: un fallo del modelo debe fallar, no saltarse.
-        recursos.calentar()
         yield recursos
     finally:
         try:
@@ -316,21 +348,30 @@ def _no_solapar_integracion_pendiente(request):
             pytest.exit("Integración incompleta: un test anterior dejó un worker activo; no se inicia otra recuperación.", returncode=2)
 
 
-def test_search_docs_devuelve_citas_y_respeta_el_rol(recursos_bd):
+@pytest.fixture(scope="module")
+def recursos_busqueda_bd(recursos_bd):
+    # La recuperación se mide con los pesos cargados, igual que en producción.
+    recursos_bd.calentar()
+    return recursos_bd
+
+
+def test_search_docs_devuelve_citas_y_respeta_el_rol(recursos_busqueda_bd):
+    recursos_bd = recursos_busqueda_bd
     r = H.ejecutar(recursos_bd, CTX, "search_docs", {"query": "¿Cómo se restablece el MFA de un usuario?"}, TODAS, timeout=60)
     assert r.ok and r.contenido["fragmentos"] and r.contenido["evidencia_suficiente"]
     roles = {c["chunk_id"]: c["roles_permitidos"] for c in recursos_bd.chunks}
     assert all("N1" in roles[f["chunk_id"]] for f in r.contenido["fragmentos"])
 
 
-def test_sin_base_vectorial_sigue_con_bm25_y_lo_marca(recursos_bd, chunks):
+def test_sin_base_vectorial_sigue_con_bm25_y_lo_marca(recursos_busqueda_bd, chunks):
     from tickets_rag import vectores
     from tickets_rag.recuperacion import Configuracion, RecuperadorHibrido
 
     caida = vectores.conectar()
     caida.close()
-    roto = H.Recursos(chunks=chunks, bm25=recursos_bd.bm25,
-                      procedimientos=RecuperadorHibrido(chunks, Configuracion(tipos=["manual", "articulo"]), conexion=caida, bm25=recursos_bd.bm25))
+    bm25 = recursos_busqueda_bd.bm25
+    roto = H.Recursos(chunks=chunks, bm25=bm25,
+                      procedimientos=RecuperadorHibrido(chunks, Configuracion(tipos=["manual", "articulo"]), conexion=caida, bm25=bm25))
     r = H.ejecutar(roto, CTX, "search_docs", {"query": "Error 0x80070005 al actualizar"}, TODAS, timeout=60)
     assert r.ok and r.contenido["degradado"] and r.contenido["fragmentos"]
 

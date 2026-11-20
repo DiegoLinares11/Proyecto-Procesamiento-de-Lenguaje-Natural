@@ -132,7 +132,7 @@ def test_worker_tardio_bloquea_liberacion_e_import_juez_con_espera_acotada(cli, 
     liberar, iniciado = threading.Event(), threading.Event()
     eventos = []
     modulos_falsos(monkeypatch, eventos)
-    monkeypatch.setattr(cli.config, "TIMEOUT_HERRAMIENTA_S", .01)
+    monkeypatch.setattr(cli.config, "TIMEOUT_DRENAJE_EVALUACION_S", .02)
     with ProgresoEvaluacion(tmp_path / "eval", {}) as p:
         def worker():
             with p.trabajo_herramienta("agente", "R01", "search_docs"):

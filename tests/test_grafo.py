@@ -11,6 +11,7 @@ from tickets_rag import acciones
 from tickets_rag import herramientas as H
 from tickets_rag.grafo import atender, construir_grafo, reanudar
 from tickets_rag.ingesta import cargar_chunks
+from tickets_rag.modelo import ErrorModelo
 
 TICKET = "TCK-2026-09002"
 
@@ -167,6 +168,48 @@ def test_ruta_de_datos_cita_la_consulta(falsas, chunks):
     assert not r["abstained"] and r["sources"][0]["chunk_id"] == "sql-1" and "conteo_por_categoria" in r["sources"][0]["source"]
 
 
+@pytest.mark.parametrize("pregunta", [
+    "¿Qué código aparece en la pantalla?",
+    "Pregunte: «¿Qué código aparece en la pantalla?» Por ahora, no indique pasos de reparación.",
+])
+def test_pide_aclaracion_con_evidencia_sin_escalar(falsas, chunks, chunk_manual, pregunta):
+    modelo = ModeloFalso(
+        pide(("search_docs", {"query": "diagnóstico de pantalla"})),
+        [Texto(json.dumps({"answer": pregunta, "citas": [chunk_manual["chunk_id"]],
+                           "sin_evidencia": False, "aclaracion": True}))],
+    )
+    estado, _ = atender(grafo_con(modelo, chunks), TICKET, "N1", "La pantalla muestra un aviso.")
+    respuesta = estado["respuesta"]
+    assert respuesta["answer"] == pregunta and not respuesta["abstained"]
+    assert respuesta["needs_human_review"] and respuesta["sources"][0]["chunk_id"] == chunk_manual["chunk_id"]
+    assert "escalate" not in falsas.llamadas
+
+
+@pytest.mark.parametrize("falla_modelo", [False, True])
+def test_una_accion_registrada_conserva_la_pausa_si_falla_la_respuesta(falsas, chunks, monkeypatch, falla_modelo):
+    falsas.cfg["tipo"] = "accion"
+    modelo = ModeloFalso(
+        pide(("search_docs", {"query": "restablecer MFA"})),
+        pide(("take_action", {"accion": "restablecer_mfa", "motivo": "Perdió el teléfono (2.3)"})),
+        final("No encontré evidencia.", [], sin_evidencia=True),
+    )
+    generar = modelo.generar
+
+    def generar_con_falla(**kwargs):
+        if falla_modelo and len(modelo.llamadas) == 2:
+            raise ErrorModelo("timeout")
+        return generar(**kwargs)
+
+    monkeypatch.setattr(modelo, "generar", generar_con_falla)
+    grafo = grafo_con(modelo, chunks)
+    estado, cfg = atender(grafo, TICKET, "N1", "Perdí mi teléfono y solicito restablecer el MFA.")
+    assert estado["__interrupt__"][0].value["solicitud_id"] == 41
+    assert not estado.get("respuesta") and "escalate" not in falsas.llamadas
+    estado = reanudar(grafo, cfg, aprobada=True, aprobador="Agente N1", rol="N1")
+    assert estado["__interrupt__"][0].value["solicitud_id"] == 41
+    assert estado["solicitudes"][0]["estado"] == "pendiente"
+
+
 @pytest.fixture
 def accion_pendiente(falsas, chunks, chunk_manual, monkeypatch):
     falsas.cfg["tipo"] = "accion"
@@ -182,7 +225,7 @@ def accion_pendiente(falsas, chunks, chunk_manual, monkeypatch):
     monkeypatch.setattr(acciones, "resolver_solicitud", resolver)
     modelo = ModeloFalso(pide(("search_docs", {"query": "restablecer MFA"})),
                          pide(("take_action", {"accion": "restablecer_mfa", "motivo": "Perdió el teléfono (2.3)"})),
-                         final("Se solicitó restablecer el MFA; queda pendiente de N2.", [chunk_manual["chunk_id"]]))
+                         final("El MFA ya se restableció.", [chunk_manual["chunk_id"]]))
     grafo = grafo_con(modelo, chunks)
     estado, cfg = atender(grafo, TICKET, "N1", "Perdí mi teléfono y necesito que restablezcan mi MFA")
     return SimpleNamespace(grafo=grafo, estado=estado, cfg=cfg, decisiones=decisiones)
@@ -207,6 +250,14 @@ def test_un_n1_no_puede_aprobar_la_accion(accion_pendiente):
     estado = reanudar(accion_pendiente.grafo, accion_pendiente.cfg, aprobada=True, aprobador="Técnico N2", rol="N2")
     assert "Ejecutada en simulación" in estado["respuesta"]["answer"]
     assert accion_pendiente.decisiones == [(41, True, "N2")]
+
+
+def test_rechazo_n2_no_anuncia_ejecucion_del_modelo(accion_pendiente):
+    estado = reanudar(accion_pendiente.grafo, accion_pendiente.cfg, aprobada=False, aprobador="Técnico N2", rol="N2")
+    respuesta = estado["respuesta"]
+    assert "Rechazada por N2" in respuesta["answer"]
+    assert "ya se restableció" not in respuesta["answer"]
+    assert accion_pendiente.decisiones == [(41, False, "N2")]
 
 
 def test_posible_inyeccion_pasa_marcada_para_revision(falsas, chunks, chunk_manual):

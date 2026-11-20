@@ -33,9 +33,12 @@ TOP_K = 5
 ROLES = ("N1", "N2")
 # Umbral τ sobre el score del reranker, calibrado en la fase 3 (resultados/rag/reporte_rag.md)
 UMBRAL_TAU = 0.0045
+# BM25 y el reranker tienen escalas distintas. Este mínimo descarta coincidencias débiles.
+UMBRAL_BM25_RESPALDO = 7.0
 
 # Herramientas (sección 11 del anteproyecto)
 TIMEOUT_HERRAMIENTA_S = 10
+TIMEOUT_DRENAJE_EVALUACION_S = 90
 REINTENTOS_HERRAMIENTA = 1
 MAX_LLAMADAS_HERRAMIENTAS = 5
 # Cada proceso de inferencia tiene timeout; no hay reintentos ni cambio de proveedor ante fallo.

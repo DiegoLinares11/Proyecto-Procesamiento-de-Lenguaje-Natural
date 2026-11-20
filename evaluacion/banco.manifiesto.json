@@ -2,7 +2,7 @@
   "version_formato": 1,
   "version_banco": "1.0.0",
   "fecha_congelacion_utc": "2026-11-18T07:14:52.934761+00:00",
-  "estado": "congelado_tecnicamente_revision_humana_pendiente",
+  "estado": "congelado_tecnicamente_revision_humana_registrada",
   "banco": {
     "archivo": "banco.jsonl",
     "sha256": "1ecf594191ec5b9c67f01c8a1f069e1b1d52338c03e1f7672e65b48302dccd75",
@@ -13,13 +13,14 @@
     "redaccion_original": "Claude, borrador conservado",
     "reescritura": "Codex, asistencia de IA",
     "autor_f3_historico": "Claude Haiku 5.5 según metadatos de F3",
-    "independencia_humana": "pendiente de declaración y revisión por integrante que no redactó la fuente correspondiente"
+    "independencia_humana": "Revisión humana remitida por un integrante; no se documentó una declaración de independencia respecto de la autoría de las fuentes."
   },
   "revision_humana": {
-    "estado": "pendiente",
+    "estado": "registrada",
     "registro": "evaluacion/revision_humana_banco.csv",
-    "revisor": null,
-    "fecha": null,
+    "revisor": "Andyfer004",
+    "fecha": "2026-11-19",
+    "tipo_fecha": "registro",
     "alcance": "42 casos contra fuentes; no equivale a revisión de respuestas de la fase 6"
   },
   "revision_casos": {
@@ -48,7 +49,7 @@
     "ajuste_modelos_umbral_prompt": false,
     "nuevo_holdout_ciego": false,
     "limitaciones": [
-      "Revisión técnica de IA; pendiente autoría/revisión humana independiente.",
+      "Reescritura y revisión técnica de IA. La revisión humana posterior registra los 42 dictámenes y no incluye una declaración de independencia.",
       "Se conocen resultados previos del borrador; no es un holdout nuevo ciego.",
       "No duplicación exacta normalizada no prueba independencia semántica.",
       "Los resultados12/12de ataques del borrador no se transfieren a este banco.",

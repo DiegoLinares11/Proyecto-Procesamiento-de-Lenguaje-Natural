@@ -12,6 +12,7 @@ Lo que nunca decide el modelo:
 
 Ejecución: cada llamada tiene un límite de 10 s y una segunda ventana ante fallas pasajeras (red,
 base de datos o modelo). Si el worker sigue activo, espera la misma ejecución sin duplicarla;
+search_docs usa BM25 tras el primer timeout de ejecución para devolver evidencia sin esperar el reranker.
 si terminó con una excepción pasajera, puede ejecutarla de nuevo. classify espera sus cinco votos con el plazo propio de cada llamada al modelo;
 no se envía al pool ni se reintenta como herramienta, para evitar inferencias duplicadas en segundo
 plano. Los errores se devuelven como texto para que el modelo corrija, nunca como excepción.
@@ -209,6 +210,21 @@ def search_docs(recursos: Recursos, contexto: Contexto, e: EntradaBusqueda) -> d
     }
 
 
+def _respaldo_documentos(recursos: Recursos, contexto: Contexto, entrada: EntradaBusqueda) -> dict:
+    resultados = recursos.bm25.buscar(
+        entrada.query, contexto.rol, entrada.version, top_k=entrada.top_k, tipos=["manual", "articulo"],
+    )
+    mejor = resultados[0].score if resultados else 0.0
+    return {
+        "fragmentos": [_fragmento(r) for r in resultados],
+        "mejor_score": round(mejor, 4),
+        "evidencia_suficiente": mejor >= config.UMBRAL_BM25_RESPALDO,
+        "degradado": True,
+        "metodo_recuperacion": "bm25_por_timeout",
+        "nota": "Coincidencias léxicas sin reranking. Úsalas solo si respaldan la solicitud exacta.",
+    }
+
+
 def buscar_casos_similares(recursos: Recursos, contexto: Contexto, e: EntradaCasos) -> dict:
     resultados, degradado = _buscar_degradable(recursos, recursos.casos, e.query, contexto.rol, None, e.top_k)
     return {
@@ -389,12 +405,17 @@ def ejecutar(recursos: Recursos, contexto: Contexto, nombre: str, argumentos: di
         except ErrorHerramienta as error:
             return fallo(str(error), intentos)
         except PASAJERAS as error:
+            if nombre == "search_docs" and isinstance(error, TimeoutFuturo) and recursos.bm25 is not None:
+                if futuro is not None:
+                    futuro.cancel()
+                contenido = _respaldo_documentos(recursos, contexto, entrada)
+                return ResultadoHerramienta(nombre, True, contenido, None, round(time.perf_counter() - inicio, 3), intentos)
             if isinstance(error, ErrorModelo) and not error.transitorio:
                 return fallo(f"El modelo no respondió ({error.codigo}).", intentos)
             if nombre == "classify" or intentos > config.REINTENTOS_HERRAMIENTA:
                 if futuro is not None:
                     futuro.cancel()  # Solo cancela si seguía en cola; un worker activo puede terminar tarde.
-                motivo = ("tardó más de 10 s" if isinstance(error, TimeoutFuturo)
+                motivo = (f"tardó más de {timeout:g} s" if isinstance(error, TimeoutFuturo)
                           else error.codigo if isinstance(error, ErrorModelo) else type(error).__name__)
                 return fallo(f"El servicio no respondió ({motivo}) después de {intentos} intentos.", intentos)
             # Un timeout de espera no autoriza otra ejecución simultánea. Si la función

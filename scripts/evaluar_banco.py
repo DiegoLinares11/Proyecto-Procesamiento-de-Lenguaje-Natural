@@ -383,7 +383,7 @@ def liberar_recursos_evaluacion(progreso, recursos, generadores, conexiones, *, 
     """No carga modelos: drena workers y libera los que ya estén en memoria antes del juez."""
     transiciones = progreso.manifiesto.get("transiciones_calificacion", [])
     agotado = transiciones and transiciones[-1].get("drenado") is False
-    estado = progreso.esperar_herramientas(0 if not estricto and agotado else 2 * config.TIMEOUT_HERRAMIENTA_S)
+    estado = progreso.esperar_herramientas(0 if not estricto and agotado else config.TIMEOUT_DRENAJE_EVALUACION_S)
     estado["fecha_utc"] = datetime.now(timezone.utc).isoformat()
     if not estado["drenado"]:
         progreso.manifiesto.setdefault("transiciones_calificacion", []).append(estado)
@@ -477,8 +477,9 @@ def huella_evaluacion(banco: Path, casos: list[Caso], sistemas: list[str], con_j
             versiones[paquete] = importlib.metadata.version(paquete)
         except importlib.metadata.PackageNotFoundError:
             versiones[paquete] = None
-    parametros = {n: getattr(config, n) for n in ("TOP_K", "UMBRAL_TAU", "CORRIDAS_CLASIFICADOR", "CONFIANZA_MINIMA",
-                  "MAX_LLAMADAS_HERRAMIENTAS", "TIMEOUT_HERRAMIENTA_S", "REINTENTOS_HERRAMIENTA", "TIMEOUT_MODELO_S")}
+    parametros = {n: getattr(config, n) for n in ("TOP_K", "UMBRAL_TAU", "UMBRAL_BM25_RESPALDO", "CORRIDAS_CLASIFICADOR", "CONFIANZA_MINIMA",
+                  "MAX_LLAMADAS_HERRAMIENTAS", "TIMEOUT_HERRAMIENTA_S", "TIMEOUT_DRENAJE_EVALUACION_S",
+                  "REINTENTOS_HERRAMIENTA", "TIMEOUT_MODELO_S")}
     return {"protocolo": "incremental_observado_v2", "proveedor": "codex_subscription", "autenticacion": "chatgpt",
             "sistemas": sistemas, "ids": [c.id for c in casos], "juez_en": sorted(con_juez),
             "modelos": {"generador": config.MODELO_GENERADOR, "clasificador": config.MODELO_CLASIFICADOR,

@@ -1,6 +1,28 @@
 # Demo de ¡PILAS! — guion de seis puntos
 
-**Estado: guion preparado; ensayo integrado pendiente.** Duración objetivo: **9 min 20 s**. Las franjas son un presupuesto de exposición, no una promesa de latencia. Este documento se preparó leyendo la implementación y evidencia existente; no se ejecutó la demo para redactarlo.
+**Estado: comprobaciones técnicas realizadas. Ensayo integrado con el equipo pendiente.** El recorrido de **9 min 20 s** sirve como ensayo extendido. Para la defensa, usen el formato de 15 minutos y midan los cuatro minutos de demo con el equipo que va a presentar.
+
+| Bloque de defensa | Tiempo | Contenido |
+|---|---:|---|
+| Problema | 2 min | Triage de TI, usuario N1 y criterio de éxito. |
+| Arquitectura | 3 min | Ingesta, búsqueda híbrida, herramientas y aprobación N2. |
+| Demostración | 4 min | Ejecutar la consulta nominal y abrir una cita. Preparar de antemano el caso de abstención, la consulta SQL y la traza de R03 para mostrarlos si la espera consume el bloque. |
+| Evaluación | 3 min | Comparación de los tres sistemas, cuatro metas pendientes y diagnóstico de la falla real. |
+| Seguridad | 2 min | Ejemplo local de bloqueo, filtros de documentos y aprobación en simulación. |
+| Cierre | 1 min | Límites, prioridades y reparto de preguntas de la defensa. |
+
+Al mostrar una ejecución guardada, identifiquen la corrida y distingan su evidencia de lo observado durante la presentación.
+
+## Comprobaciones técnicas del 19 de noviembre
+
+| Punto | Resultado comprobado localmente |
+|---|---|
+| Portada | La API sirve la aplicación compilada. |
+| Citas y permisos | N1 puede consultar el fragmento F1 de la sección 3.1, página 6. El manual completo devolvió 403 para N1 y un PDF válido para N2. |
+| Seguridad | El ticket ficticio del guion pasó por el guardrail y fue rechazado antes de llamar al modelo. |
+| Historial | La consulta H01, ejecutada mediante el catálogo con el rol de solo lectura, devolvió 8 tickets, promedio de 3.3 horas y mediana de 3.0 horas. |
+
+Las comprobaciones anteriores usaron la API local y el catálogo de consultas. El ensayo oral debe registrar cuánto tarda cada demostración, qué se mostró en vivo y qué resultado se mostró desde una corrida guardada.
 
 El recorrido muestra consulta nominal, trazabilidad de citas, abstención, herramientas, seguridad y diagnóstico de una falla real. Se ejecuta en la Mac y la base local del proyecto; no depende de PRO Procesos ni de servicios de producción de esa aplicación.
 
@@ -143,7 +165,7 @@ Texto sugerido si la ejecución lo cumple:
 
 > «Este dato sale del historial mediante una consulta del catálogo, no de un párrafo del manual. La cantidad nos permite entender sobre cuántos casos se calculó el promedio».
 
-**Respaldo histórico honesto:** H01 del [borrador histórico](../resultados/evaluacion/banco_borrador/casos_agente.jsonl) registró varias llamadas `query_tickets` con `ok:true`, pero terminó con respuesta vacía y abstención. Su traza identifica `claude-sonnet-5-5`; no acredita un resultado correcto de 8/3.3 ni una ejecución actual de Codex. Sirve para explicar que «la herramienta respondió» y «la respuesta resolvió la pregunta» son verificaciones diferentes. No usarlo como sustituto silencioso de una herramienta exitosa en vivo.
+**Respaldo de la evaluación oficial.** H01 devolvió **8 tickets y 3.3 horas** con la cita `sql-1` en 42.0 s. Si se muestra ese resultado, presentar la [corrida oficial](../resultados/codex_suscripcion/evaluacion/banco/reporte.md) como evidencia guardada. El [borrador histórico](../resultados/evaluacion/banco_borrador/casos_agente.jsonl) conserva el caso que terminó en abstención pese a llamar a la herramienta.
 
 ### Extensión opcional: pausa humana
 
@@ -204,7 +226,7 @@ La [revisión técnica de R01–R08](../resultados/cierre_tecnico/revision_respu
 
 Texto sugerido, ajustándolo a lo efectivamente observado:
 
-> «Mostramos la consulta, sus fuentes, el límite de conocimiento, las herramientas y los controles. Tenemos 88 ejecuciones del banco oficial y los resultados del clasificador sobre 20 tickets de autoría humana declarada. La pestaña Casos sintéticos contiene otros 20 casos generados con IA. La revisión humana de las respuestas sigue pendiente».
+> «Mostramos la consulta, sus fuentes, el límite de conocimiento, las herramientas y los controles. Tenemos 88 ejecuciones del banco oficial y los resultados del clasificador sobre 20 tickets de autoría humana declarada. La pestaña Casos sintéticos contiene otros 20 casos generados con IA. La revisión humana abarcó los 42 casos del banco y nueve respuestas. R15 recibió cobertura parcial».
 
 Después del ensayo, registrar fecha, versión/huella, preguntas usadas, tiempos, qué apareció realmente y enlaces a evidencia. Cambiar el estado de este documento únicamente cuando se haya completado ese ensayo, indicando los puntos cumplidos y los fallidos. Preparar el guion no acredita ejecución ni revisión humana.
 

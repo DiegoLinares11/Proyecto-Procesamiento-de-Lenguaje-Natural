@@ -21,8 +21,11 @@ matriz de 12 ataques con evidencia. Ver [resultados y límites](resultados/segur
 
 **Estado.** Completamos la comparación del banco oficial con 88 ejecuciones: 42 del agente,
 23 de RAG y 23 de BM25. Se evaluaron también los 20 tickets de autoría humana declarada.
-Quedan pendientes la revisión humana independiente del banco y de una muestra de respuestas,
-el informe académico y el ensayo de la demo. [Evaluación final](resultados/codex_suscripcion/evaluacion/banco/reporte.md) ·
+El [informe técnico de 12 páginas](docs/Informe_Tecnico_CC3103.pdf) está disponible.
+La confirmación posterior aprobó los cuatro casos de regresión. La revisión humana de los 42
+oráculos y nueve respuestas quedó registrada. Falta el ensayo de la defensa. Las métricas del informe siguen
+correspondiendo a la evaluación completa original.
+[Evaluación final](resultados/codex_suscripcion/evaluacion/banco/reporte.md) ·
 [Clasificación de los 20 tickets](resultados/cierre_tecnico/clasificador_20_manuales.json).
 
 Se conservan los reportes históricos del borrador:
@@ -33,14 +36,14 @@ Se conservan los reportes históricos del borrador:
 ## Para el equipo
 
 - **Anteproyecto:** [docs/Anteproyecto_Proyecto_Final_CC3103.docx](docs/Anteproyecto_Proyecto_Final_CC3103.docx), la
-  versión corregida. Quedó desactualizado en tres puntos que hay que cambiar en el documento técnico:
+  propuesta original. El informe técnico documenta tres decisiones que cambiaron durante la implementación:
   - La revisión humana del clasificador se activa si algún voto discrepa, no con 0.6.
   - τ vale 0.0045, no 0.30.
   - Los tickets resueltos se buscan en un canal aparte, no mezclados con los procedimientos.
 - **Cómo funciona por dentro:** el diagrama de abajo y los tres reportes por fase. Cada decisión está
   justificada con números.
-- **Qué sigue.** Revisar el banco y las respuestas, preparar el informe y ensayar la presentación.
-  El [plan de cierre](docs/PLAN_CIERRE.md) detalla el avance.
+- **Qué sigue.** Revisar el banco y las respuestas, verificar las correcciones y ensayar la presentación.
+  La [matriz de entrega](docs/ENTREGA.md) vincula cada requisito con su evidencia.
 - **Proveedor.** El sistema usa la sesión local de ChatGPT/Codex con la cuota de la suscripción.
   [Guía de ejecución](docs/EJECUCION_LOCAL.md).
 
@@ -80,7 +83,7 @@ es inválida, la acción sigue en pausa, se muestra el motivo y N2 puede corregi
 
 ```bash
 uv sync --locked
-cd demo && npm install && npm run build && cd ..   # una vez, o cuando cambie la página; validado con Node 24
+cd demo && npm ci && npm run build && cd ..        # una vez, o cuando cambie la página; validado con Node 24
 uv run uvicorn tickets_rag.api:app --host 127.0.0.1 --port 8000
 ```
 
@@ -93,9 +96,10 @@ PostgreSQL, historial y vectores descrita abajo; el motor se inicializa al atend
 Con el proveedor por suscripción, cada ticket consume tokens y cuota incluida de ChatGPT/Codex.
 El cargo incremental de API de esta ruta es US$0; eso no significa uso ilimitado ni incluye el precio
 de la suscripción. El cliente rechaza iniciar una llamada si no puede verificar la cuota, si alguna
-ventana aplicable ya registra un uso de 80 % o más, si se agotó el uso incluido o si hay créditos
-disponibles. El 80 % es un umbral conservador de la aplicación; no predice lo que gastará la llamada.
-No compra créditos ni cambia a una API key. Las fallas simuladas y los
+ventana aplicable ya registra un uso de 80 % o más o si se agotó el uso incluido. Por defecto también
+rechaza cuentas con saldo de créditos. `CODEX_PERMITIR_CREDITOS=1` permite iniciar con ese saldo
+presente y conserva el freno del 80 %. El umbral no predice lo que gastará la llamada.
+La aplicación no compra créditos ni cambia a una API key. Las fallas simuladas y los
 tickets bloqueados pueden consumir menos; el clasificador también cuenta contra la cuota.
 
 Las evaluaciones nuevas de generación y del clasificador LLM, la demo y el banco se guardan bajo
@@ -196,7 +200,7 @@ de la medición. Los textos y el registro de captura se conservan localmente.
 | `scripts/` | Pasos del pipeline, en el orden de abajo |
 | `evaluacion/validacion_dev.jsonl` | 37 consultas de validación interna. No es el banco oficial de la fase 5 |
 | `evaluacion/banco_borrador.jsonl` | Borrador original de 42 casos, conservado como referencia. Guía en `evaluacion/LEEME_banco.md` |
-| `evaluacion/banco.jsonl` | 42 casos reescritos con IA y congelados técnicamente; revisión humana independiente pendiente en su manifiesto |
+| `evaluacion/banco.jsonl` | 42 casos reescritos con IA y congelados técnicamente. El manifiesto enlaza el registro de revisión humana. |
 | `evaluacion/revision_banco.json` | Justificación, evidencia y oráculos revisados por caso |
 | `evaluacion/tickets_manuales/` | Plantilla y guía de captura de los 20 tickets escritos a mano |
 | `evaluacion/pii_sembrada.jsonl` | 30 textos sintéticos congelados para seguridad; no son los 20 tickets manuales |
@@ -236,10 +240,10 @@ Si falta iniciar sesión, ejecuten `"$CODEX_BIN" login` y completen el acceso co
 de API key ni copien credenciales al proyecto. También pueden guardar únicamente la ruta del binario
 en `CODEX_BIN` del `.env`. Esta conexión es local y personal: no registra una aplicación OAuth propia
 ni permite compartir las credenciales mediante el frontend. Antes de cada inferencia real, el cliente
-debe verificar que hay autenticación ChatGPT, uso incluido permitido, ventanas aplicables por debajo
-del 80 % y ausencia de créditos adicionales; si la comprobación falla, la ejecución se rechaza.
+debe verificar que hay autenticación ChatGPT, uso incluido permitido y ventanas aplicables por debajo
+del 80 %. Por defecto exige también ausencia de créditos adicionales.
 
-Los comandos de modelo consumen cuota incluida. El banco oficial y la evaluación final quedan para las fases 5 y 6.
+Los comandos de modelo consumen cuota incluida. El banco oficial y sus resultados están enlazados al inicio.
 
 ```bash
 uv sync --locked

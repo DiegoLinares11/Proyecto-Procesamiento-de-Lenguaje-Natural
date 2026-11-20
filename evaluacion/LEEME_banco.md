@@ -5,11 +5,10 @@ composición del anteproyecto, pero reescribe las preguntas y corrige sus expect
 las fuentes. `banco_borrador.jsonl`, redactado originalmente con Claude, se conserva intacto.
 La distribución anterior de tareas entre integrantes no condiciona este trabajo.
 
-**Estado de autoría:** la reescritura y la revisión técnica son de IA. La revisión por un
-integrante que no redactó el documento correspondiente sigue pendiente, como promete la
-sección 12 del anteproyecto. El archivo congelado no acredita por sí solo esa independencia.
-`banco.manifiesto.json` lo declara y `revision_humana_banco.csv` permite registrar la revisión.
-No completar nombres, fechas o conformidades hasta que esa revisión ocurra.
+**Estado de autoría.** La reescritura y la revisión técnica se hicieron con IA. La revisión
+humana posterior se registró en [la planilla del banco](revision_humana_banco.csv).
+El [manifiesto](banco.manifiesto.json) indica el alcance y deja constancia de que no se
+documentó una declaración de independencia respecto de la autoría de las fuentes.
 
 La fase 5 del plan de cierre prepara este banco y los 20 tickets manuales. La evaluación de
 los tres sistemas corresponde a la fase 6. La numeración del plan de cierre es distinta de
@@ -67,7 +66,7 @@ de cada afirmación.
 No modificar el banco congelado para mejorar una métrica. Si una corrección documentada resulta
 necesaria, conservar esta versión y sus resultados, crear una versión nueva con su justificación
 y volver a validar antes de medir. No recalcular silenciosamente los hashes de referencia.
-La revisión humana se registra antes de la evaluación final; las correcciones que cambien el
+Esta revisión humana se registró después de las corridas. Las correcciones que cambien el
 contenido requieren una nueva congelación. El banco actual no se presenta como un holdout
 ciego: se conocen resultados previos del borrador y las reevaluaciones no son muestras nuevas.
 

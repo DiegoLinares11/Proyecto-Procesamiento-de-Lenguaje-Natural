@@ -9,9 +9,9 @@ condiciona este plan: Diederich y Codex completarán el trabajo técnico y prepa
 | 2. Migración del proveedor | Sustituir las llamadas de Anthropic en agente, clasificador, generador, F3 y evaluadores por una conexión local de Codex | Los flujos usan la suscripción, conservan sus contratos y no tienen fallback a API keys | Completada; validación local y prueba real acotada documentadas |
 | 3. Correcciones funcionales | Corregir el saneamiento de entrada, el acceso al PDF N2, el estado de error persistente y el aislamiento del documento envenenado | Reproducciones verificadas y pruebas de regresión pertinentes | Completada; 238 pruebas pasaron, 20 de PostgreSQL omitidas |
 | 4. Seguridad | Incorporar Presidio para nombres, medir recall en 30 textos con PII sembrada y documentar los 12 ataques | Recall ≥ 0.95 y matriz con amenaza, componente, comportamiento esperado, resultado observado y mitigación | Completada el 18 de noviembre de 2026; recall 55/56 y 12/12 criterios en Codex-BM25 |
-| 5. Banco oficial | Revisar y congelar los 42 casos; recoger 20 tickets escritos por una persona que no redactó F3 | `evaluacion/banco.jsonl` validado y tickets independientes reservados para evaluación | Banco congelado con revisión técnica de IA. Los 20 tickets de autoría humana declarada se reservaron y evaluaron. La revisión humana del banco sigue pendiente. |
-| 6. Evaluación final | Ejecutar los tres sistemas, revisar respuestas a mano y realizar la autopsia de fallos | Métricas y análisis reproducibles con el nuevo proveedor; sin reutilizar resultados históricos como actuales | Comparación completa con 88 ejecuciones y calificación de juez y Ragas. R11 de BM25 se completó en un segundo intento registrado. Quedan la revisión manual de respuestas y el análisis de fallos. |
-| 7. Entrega y defensa | Completar informe de 10–15 páginas y demo de 15 minutos | Demo verificada con consulta nominal, citas, abstención, herramientas, seguridad y diagnóstico de una falla real | Pendiente |
+| 5. Banco oficial | Revisar y congelar los 42 casos; recoger 20 tickets escritos por una persona que no redactó F3 | `evaluacion/banco.jsonl` validado y tickets independientes reservados para evaluación | Banco congelado y [42 dictámenes humanos registrados](../evaluacion/revision_humana_banco.csv). Los 20 tickets de autoría humana declarada se reservaron y evaluaron. |
+| 6. Evaluación final | Ejecutar los tres sistemas, revisar respuestas a mano y realizar la autopsia de fallos | Métricas y análisis reproducibles con el nuevo proveedor; sin reutilizar resultados históricos como actuales | Comparación completa con 88 ejecuciones y calificación de juez y Ragas. El informe incluye la autopsia inicial. Se registró la [revisión humana de nueve respuestas](../evaluacion/revision_humana_respuestas.csv). |
+| 7. Entrega y defensa | Completar informe de 10–15 páginas y demo de 15 minutos | Demo verificada con consulta nominal, citas, abstención, herramientas, seguridad y diagnóstico de una falla real | [Informe de 12 páginas](Informe_Tecnico_CC3103.pdf) listo. Ensayo y defensa pendientes. |
 
 Los 20 tickets deben tener autoría humana real. Codex puede preparar el formulario y analizar
 las respuestas; no se presentarán tickets generados por IA como escritos a mano. La revisión
@@ -195,9 +195,9 @@ con borrador/dev/F3 y hashes de banco, corpus, índice y registro de revisión. 
 ni se ajustaron modelos, prompts o umbrales con sus preguntas. Las expectativas SQL se contrastaron
 offline con los registros de F3 que forman el historial, sin consultar PostgreSQL.
 
-La autoría IA está declarada. Queda pendiente la revisión por un integrante que no redactó la fuente
-correspondiente; `evaluacion/revision_humana_banco.csv` tiene sus 42 filas sin veredictos, nombres ni
-fechas inventados. La congelación técnica no acredita esa independencia ni un nuevo holdout ciego.
+La autoría IA está declarada. Al congelar el banco, la planilla humana se dejó vacía. La revisión
+posterior está registrada en [la planilla de los 42 casos](../evaluacion/revision_humana_banco.csv).
+La congelación técnica no acredita independencia del revisor ni un nuevo holdout ciego.
 
 La plantilla `evaluacion/tickets_manuales/plantilla.csv` se preparó con 20 filas vacías para nuevas
 capturas. El importador verifica 20 textos, sus etiquetas, los datos del conjunto y las coincidencias
