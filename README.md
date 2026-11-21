@@ -21,7 +21,7 @@ matriz de 12 ataques con evidencia. Ver [resultados y límites](resultados/segur
 
 **Estado.** Completamos la comparación del banco oficial con 88 ejecuciones: 42 del agente,
 23 de RAG y 23 de BM25. Se evaluaron también los 20 tickets de autoría humana declarada.
-El [informe técnico de 12 páginas](docs/Informe_Tecnico_CC3103.pdf) está disponible.
+El informe técnico está disponible en [PDF](docs/Informe_Tecnico_CC3103.pdf) y [Word](docs/Informe_Tecnico_CC3103.docx).
 La confirmación posterior aprobó los cuatro casos de regresión. La revisión humana de los 42
 oráculos y nueve respuestas quedó registrada. Falta el ensayo de la defensa. Las métricas del informe siguen
 correspondiendo a la evaluación completa original.
@@ -48,6 +48,10 @@ Se conservan los reportes históricos del borrador:
   [Guía de ejecución](docs/EJECUCION_LOCAL.md).
 
 ## La demo
+
+[![Ver la demostración de ¡PILAS! en YouTube](https://i.ytimg.com/vi/VvRzEsFNDDE/mqdefault.jpg)](https://youtu.be/VvRzEsFNDDE)
+
+[Ver el video de la demostración en YouTube](https://youtu.be/VvRzEsFNDDE).
 
 La interfaz usa la identidad **¡PILAS!**: azul, fondo marfil, acentos lima, Open Sans y el logo
 extraído de la guía de marca. La distribución bento reúne los ejemplos en seis categorías y
