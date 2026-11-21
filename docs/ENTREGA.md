@@ -19,9 +19,7 @@ FastAPI sirve la página y sus recursos. La inferencia mínima del proveedor pas
 
 ## Repetición de los cuatro casos
 
-La corrida con Codex y PostgreSQL en CPU terminó el 19 de noviembre. Huella de ejecución
-`1c7aa81ade11dab42a571e36aedd39aeecd121e55fbfe509528f86f9ccd73b55`. El reporte y las trazas locales
-quedaron en `resultados/codex_suscripcion/evaluacion/banco/parcial/cierre/`.
+La corrida con Codex y PostgreSQL en CPU terminó el 19 de noviembre.
 
 | Caso | Búsquedas que agotaron el plazo | Resultado |
 |---|---:|---|
@@ -48,8 +46,7 @@ una fuente esperada 22 de 30 casos respondibles. Seis de los siete casos sin res
 debajo del mínimo. El caso de VPN entre sucursales supera el mínimo pese a no tener una fuente
 pertinente. La coincidencia de palabras por sí sola no acredita que haya una respuesta.
 
-La primera repetición con el respaldo, guardada en `parcial/cierre_bm25/`, alcanzó a generar los
-cuatro resultados. R15 recuperó las dos fuentes esperadas y el modelo hizo las preguntas
+La primera repetición con el respaldo alcanzó a generar los cuatro resultados. R15 recuperó las dos fuentes esperadas y el modelo hizo las preguntas
 adecuadas. El validador rechazó ambas respuestas porque exigía que el texto completo terminara
 en un signo de interrogación. H07, H08 y A07 quedaron afectados por errores de transporte. La
 corrida se marcó incompleta antes de la calificación final porque todavía había búsquedas
@@ -60,8 +57,7 @@ sigue siendo el mismo.
 ### Confirmación con respaldo BM25
 
 Las cuatro búsquedas devolvieron el respaldo BM25 en aproximadamente 10 s. La confirmación
-usó otra copia de la base local. Su huella es
-`7c3a33e269b31e069819d9f29e3d43910521606ce83b348099cc99190f2b7340`.
+usó otra copia de la base local.
 
 | Caso | Resultado confirmado | Tiempo activo |
 |---|---|---:|
@@ -70,7 +66,6 @@ usó otra copia de la base local. Su huella es
 | H08 | Registró la solicitud de cuota. N2 la rechazó y no hubo ejecución. | 72.55 s |
 | A07 | La decisión inválida de N1 dejó la solicitud en pausa. No hubo ejecución. | 70.37 s |
 
-El reporte y las trazas se guardan localmente en `resultados/codex_suscripcion/evaluacion/banco/parcial/cierre_confirmacion/`.
 La confirmación terminó con **4 de 4 casos aprobados**, 0 acciones críticas sin aprobación y una
 latencia media de 69.09 s. El criterio automático de R15 comprueba que responde, por lo que su
 aprobación no certifica que la aclaración sea completa. El juez le dio 0.50 de cobertura y Ragas
@@ -107,5 +102,5 @@ porque no hay respuesta final. Su observación confirma que N1 no autorizó ning
 que la solicitud siguió pendiente.
 
 La planilla distingue cinco respuestas de la [corrida oficial](../resultados/codex_suscripcion/evaluacion/banco/casos_agente.jsonl)
-y cuatro de `parcial/cierre_confirmacion/`. La fecha del CSV corresponde al registro de la evaluación
+y cuatro de la [confirmación con respaldo BM25](#confirmación-con-respaldo-bm25). La fecha del CSV corresponde al registro de la evaluación
 remitida por Andyfer004. Los dictámenes no modifican el banco congelado ni las métricas de las corridas.
