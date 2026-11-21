@@ -19,8 +19,6 @@ FastAPI sirve la página y sus recursos. La inferencia mínima del proveedor pas
 
 ## Repetición de los cuatro casos
 
-La corrida con Codex y PostgreSQL en CPU terminó el 19 de noviembre.
-
 | Caso | Búsquedas que agotaron el plazo | Resultado |
 |---|---:|---|
 | R15 | 3 | Abstención y escalamiento. No llegó a formular la aclaración. |
@@ -29,12 +27,12 @@ La corrida con Codex y PostgreSQL en CPU terminó el 19 de noviembre.
 | A07 | 2 | Ninguna acción se ejecutó, pero no hubo pausa para intentar la aprobación inválida. |
 
 Las diez búsquedas agotaron dos ventanas de 10 segundos cada una. Los cuatro tickets terminaron
-sin citas. El control local con BM25, usando el texto de cada caso y aplicando el filtro de rol,
+sin citas. Un control con BM25, usando el texto de cada caso y aplicando el filtro de rol,
 encontró todas las unidades esperadas en el top 5: 2 en R15, 1 en H07, 1 en H08 y 2 en A07.
 El control mide recuperación de fuentes. Los resultados de la comparación de 88 ejecuciones
 corresponden a su propia versión, y esta repetición de cuatro casos se reporta por separado.
 
-En un perfil local de R15 con los modelos precalentados, BM25 tardó 0.006 s y la consulta vectorial,
+En un perfil de R15 con los modelos precalentados, BM25 tardó 0.006 s y la consulta vectorial,
 incluido el embedding, 13.121 s. El reranking tardó 19.701 s con 20 candidatos y 17.500 s con ocho.
 Ambas variantes recuperaron las dos unidades esperadas entre las cinco primeras. Reducir los
 candidatos dejó la recuperación cerca de 31 s y siguió excediendo el presupuesto actual de 20 s.
@@ -56,8 +54,7 @@ sigue siendo el mismo.
 
 ### Confirmación con respaldo BM25
 
-Las cuatro búsquedas devolvieron el respaldo BM25 en aproximadamente 10 s. La confirmación
-usó otra copia de la base local.
+Las cuatro búsquedas devolvieron el respaldo BM25 en aproximadamente 10 s.
 
 | Caso | Resultado confirmado | Tiempo activo |
 |---|---|---:|

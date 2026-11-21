@@ -15,7 +15,7 @@ Al mostrar una ejecución guardada, identifiquen la corrida y distingan su evide
 
 ## Comprobaciones técnicas del 19 de noviembre
 
-| Punto | Resultado comprobado localmente |
+| Punto | Resultado comprobado |
 |---|---|
 | Portada | La API sirve la aplicación compilada. |
 | Citas y permisos | N1 puede consultar el fragmento F1 de la sección 3.1, página 6. El manual completo devolvió 403 para N1 y un PDF válido para N2. |
@@ -24,7 +24,7 @@ Al mostrar una ejecución guardada, identifiquen la corrida y distingan su evide
 
 Las comprobaciones anteriores usaron la API local y el catálogo de consultas. El ensayo oral debe registrar cuánto tarda cada demostración, qué se mostró en vivo y qué resultado se mostró desde una corrida guardada.
 
-El recorrido muestra consulta nominal, trazabilidad de citas, abstención, herramientas, seguridad y diagnóstico de una falla real. Se ejecuta en la Mac y la base local del proyecto; no depende de PRO Procesos ni de servicios de producción de esa aplicación.
+El recorrido muestra consulta nominal, trazabilidad de citas, abstención, herramientas, seguridad y diagnóstico de una falla real. Se ejecuta con la base de datos del proyecto en Docker.
 
 ## Preparación antes de iniciar el cronómetro
 
@@ -40,7 +40,7 @@ Abrir `http://localhost:8000`. Si el servidor ya está funcionando, usarlo sin i
 Si cambió la UI y es necesario reconstruirla antes del ensayo:
 
 ```bash
-PATH=/opt/homebrew/opt/node@24/bin:$PATH npm run build --prefix demo
+npm run build --prefix demo
 ```
 
 Comprobaciones de preparación, sin pedir una inferencia de prueba:

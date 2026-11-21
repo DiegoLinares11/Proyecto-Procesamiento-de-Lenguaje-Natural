@@ -57,8 +57,7 @@ La interfaz usa la identidad **¡PILAS!**: azul, fondo marfil, acentos lima, Ope
 extraído de la guía de marca. La distribución bento reúne los ejemplos en seis categorías y
 mantiene juntos el ticket, la respuesta y sus fuentes. El [reporte de PILAS](resultados/branding_pilas/reporte.md)
 registra la verificación visual y la preservación de lógica, permisos y datos.
-La [primera revisión visual](resultados/rediseno_ui/reporte.md) queda como antecedente; PRO Procesos
-se consultó únicamente como referencia y no se modificó.
+La [primera revisión visual](resultados/rediseno_ui/reporte.md) queda como antecedente.
 
 Una página para ver el sistema funcionando: el grafo se ilumina paso a paso mientras corre, la respuesta
 trae sus citas. Cada una abre el fragmento y, cuando el rol permite el documento completo, el PDF en
@@ -188,7 +187,7 @@ mediciones del proveedor por suscripción:
 
 En los 20 tickets reservados de autoría humana declarada, Codex obtuvo macro-F1 de 1.000 en categoría
 y prioridad. TF-IDF obtuvo 0.778 en categoría y 0.512 en prioridad. El repositorio publica el resumen
-de la medición. Los textos y el registro de captura se conservan localmente.
+de la medición. Los textos de esos tickets no se publican.
 [Resumen de clasificación](resultados/cierre_tecnico/clasificador_20_manuales.json).
 
 ## Qué hay aquí

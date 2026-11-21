@@ -47,18 +47,18 @@ Para continuar la corrida canónica guardada, usar el lanzador que compara la hu
 ```bash
 PYTHONPATH=src TOKENIZERS_PARALLELISM=false RAGAS_DO_NOT_TRACK=true \
   PYTORCH_ENABLE_MPS_FALLBACK=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 \
-  caffeinate -is .venv/bin/python scripts/reanudar_banco_local.py
+  uv run python scripts/reanudar_banco_local.py
 ```
 
-El evaluador verifica las huellas del banco, corpus, código, configuración, modelos, hardware e índice vectorial. Conserva los votos terminados, las etapas del juez/Ragas y las acciones ya observadas. Un envío sin desenlace bloquea la reanudación automática. El segundo intento del caso R11 de BM25 quedó autorizado y documentado en `resultados/cierre_tecnico/continuacion_r11_20261118T193728Z.json`. El journal privado conserva el registro original. El uso y el tiempo de ese primer intento siguen desconocidos.
+El evaluador verifica las huellas del banco, corpus, código, configuración, modelos, hardware e índice vectorial. Conserva los votos terminados, las etapas del juez/Ragas y las acciones ya observadas. Un envío sin desenlace bloquea la reanudación automática. El segundo intento del caso R11 de BM25 quedó autorizado y documentado en `resultados/cierre_tecnico/continuacion_r11_20261118T193728Z.json`.
 
-En macOS el lanzador mantiene la máquina despierta solo mientras se ejecuta la evaluación. No modifica permanentemente las preferencias de energía.
+En macOS se puede anteponer `caffeinate -is` al comando para que la máquina no se suspenda mientras corre la evaluación.
 
 ## Clasificación de los veinte sintéticos
 
 ```bash
-PYTHONPATH=src RAGAS_DO_NOT_TRACK=true .venv/bin/python scripts/evaluar_sinteticos.py --solo-validar
-PYTHONPATH=src RAGAS_DO_NOT_TRACK=true caffeinate -is .venv/bin/python scripts/evaluar_sinteticos.py
+PYTHONPATH=src RAGAS_DO_NOT_TRACK=true uv run python scripts/evaluar_sinteticos.py --solo-validar
+PYTHONPATH=src RAGAS_DO_NOT_TRACK=true uv run python scripts/evaluar_sinteticos.py
 ```
 
 Cada corrida anuncia su UUID. `--reanudar UUID` recupera sus resultados; un intento iniciado sin resultado requiere revisar el fallo antes de usar `--reintentar-pendiente`. Ese segundo intento puede consumir cuota adicional y queda registrado. El conjunto se mantiene fuera del entrenamiento, del índice y de los ejemplos del prompt.

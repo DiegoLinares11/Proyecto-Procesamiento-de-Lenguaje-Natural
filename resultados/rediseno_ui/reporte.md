@@ -57,13 +57,10 @@ se preservaron.
 - Anchos 320, 375, 768 y 1440 px sin desbordamiento horizontal. Se inspeccionaron las imágenes
   de escritorio, captura móvil, documentos y aprobación.
 
-Los ensayos usaron respuestas simuladas y archivos de captura bajo `/tmp`. Los resultados
+Los ensayos usaron respuestas simuladas y archivos de captura temporales. Los resultados
 históricos se utilizaron únicamente para comprobar su representación con procedencia explícita;
 no son métricas nuevas. No se ejecutaron inferencias reales.
 
 La aplicación real se comprobó en `http://127.0.0.1:8000`: captura **0/20**, autoría pendiente,
 sin fixtures en el conjunto del proyecto. [Vista de atención](app_real_atencion.png),
 [captura](app_real_captura.png) y [móvil](app_real_movil.png).
-
-El cambio está aplicado localmente. PRO Procesos permanece como referencia de lectura;
-no se hizo commit, push ni despliegue.
