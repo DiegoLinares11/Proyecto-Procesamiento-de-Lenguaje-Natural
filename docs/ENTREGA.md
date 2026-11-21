@@ -13,7 +13,7 @@ FastAPI sirve la página y sus recursos. La inferencia mínima del proveedor pas
 | Ingesta, recuperación, herramientas, permisos y salida estructurada | [Código](../src/tickets_rag), [pruebas](../tests), [ejecución local](EJECUCION_LOCAL.md) | Implementado. El rol de la demo se declara localmente. |
 | Banco y comparación de sistemas | [42 casos](../evaluacion/banco.jsonl), [88 ejecuciones](../resultados/codex_suscripcion/evaluacion/banco/reporte.md) | Medido. Los cuatro casos de regresión aprobaron sus criterios automáticos en la confirmación. |
 | Seguridad y privacidad | [Matriz y medición PII](../resultados/seguridad/reporte_fase_4.md) | Medido. El banco completo obtuvo 11/12 criterios adversarios. |
-| Informe de 10–15 páginas | [PDF de 12 páginas](Informe_Tecnico_CC3103.pdf) | Disponible. Fidelidad y latencia siguen por debajo de las metas en la medición publicada. |
+| Informe de 10–15 páginas | [PDF de 14 páginas](Informe_Tecnico_CC3103.pdf) | Disponible. Fidelidad y latencia siguen por debajo de las metas en la medición publicada. |
 | Demostración y defensa | [Guion](DEMO_PILAS.md) | Comprobaciones técnicas realizadas. Ensayo oral pendiente por el equipo. |
 | Revisión humana comprometida en el proyecto | [Planilla de los 42 casos](../evaluacion/revision_humana_banco.csv) y [muestra de nueve respuestas](../evaluacion/revision_humana_respuestas.csv) | Registrada el 19 de noviembre. El registro no incluye una declaración de independencia. |
 
